@@ -9,6 +9,11 @@ font = "sans serif"
 
 [server]
 headless = true
+# Tắt bộ theo dõi tệp: nó quét mọi module đã nạp, chạm vào các module ảnh nạp
+# chậm của transformers và in traceback "No module named 'torchvision'" vào log,
+# dù app không dùng tới chúng. Khi cần sửa mã và muốn app tự nạp lại, đổi lại
+# thành "auto".
+fileWatcherType = "none"
 
 [browser]
 gatherUsageStats = false
