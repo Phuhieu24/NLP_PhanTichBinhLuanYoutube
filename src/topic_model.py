@@ -6,7 +6,7 @@ module `topic_pipeline` mà `app.py` đang dùng, nên kết quả hai bên kh�
 
 Ví dụ:
     python src/topic_model.py --input data/dataset_chuan.csv --text-col text \
-        --limit 1500 --out-dir /tmp/topics
+        --limit 1500 --min-topic-size 15 --min-samples 1 --out-dir /tmp/topics
 """
 
 from __future__ import annotations
@@ -25,17 +25,27 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Gom cụm chủ đề bình luận tiếng Việt bằng BERTopic.")
-    parser.add_argument("--input", default=os.path.join("data", "comments_clean.csv"),
-                        help="File CSV đầu vào (mặc định: data/comments_clean.csv).")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Gom cụm chủ đề bình luận tiếng Việt bằng BERTopic. Khuyến nghị chạy với "
+            "--min-topic-size 15 --min-samples 1: với tham số mặc định của BERTopic, "
+            "1.496 bình luận mẫu bị gom 91% vào một chủ đề duy nhất."
+        )
+    )
+    parser.add_argument("--input", default=os.path.join("data", "comments.csv"),
+                        help="File CSV đầu vào (mặc định: data/comments.csv, tức kết quả "
+                             "thô của crawler; bước làm sạch chạy lại từ cột văn bản gốc).")
     parser.add_argument("--text-col", default="text", help="Tên cột chứa văn bản gốc.")
     parser.add_argument("--limit", type=int, default=None, help="Chỉ lấy N dòng đầu tiên.")
-    parser.add_argument("--min-topic-size", type=int, default=10, help="Kích thước cụm tối thiểu.")
+    parser.add_argument("--min-topic-size", type=int, default=10,
+                        help="Kích thước cụm tối thiểu (mặc định 10 của BERTopic; nên đặt 15).")
     parser.add_argument("--nr-topics", type=int, default=None, help="Ép về N chủ đề sau khi gom cụm.")
     parser.add_argument("--no-stopwords", action="store_true", help="Không loại bỏ từ dừng tiếng Việt.")
     parser.add_argument("--cluster-selection", choices=["eom", "leaf"], default="eom",
                         help="Cách HDBSCAN chọn cụm: 'eom' (ít cụm lớn) hoặc 'leaf' (nhiều cụm nhỏ).")
-    parser.add_argument("--min-samples", type=int, default=None, help="Tham số min_samples của HDBSCAN.")
+    parser.add_argument("--min-samples", type=int, default=None,
+                        help="Tham số min_samples của HDBSCAN (mặc định bằng "
+                             "min_topic_size; nên đặt 1 để bớt nhiễu gom vào một cụm).")
     parser.add_argument("--out-dir", default="results", help="Thư mục ghi kết quả.")
     parser.add_argument("--seed", type=int, default=42, help="Seed cho UMAP.")
     return parser
