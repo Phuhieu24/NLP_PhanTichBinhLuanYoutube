@@ -113,6 +113,37 @@ def test_results_survive_a_widget_interaction():
 
 
 @pytest.mark.slow
+def test_all_tabs_render_with_metadata_and_llm_summaries():
+    """Đường đi đầy đủ: thẻ video, chỉ số, bảng chủ đề kèm tóm tắt, bộ lọc, tab mô hình."""
+    bundle = fake_result()
+    bundle["metadata"] = {
+        "title": "Anh Trai Say Hi tập 10",
+        "channel_title": "VieChannel",
+        "published_at": "2024-01-01T00:00:00Z",
+        "view_count": 1234567,
+        "like_count": 4321,
+        "comment_count": 9876,
+        "thumbnail_url": "https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg",
+    }
+    bundle["summaries"] = {0: "Người xem khen phần trình diễn.", 1: "Người xem chê phần dàn dựng."}
+
+    app = AppTest.from_file(APP_PATH, default_timeout=60)
+    app.session_state["result"] = bundle
+    app.run(timeout=60)
+
+    assert not app.exception, [str(error) for error in app.exception]
+    metrics = {element.label: element.value for element in app.metric}
+    assert metrics["Bình luận thu được"] == "6"
+    assert metrics["Hợp lệ sau lọc"] == "4"
+    assert metrics["Số chủ đề"] == "2"
+    assert metrics["Nhiễu (-1)"] == "25.0%"
+    assert metrics["Tích cực"] == "50.0%"
+    assert len(app.get("download_button")) == 1
+    assert any("Anh Trai Say Hi" in element.value for element in app.markdown)
+    assert any("Người xem khen phần trình diễn." in element.value for element in app.info)
+
+
+@pytest.mark.slow
 def test_clear_button_drops_the_stored_result():
     app = AppTest.from_file(APP_PATH, default_timeout=60)
     app.session_state["result"] = fake_result()
