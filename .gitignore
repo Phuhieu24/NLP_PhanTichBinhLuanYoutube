@@ -13,3 +13,7 @@ data/comments_with_topics.csv
 
 # Biểu đồ HTML sinh ra bởi CLI (PNG/JSON kết quả đánh giá vẫn được commit)
 results/*.html
+
+# CSV sinh ra bởi src/topic_model.py khi --out-dir là results/ (kết quả đánh giá sentiment vẫn được commit)
+results/comments_with_topics.csv
+results/topics_summary.csv
