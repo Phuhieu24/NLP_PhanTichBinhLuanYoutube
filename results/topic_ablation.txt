@@ -1,0 +1,26 @@
+ABLATION THAM SỐ HDBSCAN CHO PIPELINE CHỦ ĐỀ (mã nguồn đang xuất xưởng)
+============================================================================================
+Dữ liệu        : data/dataset_chuan.csv, 1500 dòng đầu tiên -> 1493 bình luận hợp lệ (>= 2 token)
+Nhúng câu      : keepitreal/vietnamese-sbert (2.4s cho toàn bộ, dùng lại cho mọi cấu hình)
+UMAP           : n_neighbors=15, n_components=5, metric=cosine, random_state=42
+Từ dừng        : 236 mục, chỉ dùng cho CountVectorizer của c-TF-IDF
+Phiên bản      : BERTopic 0.17.4, umap-learn 0.5.12, hdbscan 0.8.44
+
+chọn cụm                      min_topic_size  min_samples   chủ đề             nhiễu        cụm lớn nhất  thời gian
+--------------------------------------------------------------------------------------------
+eom (mặc định BERTopic)                   10         None       23       735 (49.2%)           81 (5.4%)      10.2s
+eom                                       20            5        3          0 (0.0%)        1359 (91.0%)       2.6s
+eom (cấu hình khuyến nghị)                15            1       26       497 (33.3%)          117 (7.8%)       2.7s
+leaf                                      10         None       27       793 (53.1%)           80 (5.4%)       2.6s
+leaf                                      20            5       19       620 (41.5%)           94 (6.3%)       2.6s
+
+Từ khóa của cụm lớn nhất từng cấu hình:
+  eom (mặc định BERTopic) 10/None -> [0] hạng, cuối, đứng, top, no, nhóm, vậy_mà, hiểu
+  eom 20/5 -> [0] hay, bài, team, xem, tập, hùng, nghe, hát
+  eom (cấu hình khuyến nghị) 15/1 -> [0] hát, nghe, hay, bài, rap, da_gà, nhảy, nổi
+  leaf 10/None -> [0] buồn, loại, tập, chán, coi, xem, ngắn, chương_trình
+  leaf 20/5 -> [0] chấm, khán_giả, vote, điểm, bình_chọn, fan, ng, giám_khảo
+
+KIỂM TRA DANH SÁCH TỪ DỪNG (cấu hình khuyến nghị 15/1)
+--------------------------------------------------------------------------------------------
+Tắt từ dừng (use_stopwords=False) cho cột Topic GIỐNG HỆT bản bật từ dừng (26 chủ đề, 33.3% nhiễu); chỉ danh sách từ khóa đổi. Danh sách từ dừng chỉ đi vào CountVectorizer ở bước c-TF-IDF, tức là sau khi HDBSCAN đã cố định nhãn cụm, nên nó không thể làm đổi số chủ đề hay tỷ lệ nhiễu.

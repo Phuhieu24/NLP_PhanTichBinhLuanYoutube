@@ -1,0 +1,25 @@
+Lệnh:
+  python src/topic_model.py --input data/dataset_chuan.csv --text-col text \
+      --limit 1500 --min-topic-size 15 --min-samples 1 --out-dir <thư mục tạm>
+Mã nguồn: commit d27d649, máy Apple Silicon, đã lọc bỏ thanh tiến trình của sentence-transformers.
+Đường dẫn tuyệt đối được thay bằng <repo> và <out-dir> cho gọn.
+
+1. Đọc dữ liệu từ <repo>/data/dataset_chuan.csv
+2. Làm sạch và tách từ tiếng Việt
+   Còn 1493 bình luận hợp lệ
+3. Nhúng câu bằng keepitreal/vietnamese-sbert
+4. Gom cụm bằng BERTopic (eom, min_topic_size=15)
+5. Vẽ biểu đồ HTML
+--- Kết quả: 26 chủ đề, 33.3% bình luận là nhiễu (-1) ---
+  [  0]   117 bình luận | hát, nghe, hay, bài, rap, da_gà, nhảy, nổi
+  [  1]   101 bình luận | buồn, tập, lụy, loại, cày, coi, chương_trình, xem
+  [  2]    81 bình luận | hạng, cuối, đứng, no, top, vậy_mà, nhóm, hiểu
+  [  3]    69 bình luận | hùng, huỳnh, quang, cố, đỉnh, masterd, oi, học_sinh
+  [  4]    53 bình luận | atus, team, đỉnh, mê, nước_mắt, tú_atus, oi, xui
+  [  5]    50 bình luận | bài, nhạc, hay, hát, nghe, thi_sĩ, tiếc, nói
+  [  6]    42 bình luận | khóc, cười, bé, mẹ, tập, thương, nghe, mắt
+  [  7]    41 bình luận | anh_trai, mê, quăng, ổng, captain, ê_hề, vượt, việt
+  [  8]    37 bình luận | khán_giả, chấm, điểm, bình_chọn, bgk, fan, xứng_đáng, giám_khảo
+  [  9]    36 bình luận | khờ, hài, xem, tập, gáy, chương_trình, coi, xỉu
+Đã ghi: <out-dir>/comments_with_topics.csv
+Đã ghi: <out-dir>/topics_summary.csv

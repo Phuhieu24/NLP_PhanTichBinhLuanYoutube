@@ -1,0 +1,7 @@
+﻿label,cluster_selection_method,min_topic_size,min_samples,use_stopwords,n_topics,n_noise,noise_share_pct,largest_topic_id,largest_topic_size,largest_topic_share_pct,largest_topic_keywords,fit_seconds
+eom (mặc định BERTopic),eom,10,None,True,23,735,49.2297,0,81,5.4253,"hạng, cuối, đứng, top, no, nhóm, vậy_mà, hiểu",10.24
+eom,eom,20,5,True,3,0,0.0,0,1359,91.0248,"hay, bài, team, xem, tập, hùng, nghe, hát",2.61
+eom (cấu hình khuyến nghị),eom,15,1,True,26,497,33.2887,0,117,7.8366,"hát, nghe, hay, bài, rap, da_gà, nhảy, nổi",2.67
+leaf,leaf,10,None,True,27,793,53.1145,0,80,5.3583,"buồn, loại, tập, chán, coi, xem, ngắn, chương_trình",2.65
+leaf,leaf,20,5,True,19,620,41.5271,0,94,6.296,"chấm, khán_giả, vote, điểm, bình_chọn, fan, ng, giám_khảo",2.6
+eom (cấu hình khuyến nghị) · tắt từ dừng,eom,15,1,False,26,497,33.2887,0,117,7.8366,"hát, hay, nghe, bài, quá, nhảy, rap, da_gà",2.63
