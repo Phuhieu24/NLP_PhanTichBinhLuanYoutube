@@ -228,3 +228,89 @@ def test_token_pattern_keeps_vietnamese_words_and_drops_bare_numbers():
     vectorizer = CountVectorizer(token_pattern=tp.TOKEN_PATTERN)
     tokens = vectorizer.build_tokenizer()("không chương_trình được top4 10 5 _x")
     assert tokens == ["không", "chương_trình", "được", "top4"]
+
+
+# --------------------------------------------------------------------------
+# comments_from_dataframe (nguồn dữ liệu ngoại tuyến: CSV tải lên, tệp mẫu)
+# --------------------------------------------------------------------------
+
+
+def test_comments_from_dataframe_defaults_missing_columns():
+    df = pd.DataFrame({"text": ["Bài hát rất hay", "Nghe chán quá"]})
+    out = tp.comments_from_dataframe(df, "text")
+
+    assert list(out.columns) == tp.COMMENT_COLUMNS
+    assert out["comment_id"].tolist() == ["0", "1"]
+    assert out["parent_id"].tolist() == [None, None]
+    assert out["is_reply"].tolist() == [False, False]
+    assert out["author"].tolist() == ["Ẩn danh", "Ẩn danh"]
+    assert out["published_at"].tolist() == ["", ""]
+    assert out["like_count"].tolist() == [0, 0]
+    assert out["reply_count"].tolist() == [0, 0]
+    assert out["text"].tolist() == ["Bài hát rất hay", "Nghe chán quá"]
+    assert out["is_reply"].dtype == bool
+    assert out["like_count"].dtype.kind == "i"
+    assert out["reply_count"].dtype.kind == "i"
+
+
+def test_comments_from_dataframe_keeps_columns_that_exist():
+    df = pd.DataFrame(
+        {
+            "noi_dung": ["Bài hát rất hay", "Nghe chán quá"],
+            "author": ["An", "Bình"],
+            "like_count": ["7", None],
+            "is_reply": [True, False],
+            "parent_id": ["Ugx1", None],
+            "published_at": ["2024-01-01T00:00:00Z", ""],
+            "reply_count": [2, 0],
+            "comment_id": ["Ugy0", "Ugy1"],
+        }
+    )
+    out = tp.comments_from_dataframe(df, "noi_dung")
+
+    assert out["comment_id"].tolist() == ["Ugy0", "Ugy1"]
+    assert out["author"].tolist() == ["An", "Bình"]
+    assert out["is_reply"].tolist() == [True, False]
+    # Giá trị số hỏng hoặc thiếu quy về 0 chứ không làm hỏng kiểu dữ liệu.
+    assert out["like_count"].tolist() == [7, 0]
+    assert out["like_count"].dtype.kind == "i"
+    assert out["text"].tolist() == ["Bài hát rất hay", "Nghe chán quá"]
+
+
+def test_comments_from_dataframe_drops_empty_text_then_applies_limit():
+    df = pd.DataFrame({"text": ["Bài hát rất hay", None, "   ", "Nghe chán quá", "Giọng ấm thật"]})
+    out = tp.comments_from_dataframe(df, "text", limit=2)
+
+    assert out["text"].tolist() == ["Bài hát rất hay", "Nghe chán quá"]
+    # comment_id giữ chỉ số dòng gốc, nên vẫn dò ngược được về tệp đầu vào.
+    assert out["comment_id"].tolist() == ["0", "3"]
+    assert list(out.index) == [0, 1]
+
+
+def test_comments_from_dataframe_limit_none_keeps_everything():
+    df = pd.DataFrame({"text": [f"bình luận số {index}" for index in range(5)]})
+    assert len(tp.comments_from_dataframe(df, "text")) == 5
+
+
+def test_comments_from_dataframe_requires_the_text_column():
+    with pytest.raises(ValueError) as error:
+        tp.comments_from_dataframe(pd.DataFrame({"text": ["một hai"]}), "noi_dung")
+    assert "noi_dung" in str(error.value)
+
+
+def test_comments_from_dataframe_rejects_a_frame_without_usable_rows():
+    df = pd.DataFrame({"text": [None, "", "  "]})
+    with pytest.raises(ValueError):
+        tp.comments_from_dataframe(df, "text")
+
+
+def test_comments_from_dataframe_handles_a_header_read_with_bom():
+    """Tệp CSV có BOM: người gọi đọc bằng utf-8-sig, ở đây chỉ nhận bảng đã sạch."""
+    import io
+
+    payload = "﻿text,label\nBài hát rất hay,2\nNghe chán quá,0\n".encode("utf-8")
+    frame = pd.read_csv(io.BytesIO(payload), encoding="utf-8-sig")
+    out = tp.comments_from_dataframe(frame, "text")
+
+    assert list(frame.columns) == ["text", "label"]
+    assert out["text"].tolist() == ["Bài hát rất hay", "Nghe chán quá"]

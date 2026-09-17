@@ -40,6 +40,20 @@ SENTIMENT_ICONS = {0: "🔴 Tiêu cực", 1: "⚪ Trung tính", 2: "🟢 Tích c
 
 OUTLIER_LABEL = "-1: Nhiễu (không thuộc chủ đề nào)"
 
+# Hợp đồng cột của `crawler.get_video_comments`. Mọi nguồn dữ liệu khác (tệp CSV
+# người dùng tải lên, tệp mẫu trong `data/`) phải đưa về đúng thứ tự cột này thì
+# phần còn lại của pipeline mới dùng chung được một đường đi.
+COMMENT_COLUMNS = [
+    "comment_id",
+    "parent_id",
+    "is_reply",
+    "author",
+    "published_at",
+    "like_count",
+    "reply_count",
+    "text",
+]
+
 
 @dataclass
 class TopicConfig:
@@ -77,6 +91,59 @@ def prepare_documents(df: pd.DataFrame, text_col: str = "text") -> pd.DataFrame:
     out["tokenized_text"] = out["clean_text"].apply(tokenize_vietnamese)
     keep = out["tokenized_text"].apply(lambda value: len(str(value).split()) >= 2)
     return out[keep].reset_index(drop=True)
+
+
+def _int_column(source: pd.DataFrame, name: str) -> pd.Series:
+    """Cột số nguyên: thiếu cột thì trả về 0, giá trị hỏng cũng quy về 0."""
+    if name not in source.columns:
+        return pd.Series(0, index=source.index, dtype="int64")
+    return pd.to_numeric(source[name], errors="coerce").fillna(0).astype("int64")
+
+
+def comments_from_dataframe(
+    df: pd.DataFrame,
+    text_col: str,
+    limit: int | None = None,
+) -> pd.DataFrame:
+    """Đưa một bảng bất kỳ về đúng hợp đồng cột của `crawler.get_video_comments`.
+
+    Dùng cho hai nguồn dữ liệu ngoại tuyến: tệp CSV người dùng tải lên và tệp
+    mẫu trong `data/`. Cột nào có trong bảng thì lấy nguyên, cột nào thiếu thì
+    điền giá trị mặc định (`author` là "Ẩn danh", `comment_id` là chỉ số dòng,
+    `like_count` và `reply_count` là 0). Dòng có nội dung trống hoặc NaN bị loại
+    trước, rồi mới cắt theo `limit`, nên số dòng trả về đúng bằng số bình luận
+    dùng được mà người dùng yêu cầu.
+
+    Ném `ValueError` kèm thông điệp tiếng Việt khi thiếu cột văn bản hoặc không
+    còn dòng nào dùng được; phía giao diện bắt lỗi này và hiển thị bằng
+    `st.error` thay vì đổ traceback.
+    """
+    if text_col not in df.columns:
+        raise ValueError(f"Không tìm thấy cột văn bản '{text_col}' trong dữ liệu.")
+
+    source = df[df[text_col].notna()]
+    source = source[source[text_col].astype(str).str.strip() != ""]
+    if limit is not None and int(limit) > 0:
+        source = source.head(int(limit))
+    if source.empty:
+        raise ValueError("Không có dòng bình luận nào dùng được trong dữ liệu.")
+
+    out = pd.DataFrame(index=source.index)
+    out["comment_id"] = (
+        source["comment_id"].astype(str) if "comment_id" in source.columns
+        else source.index.astype(str)
+    )
+    out["parent_id"] = source["parent_id"] if "parent_id" in source.columns else None
+    out["is_reply"] = source["is_reply"] if "is_reply" in source.columns else False
+    out["author"] = source["author"].astype(str) if "author" in source.columns else "Ẩn danh"
+    out["published_at"] = (
+        source["published_at"].astype(str) if "published_at" in source.columns else ""
+    )
+    out["like_count"] = _int_column(source, "like_count")
+    out["reply_count"] = _int_column(source, "reply_count")
+    out["text"] = source[text_col].astype(str)
+    out["is_reply"] = out["is_reply"].fillna(False).astype(bool)
+    return out[COMMENT_COLUMNS].reset_index(drop=True)
 
 
 def documents_hash(docs: Sequence[str]) -> str:

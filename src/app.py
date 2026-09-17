@@ -1,6 +1,10 @@
-"""Giao diện Streamlit: dán link YouTube, nhận về chủ đề và cảm xúc bình luận.
+"""Giao diện Streamlit: chọn nguồn dữ liệu, nhận về chủ đề và cảm xúc bình luận.
 
-Luồng: thu thập -> làm sạch và tách từ -> nhúng câu bằng `keepitreal/vietnamese-sbert`
+Ba nguồn dữ liệu: link YouTube (cần YOUTUBE_API_KEY), tệp CSV tải lên, và tệp mẫu
+`data/dataset_chuan.csv` có sẵn trong dự án. Hai nguồn sau chạy được khi không có
+API key, thuận tiện cho người chấm bài.
+
+Luồng: lấy dữ liệu -> làm sạch và tách từ -> nhúng câu bằng `keepitreal/vietnamese-sbert`
 -> gom cụm bằng BERTopic -> phân loại cảm xúc bằng LinearSVC + TF-IDF -> (tùy chọn)
 tóm tắt chủ đề bằng Ollama. Kết quả nằm trong `st.session_state` nên mọi thao tác
 trên giao diện (đổi tab, lọc, tải CSV) không làm chạy lại phần tính toán nặng.
@@ -8,7 +12,9 @@ trên giao diện (đổi tab, lọc, tải CSV) không làm chạy lại phần
 
 from __future__ import annotations
 
+import hashlib
 import inspect
+import io
 import json
 import os
 import sys
@@ -32,6 +38,23 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "results")
 ORDER_CHOICES = {"Phổ biến": "relevance", "Mới nhất": "time"}
+
+SOURCE_YOUTUBE = "Link YouTube"
+SOURCE_CSV = "Tệp CSV"
+SOURCE_SAMPLE = "Dữ liệu mẫu"
+SOURCE_CHOICES = [SOURCE_YOUTUBE, SOURCE_CSV, SOURCE_SAMPLE]
+
+# Tệp mẫu đi kèm dự án, tìm theo thư mục gốc giống cách tìm models/ và results/.
+SAMPLE_REL_PATH = "data/dataset_chuan.csv"
+SAMPLE_PATH = os.path.join(PROJECT_ROOT, *SAMPLE_REL_PATH.split("/"))
+SAMPLE_NOTE = ("Tệp này đồng thời là tập huấn luyện của mô hình cảm xúc, nên tỷ lệ "
+               "cảm xúc hiển thị sẽ lạc quan hơn thực tế; chỉ phần chủ đề là minh họa "
+               "công bằng.")
+
+
+class DataSourceError(Exception):
+    """Lỗi đọc dữ liệu ngoại tuyến: hiển thị bằng st.error, không đổ traceback."""
+
 
 # Bản `crawler.py` cũ chưa có hai tên này; giữ cho app chạy được với cả hai bản.
 CrawlError = getattr(crawler, "CrawlError", Exception)
@@ -91,6 +114,33 @@ def fetch_metadata(video_id, _api_key):
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
+def read_uploaded_csv(content_hash, _payload):
+    """Khóa đệm là chuỗi băm của nội dung tệp, không phải đối tượng DataFrame."""
+    return pd.read_csv(io.BytesIO(_payload), encoding="utf-8-sig")
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def read_sample_csv(path, limit):
+    """Khóa đệm là đường dẫn tệp mẫu và số dòng tối đa cần đọc."""
+    return pd.read_csv(path, encoding="utf-8-sig", nrows=int(limit) if limit else None)
+
+
+def payload_hash(payload: bytes) -> str:
+    return hashlib.sha1(payload).hexdigest()
+
+
+def default_text_column(frame) -> int:
+    """Vị trí cột văn bản gợi ý: ưu tiên cột tên `text`, sau đó cột chữ đầu tiên."""
+    columns = list(frame.columns)
+    if "text" in columns:
+        return columns.index("text")
+    for position, name in enumerate(columns):
+        if frame[name].dtype == object:
+            return position
+    return 0
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
 def compute_embeddings(docs_hash, model_name, _model, _docs):
     """Khóa đệm là chuỗi băm của danh sách tài liệu, không phải bản thân danh sách."""
     return tp.embed_documents(_model, list(_docs))
@@ -101,7 +151,11 @@ def compute_embeddings(docs_hash, model_name, _model, _docs):
 
 @dataclass
 class Settings:
+    source: str
     video_url: str
+    csv_name: str
+    csv_payload: bytes | None
+    text_col: str
     max_comments: int
     include_replies: bool
     order: str
@@ -113,13 +167,29 @@ class Settings:
 
 
 def render_sidebar() -> tuple[Settings, bool, bool]:
+    video_url, csv_name, csv_payload, text_col = "", "", None, "text"
+    include_replies, order_label = True, list(ORDER_CHOICES)[0]
+
     with st.sidebar:
         st.subheader("Nguồn dữ liệu")
-        video_url = st.text_input("Link video YouTube", placeholder="https://www.youtube.com/watch?v=...",
-                                  help="Hỗ trợ cả dạng youtu.be, /shorts/, /live/ hoặc ID 11 ký tự.")
+        source = st.radio("Nguồn", SOURCE_CHOICES, horizontal=True)
+
+        if source == SOURCE_SAMPLE:
+            st.caption(SAMPLE_NOTE)
+        elif source == SOURCE_CSV:
+            uploaded = st.file_uploader("Tệp CSV bình luận", type=["csv"],
+                                        help="Tệp UTF-8, có một cột chứa nội dung bình luận.")
+            if uploaded is not None:
+                csv_name, csv_payload = uploaded.name, uploaded.getvalue()
+                text_col = _choose_text_column(csv_payload)
+        else:
+            video_url = st.text_input("Link video YouTube", placeholder="https://www.youtube.com/watch?v=...",
+                                      help="Hỗ trợ cả dạng youtu.be, /shorts/, /live/ hoặc ID 11 ký tự.")
+
         max_comments = st.slider("Số bình luận tối đa", 100, 5000, 1000, step=100)
-        include_replies = st.toggle("Lấy cả bình luận trả lời (replies)", value=True)
-        order_label = st.selectbox("Thứ tự lấy bình luận", list(ORDER_CHOICES), index=0)
+        if source == SOURCE_YOUTUBE:
+            include_replies = st.toggle("Lấy cả bình luận trả lời (replies)", value=True)
+            order_label = st.selectbox("Thứ tự lấy bình luận", list(ORDER_CHOICES), index=0)
 
         with st.expander("Cài đặt nâng cao (BERTopic)"):
             min_topic_size = st.slider("Kích thước cụm tối thiểu", 5, 50, 10)
@@ -147,8 +217,10 @@ def render_sidebar() -> tuple[Settings, bool, bool]:
 
         with st.expander("Hướng dẫn"):
             st.markdown(
-                "1. Tạo file `.env` ở thư mục gốc với dòng `YOUTUBE_API_KEY=...`.\n"
-                "2. Dán link video rồi bấm **Bắt đầu phân tích**.\n"
+                "1. Chưa có API key thì chọn nguồn **Dữ liệu mẫu** hoặc **Tệp CSV** rồi bấm "
+                "**Bắt đầu phân tích**.\n"
+                "2. Với nguồn **Link YouTube**: tạo file `.env` ở thư mục gốc với dòng "
+                "`YOUTUBE_API_KEY=...` rồi dán link video.\n"
                 "3. Lần chạy đầu tiên cần tải mô hình nhúng câu về máy.\n"
                 "4. Nếu chủ đề bị gom thành một cụm quá lớn, hãy giảm kích thước cụm tối thiểu "
                 "hoặc đổi sang `leaf` trong Cài đặt nâng cao."
@@ -157,12 +229,27 @@ def render_sidebar() -> tuple[Settings, bool, bool]:
     cfg = tp.TopicConfig(min_topic_size=int(min_topic_size), nr_topics=nr_topics,
                          top_n_words=int(top_n_words), use_stopwords=bool(use_stopwords),
                          cluster_selection_method=cluster_selection, min_samples=min_samples)
-    settings = Settings(video_url=video_url.strip(), max_comments=int(max_comments),
+    settings = Settings(source=source, video_url=video_url.strip(), csv_name=csv_name,
+                        csv_payload=csv_payload, text_col=text_col, max_comments=int(max_comments),
                         include_replies=bool(include_replies), order=ORDER_CHOICES[order_label],
                         topic_cfg=cfg, use_sentiment=bool(use_sentiment), use_llm=bool(use_llm),
                         llm_model=llm_model.strip() or DEFAULT_MODEL,
                         llm_base_url=llm_base_url.strip() or DEFAULT_BASE_URL)
     return settings, start, clear
+
+
+def _choose_text_column(payload: bytes) -> str:
+    """Hộp chọn cột văn bản của tệp vừa tải lên; tệp hỏng thì báo lỗi gọn."""
+    try:
+        frame = read_uploaded_csv(payload_hash(payload), _payload=payload)
+    except Exception as error:
+        st.error(f"Không đọc được tệp CSV: {error}")
+        return ""
+    if frame.empty or len(frame.columns) == 0:
+        st.error("Tệp CSV không có dòng dữ liệu nào.")
+        return ""
+    return st.selectbox("Cột chứa nội dung bình luận", list(frame.columns),
+                        index=default_text_column(frame))
 
 
 # --- Chạy phân tích --------------------------------------------------------
@@ -192,27 +279,72 @@ def _summarize_topics(settings, topics_df, limit=8) -> dict:
     return summaries
 
 
-def run_analysis(settings: Settings, api_key: str) -> dict | None:
+def load_offline_comments(settings: Settings) -> tuple[pd.DataFrame, str]:
+    """Đọc bình luận từ tệp CSV tải lên hoặc tệp mẫu, trả về (bảng, nhãn nguồn).
+
+    Bảng trả về theo đúng hợp đồng cột của crawler nên các bước sau không cần
+    biết dữ liệu đến từ đâu.
+    """
+    if settings.source == SOURCE_SAMPLE:
+        try:
+            frame = read_sample_csv(SAMPLE_PATH, settings.max_comments)
+        except FileNotFoundError:
+            raise DataSourceError(f"Không tìm thấy tệp dữ liệu mẫu {SAMPLE_REL_PATH}.")
+        except Exception as error:
+            raise DataSourceError(f"Không đọc được tệp dữ liệu mẫu: {error}")
+        text_col = "text"
+    else:
+        if not settings.csv_payload:
+            raise DataSourceError("Chưa chọn tệp CSV nào.")
+        try:
+            frame = read_uploaded_csv(payload_hash(settings.csv_payload),
+                                      _payload=settings.csv_payload)
+        except Exception as error:
+            raise DataSourceError(f"Không đọc được tệp CSV: {error}")
+        text_col = settings.text_col
+
+    if not text_col:
+        raise DataSourceError("Hãy chọn cột chứa nội dung bình luận.")
     try:
-        video_id = crawler.extract_video_id(settings.video_url)
+        raw = tp.comments_from_dataframe(frame, text_col, limit=settings.max_comments)
     except ValueError as error:
-        st.error(str(error))
-        return None
+        raise DataSourceError(str(error))
+
+    if settings.source == SOURCE_SAMPLE:
+        return raw, f"Dữ liệu mẫu: {SAMPLE_REL_PATH} ({len(raw)} dòng)"
+    return raw, f"CSV: {settings.csv_name}"
+
+
+def run_analysis(settings: Settings, api_key: str) -> dict | None:
+    video_id = ""
+    if settings.source == SOURCE_YOUTUBE:
+        try:
+            video_id = crawler.extract_video_id(settings.video_url)
+        except ValueError as error:
+            st.error(str(error))
+            return None
 
     timings: dict[str, float] = {}
     with st.status("Đang xử lý…", expanded=True) as status:
         try:
             started = time.perf_counter()
-            st.write(f"1/6 · Đang lấy tối đa {settings.max_comments} bình luận từ YouTube…")
-            note = st.empty()
-            raw = fetch_comments(video_id, settings.max_comments, settings.include_replies,
-                                 settings.order, _api_key=api_key,
-                                 _on_progress=lambda n, message: note.caption(f"{message} ({n} bình luận)"))
-            note.empty()
-            st.write(f"　　Đã lấy {len(raw)} bình luận ({_lap(timings, 'thu thập', started):.1f}s)")
+            if settings.source == SOURCE_YOUTUBE:
+                st.write(f"1/6 · Đang lấy tối đa {settings.max_comments} bình luận từ YouTube…")
+                note = st.empty()
+                raw = fetch_comments(video_id, settings.max_comments, settings.include_replies,
+                                     settings.order, _api_key=api_key,
+                                     _on_progress=lambda n, message: note.caption(f"{message} ({n} bình luận)"))
+                note.empty()
+                source_label = f"YouTube: {video_id}"
+            else:
+                st.write("1/6 · Đang đọc dữ liệu có sẵn (bỏ qua bước thu thập từ YouTube "
+                         "và bước lấy thông tin video)…")
+                raw, source_label = load_offline_comments(settings)
+            stage = "thu thập" if settings.source == SOURCE_YOUTUBE else "đọc dữ liệu"
+            st.write(f"　　Đã lấy {len(raw)} bình luận ({_lap(timings, stage, started):.1f}s)")
             if len(raw) == 0:
                 status.update(label="Không có dữ liệu", state="error")
-                st.warning("Video này không có bình luận nào hoặc đã tắt bình luận.")
+                st.warning("Không có bình luận nào trong nguồn dữ liệu đã chọn.")
                 return None
 
             started = time.perf_counter()
@@ -267,7 +399,7 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
             _lap(timings, "LLM", started)
 
             figures = tp.bertopic_figures(topic_model)
-        except CrawlError as error:
+        except (CrawlError, DataSourceError) as error:
             status.update(label="Lỗi khi lấy bình luận", state="error")
             st.error(str(error))
             return None
@@ -277,7 +409,8 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
             return None
         status.update(label="Phân tích hoàn tất", state="complete", expanded=False)
 
-    return {"video_id": video_id, "metadata": fetch_metadata(video_id, _api_key=api_key),
+    metadata = fetch_metadata(video_id, _api_key=api_key) if settings.source == SOURCE_YOUTUBE else None
+    return {"video_id": video_id, "source": source_label, "metadata": metadata,
             "df": df, "topics": topics_df, "summaries": summaries, "figures": figures,
             "timings": timings, "config": asdict(settings.topic_cfg),
             "use_sentiment": use_sentiment, "n_raw": int(len(raw))}
@@ -288,6 +421,7 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
 
 def render_overview(result):
     metadata = result.get("metadata")
+    source = str(result.get("source", ""))
     if metadata:
         left, right = st.columns([1, 3])
         if metadata.get("thumbnail_url"):
@@ -296,6 +430,9 @@ def render_overview(result):
         right.caption(f"Kênh: {metadata.get('channel_title', '?')} · "
                       f"{metadata.get('view_count', '?')} lượt xem · "
                       f"{metadata.get('comment_count', '?')} bình luận trên YouTube")
+    elif source:
+        st.markdown("#### Nguồn dữ liệu")
+        st.caption(source)
 
     df, topics_df = result["df"], result["topics"]
     n_topics = int((topics_df["Topic"] != -1).sum())
@@ -317,8 +454,9 @@ def render_overview(result):
         st.info("Chưa tách được chủ đề nào ngoài nhóm nhiễu. Hãy giảm kích thước cụm tối thiểu.")
 
     timings = result["timings"]
-    st.caption("Thời gian xử lý: " + " · ".join(f"{k} {v:.1f}s" for k, v in timings.items())
-               + f" · tổng {sum(timings.values()):.1f}s")
+    line = "Thời gian xử lý: " + " · ".join(f"{k} {v:.1f}s" for k, v in timings.items())
+    line += f" · tổng {sum(timings.values()):.1f}s"
+    st.caption(f"Nguồn: {source} · {line}" if source else line)
 
 
 def render_topics(result):
@@ -398,7 +536,8 @@ def render_data(result):
     st.caption(f"Đang hiển thị {len(table):,} / {len(df):,} bình luận.")
     st.dataframe(table, use_container_width=True, hide_index=True, height=460)
     st.download_button("Tải CSV đang lọc", data=table.to_csv(index=False).encode("utf-8-sig"),
-                       file_name=f"binh_luan_{result['video_id']}.csv", mime="text/csv")
+                       file_name=f"binh_luan_{result.get('video_id') or 'du_lieu'}.csv",
+                       mime="text/csv")
 
 
 def _read_json(path):
@@ -469,10 +608,12 @@ def main():
     if clear:
         st.session_state.pop("result", None)
     if start:
-        if not settings.video_url:
+        if settings.source == SOURCE_YOUTUBE and not settings.video_url:
             st.error("Vui lòng nhập link video YouTube.")
-        elif not api_key:
+        elif settings.source == SOURCE_YOUTUBE and not api_key:
             st.error("Không tìm thấy YOUTUBE_API_KEY. Hãy tạo file .env ở thư mục gốc dự án.")
+        elif settings.source == SOURCE_CSV and not settings.csv_payload:
+            st.error("Vui lòng chọn một tệp CSV chứa bình luận.")
         else:
             result = run_analysis(settings, api_key)
             if result is not None:
@@ -480,7 +621,8 @@ def main():
 
     result = st.session_state.get("result")
     if result is None:
-        st.info("Nhập link video ở thanh bên rồi bấm **Bắt đầu phân tích**. "
+        st.info("Chọn nguồn dữ liệu ở thanh bên rồi bấm **Bắt đầu phân tích**. "
+                "Không có API key thì dùng nguồn Dữ liệu mẫu hoặc Tệp CSV. "
                 "Kết quả sẽ được giữ lại khi bạn chuyển tab hoặc đổi bộ lọc.")
         return
 
