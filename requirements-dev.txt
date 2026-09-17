@@ -1,0 +1,3 @@
+# Thư viện chỉ dùng khi phát triển / kiểm thử (không cần để chạy app)
+-r requirements.txt
+pytest>=8.0
