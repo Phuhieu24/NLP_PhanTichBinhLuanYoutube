@@ -1,6 +1,7 @@
 """Kiểm thử cho module tiền xử lý văn bản tiếng Việt."""
 
 import os
+import unicodedata
 
 import pytest
 
@@ -41,6 +42,25 @@ def test_normalize_repeated_chars_khong_dung_den_chu_so():
 
 def test_normalize_repeated_chars_giu_dau_gach_duoi():
     assert normalize_repeated_chars("a___b") == "a___b"
+
+
+@pytest.mark.parametrize("raw", ["kkkk", "hhhh", "zzzz", "KKKK"])
+def test_normalize_repeated_chars_bo_han_tu_chi_gom_mot_chu_cai_lap(raw):
+    # Tiếng cười hoặc tạp âm: bỏ hẳn, vì rút về "k" sẽ bị teencode đổi thành
+    # "không", tức là thêm nghĩa phủ định không có trong bình luận.
+    assert normalize_repeated_chars(raw) == ""
+
+
+def test_normalize_repeated_chars_bo_tieng_cuoi_giua_cau():
+    assert normalize_repeated_chars("kkkk hài quá") == "hài quá"
+    assert normalize_repeated_chars("hài kkkk quá") == "hài quá"
+
+
+def test_normalize_repeated_chars_van_rut_gon_trong_tu_dai_hon():
+    # Chuỗi lặp nằm trong từ dài hơn vẫn rút về một ký tự như cũ.
+    assert normalize_repeated_chars("luônnnn") == "luôn"
+    assert normalize_repeated_chars("hayyy") == "hay"
+    assert normalize_repeated_chars("traiiiii") == "trai"
 
 
 # --- teencode ---
@@ -111,6 +131,24 @@ def test_clean_text_gop_khoang_trang_thua():
     assert clean_text("  hay    quá   ") == "hay quá"
 
 
+def test_clean_text_chuan_hoa_unicode_ve_nfc():
+    # Bình luận gõ trên macOS/iOS có thể ở dạng NFD ("ô" là "o" + U+0302).
+    nfd = unicodedata.normalize("NFD", "không hiểu luônnnn")
+    assert nfd != "không hiểu luônnnn"
+    assert clean_text(nfd) == clean_text("không hiểu luônnnn")
+    assert "luôn" in clean_text(nfd)
+
+
+def test_clean_text_bo_dau_gach_duoi_nguoi_dung_go():
+    # pyvi tự thêm dấu gạch dưới ở bước tách từ; dấu người dùng gõ phải biến mất.
+    assert clean_text("anh_trai say hi") == "anh trai say hi"
+    assert clean_text("__init__ hay") == "init hay"
+
+
+def test_clean_text_bo_tieng_cuoi():
+    assert clean_text("kkkk hài quá") == "hài quá"
+
+
 # --- tokenize_vietnamese và preprocess_text ---
 
 
@@ -130,6 +168,17 @@ def test_preprocess_text_toan_trinh():
     assert "luôn" in out and "luônnnn" not in out
     assert "không hiểu" in out
     assert out == out.lower()
+
+
+def test_preprocess_text_bo_tieng_cuoi_thay_vi_doi_thanh_phu_dinh():
+    assert preprocess_text("kkkk hài quá") == "hài quá"
+    out = preprocess_text("hahaha kkk hay quá")
+    assert "hay" in out
+    assert "không" not in out
+
+
+def test_preprocess_text_dau_gach_duoi_nguoi_dung_go_khong_vao_token():
+    assert preprocess_text("__init__ hay") == "init hay"
 
 
 def test_preprocess_text_gia_tri_thieu():

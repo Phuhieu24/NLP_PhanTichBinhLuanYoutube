@@ -13,6 +13,7 @@ import functools
 import os
 import re
 import sys
+import unicodedata
 
 import pandas as pd
 from pyvi import ViTokenizer
@@ -89,6 +90,13 @@ _TEENCODE_PATTERN = re.compile(
 # giữ nguyên. Khoảng 21% bình luận trong tập dữ liệu có hiện tượng lặp ký tự.
 _REPEATED_CHARS_PATTERN = re.compile(r"([^\W\d_])\1{2,}")
 
+# Cả một từ chỉ gồm một chữ cái lặp lại 3 lần trở lên ("kkkk", "hhhh", "zzzz")
+# là tiếng cười hoặc tạp âm, phải bỏ hẳn chứ không rút về một ký tự: "kkkk" rút
+# thành "k" sẽ bị teencode đổi thành "không", tức là tự thêm nghĩa phủ định
+# không có trong bình luận. Nuốt luôn khoảng trắng phía sau để không để lại
+# khoảng trống thừa.
+_REPEATED_LETTER_WORD_PATTERN = re.compile(r"\b([^\W\d_])\1{2,}\b\s*")
+
 _URL_PATTERN = re.compile(r"(?:https?://|www\.)\S+", flags=re.IGNORECASE)
 
 # Bỏ ký hiệu @ và # nhưng giữ lại chữ đứng sau ("#anhtraisayhi" -> "anhtraisayhi").
@@ -108,9 +116,11 @@ STOPWORDS_PATH = os.path.join(
 def normalize_repeated_chars(text: str) -> str:
     """Rút gọn chuỗi 3 ký tự chữ cái giống nhau trở lên về một ký tự.
 
-    "luônnnn" -> "luôn", "hayyyy" -> "hay". Chữ số không bị đụng tới nên "1000"
-    vẫn là "1000".
+    "luônnnn" -> "luôn", "hayyyy" -> "hay". Riêng từ chỉ gồm một chữ cái lặp
+    lại ("kkkk", "hhhh") là tiếng cười hoặc tạp âm nên bị bỏ hẳn, không rút về
+    một ký tự. Chữ số không bị đụng tới nên "1000" vẫn là "1000".
     """
+    text = _REPEATED_LETTER_WORD_PATTERN.sub("", text)
     return _REPEATED_CHARS_PATTERN.sub(r"\1", text)
 
 
@@ -126,16 +136,24 @@ def normalize_teencode(text: str) -> str:
 def clean_text(text) -> str:
     """Làm sạch văn bản thô, GIỮ NGUYÊN chữ hoa (pyvi cần chữ hoa để ghép tên riêng).
 
-    Các bước: bỏ URL -> bỏ ký hiệu @ và # (giữ lại chữ) -> thay dấu câu, ký tự
-    đặc biệt và emoji bằng khoảng trắng -> rút gọn ký tự lặp -> chuẩn hóa
+    Các bước: chuẩn hóa Unicode về NFC -> bỏ URL -> bỏ ký hiệu @ và # (giữ lại
+    chữ) -> thay dấu gạch dưới người dùng gõ bằng khoảng trắng -> thay dấu câu,
+    ký tự đặc biệt và emoji bằng khoảng trắng -> rút gọn ký tự lặp -> chuẩn hóa
     teencode -> gộp khoảng trắng thừa. Giá trị không phải chuỗi (NaN, None)
     trả về chuỗi rỗng.
     """
     if not isinstance(text, str):
         return ""
 
+    # Bình luận gõ trên macOS/iOS có thể ở dạng NFD ("ô" là "o" + U+0302), khi
+    # đó regex rút gọn ký tự lặp và tra teencode đều chạy sai.
+    text = unicodedata.normalize("NFC", text)
     text = _URL_PATTERN.sub(" ", text)
     text = _MENTION_HASHTAG_PATTERN.sub(r"\1", text)
+    # Dấu gạch dưới do người dùng gõ ("anh_trai", "__init__") phải biến mất ở
+    # đây, nếu không nó sẽ trôi vào token stream như một cụm ghép giả của pyvi;
+    # pyvi tự thêm dấu gạch dưới của nó ở bước tách từ.
+    text = text.replace("_", " ")
     # \w của Python 3 đã hỗ trợ Unicode nên chữ tiếng Việt có dấu được giữ lại.
     text = _NON_WORD_PATTERN.sub(" ", text)
     # Rút gọn ký tự lặp trước khi tra teencode để "kooo" -> "ko" -> "không",
