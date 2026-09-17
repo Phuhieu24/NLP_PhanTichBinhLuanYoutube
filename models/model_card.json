@@ -1,0 +1,15 @@
+{
+  "model": "LinearSVC",
+  "vectorizer": "TfidfVectorizer(1,2)-gram, 15000 features",
+  "label_map": {
+    "0": "Tiêu cực",
+    "1": "Trung tính",
+    "2": "Tích cực"
+  },
+  "trained_at": "2026-09-17T18:28:59+00:00",
+  "sklearn_version": "1.9.1",
+  "preprocessing": "clean_text (bỏ URL, ký tự đặc biệt, chuẩn hóa teencode) -> pyvi ViTokenizer -> lowercase; loại 3 dòng rỗng sau tiền xử lý",
+  "test_accuracy": 0.76425,
+  "test_f1_macro": 0.7136481977070738,
+  "notes": "Chọn mô hình bằng cross-validation 5-fold trên tập train; tập test chỉ dùng đúng một lần. Lớp trung tính là lớp yếu nhất, xem results/metrics.json."
+}
