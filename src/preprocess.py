@@ -87,7 +87,8 @@ _TEENCODE_PATTERN = re.compile(
 
 # Từ 3 ký tự chữ cái giống nhau trở lên rút về một ký tự ("luônnnn" -> "luôn").
 # [^\W\d_] là ký tự chữ cái Unicode (đã loại chữ số và dấu gạch dưới) nên "1000"
-# giữ nguyên. Khoảng 21% bình luận trong tập dữ liệu có hiện tượng lặp ký tự.
+# giữ nguyên. Khoảng 8% bình luận có 3 chữ cái lặp liên tiếp (20,7% nếu tính cả dấu
+# câu và emoji lặp); xem results/dataset_stats.json.
 _REPEATED_CHARS_PATTERN = re.compile(r"([^\W\d_])\1{2,}")
 
 # Cả một từ chỉ gồm một chữ cái lặp lại 3 lần trở lên ("kkkk", "hhhh", "zzzz")
