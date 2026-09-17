@@ -88,7 +88,7 @@ Trình duyệt sẽ tự động mở lên địa chỉ: **http://localhost:8501
 - `src/train_sentiment.py`: Mã nguồn tự huấn luyện mô hình Phân tích Cảm xúc bằng Scikit-Learn.
 - `data/`: Nơi lưu trữ các file dữ liệu `.csv` sinh ra trong quá trình chạy và tập dữ liệu huấn luyện.
 - `models/`: Chứa các file mô hình Machine Learning (`.pkl`) đã được huấn luyện.
-- `results/`: Nơi lưu trữ các file biểu đồ tĩnh `.html`.
+- `results/`: Nơi lưu trữ các file biểu đồ tĩnh (`.html`, `.png`).
 - `.streamlit/config.toml`: File cấu hình giao diện Dark Mode cho web.
 - `requirements.txt`: Danh sách các thư viện cần cài đặt.
 - `BAO_CAO.md`: Tài liệu giải thích lý thuyết các thuật toán.
