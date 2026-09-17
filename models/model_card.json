@@ -6,9 +6,9 @@
     "1": "Trung tính",
     "2": "Tích cực"
   },
-  "trained_at": "2026-09-17T19:13:49+00:00",
+  "trained_at": "2026-09-17T19:34:15+00:00",
   "sklearn_version": "1.9.1",
-  "preprocessing": "clean_text (bỏ URL, ký tự đặc biệt, chuẩn hóa teencode) -> pyvi ViTokenizer -> lowercase; loại 3 dòng rỗng sau tiền xử lý",
+  "preprocessing": "clean_text (chuẩn hóa NFC, bỏ URL và ký tự đặc biệt, gộp chữ lặp, chuẩn hóa teencode chính tả) -> pyvi ViTokenizer -> lowercase; loại 3 dòng rỗng sau tiền xử lý",
   "test_accuracy": 0.76625,
   "test_f1_macro": 0.7161015184804146,
   "notes": "So sánh 4 mô hình nền (MostFrequent, MultinomialNB, LogisticRegression, LinearSVC) bằng cross-validation 5-fold trên tập train; giữ LinearSVC theo thiết kế rồi dò tham số C cũng bằng macro-F1 cross-validation (chọn C=0.3). Tại C đã chọn, macro-F1 CV của LinearSVC là 0.7180 ± 0.0066, so với LogisticRegression 0.7170 ± 0.0054 (chênh lệch +0.0010, nhỏ hơn độ lệch chuẩn giữa các fold, nên không kết luận được mô hình nào tốt hơn). Toàn bộ việc chọn lựa chỉ dùng tập train; tập test chỉ dùng đúng một lần. Lớp trung tính là lớp yếu nhất, xem results/metrics.json."

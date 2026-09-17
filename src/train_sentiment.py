@@ -65,7 +65,8 @@ TOP_FEATURES = 25
 
 TFIDF_PARAMS = {"max_features": 15000, "ngram_range": (1, 2), "sublinear_tf": True}
 PREPROCESSING_DESC = (
-    "clean_text (bỏ URL, ký tự đặc biệt, chuẩn hóa teencode) -> pyvi ViTokenizer -> lowercase"
+    "clean_text (chuẩn hóa NFC, bỏ URL và ký tự đặc biệt, gộp chữ lặp, chuẩn hóa teencode chính tả) "
+    "-> pyvi ViTokenizer -> lowercase"
 )
 
 

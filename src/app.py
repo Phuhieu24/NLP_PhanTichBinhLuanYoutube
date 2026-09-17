@@ -57,8 +57,8 @@ class DataSourceError(Exception):
 
 # Gợi ý hiển thị cạnh hai tham số HDBSCAN, lấy từ thí nghiệm trên tệp mẫu.
 TOPIC_TUNING_HELP = (
-    "Trên 1.496 bình luận mẫu, mặc định của BERTopic gom 91% vào một chủ đề; "
-    "15/1 cho 29 chủ đề với 26% nhiễu."
+    "Trên 1.000 đến 1.500 bình luận mẫu, mặc định của BERTopic gom 91% vào một chủ đề với 0% nhiễu; "
+    "15/1 cho 23 đến 31 chủ đề với 20 đến 38% nhiễu tùy tập."
 )
 
 
