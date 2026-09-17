@@ -1,0 +1,63 @@
+{
+  "source": "data/dataset_chuan.csv",
+  "n_rows": 20000,
+  "columns": [
+    "text",
+    "label"
+  ],
+  "labels": {
+    "counts": {
+      "0": 7000,
+      "1": 3409,
+      "2": 9591
+    },
+    "names": {
+      "0": "tiêu cực",
+      "1": "trung tính",
+      "2": "tích cực"
+    },
+    "shares_pct": {
+      "0": 35.0,
+      "1": 17.045,
+      "2": 47.955
+    }
+  },
+  "duplicates": {
+    "n_duplicate_texts": 0,
+    "definition": "số dòng có cột text trùng với một dòng xuất hiện trước đó"
+  },
+  "missing": {
+    "n_missing_text": 0,
+    "n_missing_label": 0
+  },
+  "text_length_chars": {
+    "min": 5,
+    "max": 500,
+    "median": 52.0,
+    "mean": 71.7889,
+    "definition": "số ký tự của cột text gốc, chưa qua tiền xử lý"
+  },
+  "noise_markers": {
+    "n_rows_with_emoji": 6908,
+    "pct_rows_with_emoji": 34.54,
+    "n_rows_with_punctuation": 10291,
+    "pct_rows_with_punctuation": 51.455,
+    "n_rows_with_emoji_or_punctuation": 14241,
+    "pct_rows_with_emoji_or_punctuation": 71.205,
+    "n_rows_with_letter_run": 1551,
+    "pct_rows_with_letter_run": 7.755,
+    "n_rows_with_any_char_run": 4147,
+    "pct_rows_with_any_char_run": 20.735,
+    "n_rows_not_nfc": 69,
+    "n_rows_empty_after_preprocess": 3,
+    "pct_rows_empty_after_preprocess": 0.015
+  },
+  "definitions": {
+    "emoji": "ký tự có phạm trù Unicode 'So' (Symbol, other), hoặc nằm trong các khối mã emoji U+1F000-U+1FAFF, U+2600-U+27BF, U+2B00-U+2BFF, U+FE00-U+FE0F, U+1F1E6-U+1F1FF",
+    "punctuation": "ký tự có phạm trù Unicode bắt đầu bằng 'P' (Pc, Pd, Ps, Pe, Pi, Pf, Po), tức mọi dấu câu, không tính emoji",
+    "letter_run_regex": "([^\\W\\d_])\\1{2,}",
+    "any_char_run_regex": "(.)\\1{2,}",
+    "not_nfc": "unicodedata.normalize('NFC', text) != text",
+    "empty_after_preprocess": "preprocess_text(text) rỗng sau khi bỏ khoảng trắng"
+  }
+}
