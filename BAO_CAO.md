@@ -10,9 +10,9 @@ Mọi số liệu trong báo cáo được đọc từ các tệp trong thư m�
 
 Bài toán của đồ án: cho tập bình luận dưới một video YouTube tiếng Việt, hệ thống trả về hai đầu ra. Thứ nhất là các chủ đề mà người xem đang bàn tới, mỗi chủ đề được mô tả bằng một nhóm từ khóa và vài bình luận tiêu biểu. Thứ hai là phân bố cảm xúc của bình luận theo ba lớp: tiêu cực, trung tính, tích cực. Người dùng mục tiêu là người cần nắm nội dung hàng nghìn bình luận mà không thể đọc từng dòng.
 
-Bình luận YouTube tiếng Việt khó xử lý hơn văn bản báo chí vì năm lý do. Người viết dùng teencode và viết tắt (`ko`, `đc`, `j`), nhiều bình luận không gõ dấu, emoji xuất hiện trong 71% bình luận của tập dữ liệu, câu rất ngắn (độ dài trung vị 52 ký tự), và một phần không nhỏ mang tính châm biếm hoặc vừa khen vừa chê. Thêm vào đó, tiếng Việt không đánh dấu ranh giới từ bằng khoảng trắng, nên bước tách từ quyết định chất lượng của cả từ khóa chủ đề lẫn đặc trưng phân loại.
+Bình luận YouTube tiếng Việt khó xử lý hơn văn bản báo chí vì năm lý do. Người viết dùng teencode và viết tắt (`ko`, `đc`, `j`), nhiều bình luận không gõ dấu, emoji xuất hiện trong 34,5% bình luận của tập dữ liệu (71,2% nếu tính cả dấu câu), câu rất ngắn (độ dài trung vị 52 ký tự), và một phần không nhỏ mang tính châm biếm hoặc vừa khen vừa chê. Thêm vào đó, tiếng Việt không đánh dấu ranh giới từ bằng khoảng trắng, nên bước tách từ quyết định chất lượng của cả từ khóa chủ đề lẫn đặc trưng phân loại.
 
-Đồ án đi theo đúng năm bước của môn học (dữ liệu, tiền xử lý, biểu diễn, mô hình, đánh giá) và đóng góp ở hai mặt. Về phương pháp, chúng tôi ghép hai hướng biểu diễn khác nhau cho hai bài toán con: vector câu 768 chiều từ mô hình Sentence-BERT tiếng Việt cho việc gom cụm chủ đề bằng BERTopic, và TF-IDF n-gram cho việc phân loại cảm xúc bằng LinearSVC huấn luyện trên 20.000 bình luận có nhãn. Về thực nghiệm, mọi lựa chọn đều có đối chứng: bốn mô hình nền và lưới tham số C cho phân loại cảm xúc, so sánh hai phiên bản tiền xử lý trên sáu hạt giống, và bảng khảo sát tham số HDBSCAN cho phần chủ đề. Toàn bộ pipeline được đóng gói thành một ứng dụng Streamlit và một bộ 146 kiểm thử tự động.
+Đồ án đi theo đúng năm bước của môn học (dữ liệu, tiền xử lý, biểu diễn, mô hình, đánh giá) và đóng góp ở hai mặt. Về phương pháp, chúng tôi ghép hai hướng biểu diễn khác nhau cho hai bài toán con: vector câu 768 chiều từ mô hình Sentence-BERT tiếng Việt cho việc gom cụm chủ đề bằng BERTopic, và TF-IDF n-gram cho việc phân loại cảm xúc bằng LinearSVC huấn luyện trên 20.000 bình luận có nhãn. Về thực nghiệm, mọi lựa chọn đều có đối chứng: bốn mô hình nền và lưới tham số C cho phân loại cảm xúc, so sánh hai phiên bản tiền xử lý trên năm hạt giống, và bảng khảo sát tham số HDBSCAN cho phần chủ đề. Toàn bộ pipeline được đóng gói thành một ứng dụng Streamlit và một bộ 146 kiểm thử tự động.
 
 ## 2. Dữ liệu
 
@@ -39,11 +39,13 @@ Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `
 | Nhãn 0, tiêu cực | 7.000 (35,0%) | cùng tệp |
 | Nhãn 1, trung tính | 3.409 (17,0%) | cùng tệp |
 | Nhãn 2, tích cực | 9.591 (48,0%) | cùng tệp |
-| Dòng trùng nội dung | 0 | kiểm tra ngày 18-09-2026 |
-| Dòng thiếu giá trị | 0 | cùng lần kiểm tra |
-| Độ dài bình luận | 5 đến 500 ký tự, trung vị 52 | cùng lần kiểm tra |
-| Bình luận có 3 ký tự chữ lặp liên tiếp trở lên | 21% | cùng lần kiểm tra |
-| Bình luận có emoji hoặc dấu câu | 71% | cùng lần kiểm tra |
+| Dòng trùng nội dung | 0 | `results/dataset_stats.json` (script `experiments/dataset_stats.py`) |
+| Dòng thiếu giá trị | 0 | cùng tệp |
+| Độ dài bình luận | 5 đến 500 ký tự, trung vị 52 | cùng tệp |
+| Bình luận có 3 chữ cái giống nhau liên tiếp trở lên | 7,75% (20,7% nếu tính cả dấu câu và emoji lặp) | cùng tệp |
+| Bình luận có emoji | 34,5% | cùng tệp |
+| Bình luận có dấu câu | 51,5% | cùng tệp |
+| Bình luận có emoji hoặc dấu câu | 71,2% | cùng tệp |
 | Dòng rỗng sau tiền xử lý | 3 (còn 19.997 dòng, nhãn 2 còn 9.588) | `results/metrics.json`, khóa `dataset` |
 
 Hai điểm cần đọc kỹ. Số 7.000 tròn cho nhãn 0 và tổng 20.000 tròn cho thấy tập dữ liệu là kết quả của một bước lấy mẫu từ một tập lớn hơn, chứ không phải toàn bộ bình luận thu được; nhóm cần ghi rõ quy tắc lấy mẫu vào mục 2.1. Toàn bộ bình luận đều nói về một chương trình duy nhất, "Anh Trai Say Hi", nên các con số ở mục 6 chỉ có giá trị trong miền đó; hệ quả được bàn ở mục 9.
@@ -75,7 +77,7 @@ Sau đó `tokenize_vietnamese` tách từ bằng pyvi rồi mới hạ chữ th�
 
 ### 3.2. Vì sao tách từ trước khi hạ chữ thường
 
-pyvi phân biệt chữ hoa và chữ thường khi ghép tên riêng. Kiểm tra trực tiếp ngày 18-09-2026: `ViTokenizer.tokenize("Đông Hùng hát")` trả về `Đông_Hùng hát`, còn với đầu vào đã hạ chữ thường trả về `đông hùng hát`, tức là hai âm tiết rời. Phiên bản đầu của đồ án hạ chữ thường ngay trong bước làm sạch, nên cụm `đông_hùng` mà báo cáo cũ lấy làm ví dụ thực ra chưa bao giờ được tạo ra. Phiên bản hiện tại giữ nguyên chữ hoa qua `clean_text`, tách từ, rồi mới hạ chữ thường; nhờ vậy `Đông_Hùng`, `chương_trình`, `khán_giả` là token đơn trong cả từ khóa chủ đề lẫn đặc trưng TF-IDF.
+pyvi phân biệt chữ hoa và chữ thường khi ghép tên riêng. Kiểm tra trực tiếp ngày 18-09-2026: `ViTokenizer.tokenize("Đông Hùng hát")` trả về `Đông_Hùng hát`, còn với đầu vào đã hạ chữ thường trả về `đông hùng hát`, tức là hai âm tiết rời. Phiên bản đầu của đồ án hạ chữ thường ngay trong bước làm sạch, nên cụm `đông_hùng` mà báo cáo cũ lấy làm ví dụ thực ra chưa bao giờ được tạo ra. Phiên bản hiện tại giữ nguyên chữ hoa qua `clean_text`, tách từ, rồi mới hạ chữ thường; nhờ vậy tên riêng như `Đông_Hùng` là token đơn trong cả từ khóa chủ đề lẫn đặc trưng TF-IDF. Thứ tự này chỉ đem lại lợi ích cho tên riêng: các từ ghép thông thường như `chương_trình`, `khán_giả` được pyvi ghép đúng dù đầu vào viết hoa hay viết thường (kiểm tra cùng ngày).
 
 ### 3.3. Nguyên tắc của từ điển teencode
 
@@ -89,16 +91,18 @@ Danh sách này chỉ được đưa vào `CountVectorizer` của bước c-TF-I
 
 ### 3.5. So sánh hai phiên bản tiền xử lý
 
-Để biết thay đổi tiền xử lý ảnh hưởng thế nào tới bộ phân loại, chúng tôi chạy cùng một pipeline TF-IDF + LinearSVC với hai phiên bản tiền xử lý trên sáu hạt giống chia tập (`review_output/recon/ab_preprocess.log`, đo ngày 18-09-2026).
+Để biết thay đổi tiền xử lý ảnh hưởng thế nào tới bộ phân loại, chúng tôi chạy cùng một pipeline TF-IDF + LinearSVC với hai phiên bản tiền xử lý trên năm hạt giống chia tập (0 đến 4). Phiên bản cũ là bản sao đóng băng của mã tiền xử lý ban đầu (`experiments/preprocess_baseline.py`); phiên bản mới là `src/preprocess.py` hiện tại. Script `experiments/ab_preprocess.py` ghi kết quả vào `results/ab_preprocess.txt` và `results/ab_preprocess.csv`. Giá trị trong bảng là trung bình ± độ lệch chuẩn mẫu (ddof = 1) trên năm hạt giống.
 
 | Tiền xử lý | C | Tỉ lệ dự đoán đúng (accuracy) | Macro-F1 | F1 lớp trung tính |
 |---|---|---|---|---|
 | Cũ (hạ chữ thường trước, từ điển teencode cũ) | 0,3 | 77,58% ± 0,47 | 0,7199 ± 0,0052 | 0,5218 |
-| Mới (tách từ trước, từ điển chỉ chuẩn hóa chính tả) | 0,3 | 77,42% ± 0,46 | 0,7180 ± 0,0033 | 0,5195 |
+| Mới (tách từ trước, từ điển chỉ chuẩn hóa chính tả) | 0,3 | 77,58% ± 0,50 | 0,7200 ± 0,0041 | 0,5222 |
 | Cũ | 1,0 | 76,62% ± 0,40 | 0,7079 ± 0,0052 | 0,5004 |
-| Mới | 1,0 | 76,58% ± 0,51 | 0,7081 ± 0,0048 | 0,5024 |
+| Mới | 1,0 | 76,57% ± 0,43 | 0,7075 ± 0,0053 | 0,5007 |
 
-Kết luận: đối với bộ phân loại cảm xúc, thay đổi tiền xử lý là trung tính; mọi chênh lệch đều nằm trong một độ lệch chuẩn. Chúng tôi giữ phiên bản mới không phải vì nó tăng điểm phân loại, mà vì chất lượng tách từ cho từ khóa chủ đề: `Đông_Hùng`, `chương_trình`, `khán_giả` nay là token đơn, và từ điển teencode không còn áp đặt sắc thái cảm xúc lên dữ liệu.
+Script còn chạy riêng hạt giống 42 với phiên bản mới, C = 0,3: 76,62% và macro-F1 0,7161, trùng đúng với kết quả trên tập kiểm tra ở mục 6.1. Lưu ý về hai giá trị ±: `results/metrics.json` (khóa `seed_robustness`) tính độ lệch chuẩn trên cùng năm hạt giống với ddof = 0 và cho 77,58% ± 0,44, còn bảng này dùng ddof = 1 và cho ± 0,50; cùng năm con số, hai cách tính.
+
+Kết luận: đối với bộ phân loại cảm xúc, thay đổi tiền xử lý là trung tính; mọi chênh lệch đều nằm trong một độ lệch chuẩn. Chúng tôi giữ phiên bản mới không phải vì nó tăng điểm phân loại, mà vì hai lý do khác: tên riêng như `Đông_Hùng` nay là token đơn trong từ khóa chủ đề (mục 3.2), và từ điển teencode không còn áp đặt sắc thái cảm xúc lên dữ liệu (mục 3.3).
 
 ## 4. Biểu diễn
 
@@ -108,7 +112,7 @@ Văn bản đã tách từ được đưa qua `TfidfVectorizer` với `ngram_ran
 
 ### 4.2. Vector câu 768 chiều cho gom cụm chủ đề
 
-Mỗi bình luận đã tách từ được mã hóa bằng `keepitreal/vietnamese-sbert`, một mô hình Sentence-BERT tinh chỉnh từ PhoBERT-base. Theo `config.json` của mô hình trên Hugging Face Hub: `_name_or_path` là `sentence_phobert_nli`, kiến trúc RoBERTa, 12 tầng, kích thước ẩn 768, bộ tách từ của PhoBERT với từ vựng 64.001, `max_position_embeddings` 258. Theo thẻ mô hình sentence-transformers: `max_seq_length` 256, mean pooling, huấn luyện bằng `CosineSimilarityLoss`. Kết quả là một vector câu 768 chiều cho mỗi bình luận.
+Mỗi bình luận đã tách từ được mã hóa bằng `keepitreal/vietnamese-sbert`, một mô hình Sentence-BERT tiếng Việt. Thẻ mô hình không nêu mô hình gốc; chúng tôi suy ra nó được tinh chỉnh từ PhoBERT-base dựa trên `config.json` của mô hình trên Hugging Face Hub: `_name_or_path` là `sentence_phobert_nli`, kiến trúc RoBERTa, 12 tầng, kích thước ẩn 768, bộ tách từ `PhobertTokenizer` với từ vựng 64.001, `max_position_embeddings` 258. Theo thẻ mô hình sentence-transformers: `max_seq_length` 256, mean pooling, huấn luyện bằng `CosineSimilarityLoss`. Kết quả là một vector câu 768 chiều cho mỗi bình luận.
 
 PhoBERT được huấn luyện trên văn bản đã tách từ, nên bước pyvi phía trước không chỉ phục vụ từ khóa mà còn là định dạng đầu vào mà mô hình nhúng mong đợi. Trên máy thử nghiệm (Apple Silicon, MPS), mã hóa 1.496 bình luận mất 3,4 giây.
 
@@ -164,19 +168,19 @@ Pipeline trong `src/topic_pipeline.py` khai báo tường minh bốn thành ph�
 - `CountVectorizer` với mẫu token và danh sách từ dừng ở mục 3.4 và 4.3.
 - c-TF-IDF chọn 10 từ khóa cho mỗi chủ đề.
 
-Tham số mặc định của BERTopic không dùng được cho bình luận cùng một chương trình. Bảng dưới là kết quả khảo sát trên 1.496 bình luận của tập huấn luyện (không phải bình luận của một video thật), nhúng bằng vietnamese-sbert, UMAP 15/5 hạt giống 42, với một danh sách từ dừng thử nghiệm nhỏ hơn danh sách hiện tại (`review_output/recon/A1-source-review.md`, mục 5):
+Tham số mặc định của BERTopic không dùng được cho bình luận cùng một chương trình. Bảng dưới là kết quả khảo sát trên 1.500 dòng đầu của tập dữ liệu (còn 1.493 bình luận hợp lệ sau tiền xử lý; không phải bình luận của một video thật), nhúng bằng vietnamese-sbert, UMAP 15/5 hạt giống 42, danh sách 236 từ dừng của mục 3.4, chạy bằng script `experiments/topic_ablation.py`; kết quả ghi trong `results/topic_ablation.txt` và `results/topic_ablation.csv`.
 
 | Cách chọn cụm | Kích thước cụm tối thiểu | min_samples | Số chủ đề | Nhiễu (-1) | Cụm lớn nhất |
 |---|---|---|---|---|---|
-| eom (mặc định BERTopic) | 10 | mặc định | 3 | 0 (0%) | 1.358 (91%) |
-| eom | 20 | 5 | 3 | 0 (0%) | 1.358 (91%) |
-| eom | 15 | 1 | 29 | 387 (26%) | 177 (12%) |
-| leaf | 10 | mặc định | 30 | 855 (57%) | 67 (4%) |
-| leaf | 20 | 5 | 19 | 777 (52%) | 65 (4%) |
+| eom (mặc định BERTopic) | 10 | mặc định | 23 | 735 (49,2%) | 81 (5,4%) |
+| eom | 20 | 5 | 3 | 0 (0%) | 1.359 (91,0%) |
+| eom | 15 | 1 | 26 | 497 (33,3%) | 117 (7,8%) |
+| leaf | 10 | mặc định | 27 | 793 (53,1%) | 80 (5,4%) |
+| leaf | 20 | 5 | 19 | 620 (41,5%) | 94 (6,3%) |
 
-Với `eom` mặc định, HDBSCAN trả về phép chia gốc: một cụm chứa 91% bình luận và không có nhiễu, vô nghĩa đối với một báo cáo chủ đề. `leaf` cho nhiều cụm nhỏ nhưng đẩy hơn nửa dữ liệu vào nhiễu. Cấu hình `eom`, kích thước cụm tối thiểu 15, `min_samples` 1 cân bằng nhất trong bảng và được đặt làm giá trị mặc định của ứng dụng; các cụm đọc được gồm đánh giá công tâm của giám khảo (`khán_giả`, `chấm`, `điểm`, `bình_chọn`), phát sóng và quảng cáo (`tập`, `chương_trình`, `cắt`, `quảng_cáo`), và thứ hạng (`top`, `hạng`, `chót`, `cuối`).
+Bảng cho thấy hai kiểu thất bại đối nghịch. Với tham số mặc định của BERTopic (`eom`, kích thước cụm tối thiểu 10, `min_samples` theo mặc định của HDBSCAN), gần nửa bình luận (49,2%) bị xếp vào nhiễu. Ngược lại, khi tăng `min_samples` lên 5 (hàng thứ hai), HDBSCAN trả về phép chia gốc: một cụm chứa 91,0% bình luận và không có nhiễu, vô nghĩa đối với một báo cáo chủ đề. `min_samples` là tham số quyết định hiện tượng này, không phải kích thước cụm tối thiểu. `leaf` cho nhiều cụm nhỏ nhưng đẩy hơn nửa dữ liệu vào nhiễu. Cấu hình `eom`, kích thước cụm tối thiểu 15, `min_samples` 1 cân bằng nhất trong bảng (26 chủ đề, 33,3% nhiễu, cụm lớn nhất 7,8%) và được đặt làm giá trị mặc định của ứng dụng. Trong mười chủ đề lớn nhất của lần chạy này (`results/topic_cli_demo.txt`), các cụm đọc được gồm phần trình diễn (`hát`, `nghe`, `hay`, `bài`, `rap`; 117 bình luận), tiếc nuối khi thí sinh bị loại (`buồn`, `tập`, `lụy`, `loại`; 101), thứ hạng (`hạng`, `cuối`, `đứng`, `top`; 81), và đánh giá của giám khảo và khán giả (`khán_giả`, `chấm`, `điểm`, `bình_chọn`, `giám_khảo`; 37); ba cụm khác xoay quanh tên riêng của từng thí sinh.
 
-Hai lần chạy kiểm chứng cùng cấu hình này cho số liệu khác bảng trên, và cần ghi rõ. Chạy CLI với danh sách từ dừng đầy đủ trên 1.500 dòng đầu của tập dữ liệu (còn 1.493 sau lọc) cho 31 chủ đề và 37,8% nhiễu (`review_output/recon/cli_demo.log`). Chạy ứng dụng trên 1.000 dòng đầu (còn 995) cho 23 chủ đề và 20,6% nhiễu (ảnh chụp ở mục 8). Số chủ đề và tỉ lệ nhiễu nhạy với danh sách từ dừng và kích thước mẫu; việc cấu hình này có chuyển sang bình luận của một video thật hay không chưa được kiểm chứng, và ứng dụng để mở các tham số để người phân tích tự dò trên từng video.
+Số chủ đề và tỉ lệ nhiễu phụ thuộc vào mẫu bình luận, và cần ghi rõ. Chạy CLI với cấu hình mặc định trên 1.500 dòng đầu (1.493 hợp lệ) cho 26 chủ đề và 33,3% nhiễu (`results/topic_cli_demo.txt`, trùng với hàng `eom` 15/1 của bảng vì cùng tập bình luận). Chạy ứng dụng trên 1.000 dòng đầu (còn 995) cho 23 chủ đề và 20,6% nhiễu (ảnh chụp ở mục 8). Danh sách từ dừng không ảnh hưởng tới hai con số này: BERTopic gom cụm trước, rồi mới đưa `CountVectorizer` vào bước chọn từ khóa, nên chạy lại với `--no-stopwords` cho phép gán chủ đề giống hệt từng dòng và chỉ từ khóa thay đổi. Việc cấu hình này có chuyển sang bình luận của một video thật hay không chưa được kiểm chứng, và ứng dụng để mở các tham số để người phân tích tự dò trên từng video.
 
 Một bài học kỹ thuật đã xác minh trong mã nguồn thư viện: `BERTopic` khởi tạo với `language="english"`, và khi không truyền `embedding_model`, bước tiền xử lý nội bộ xóa mọi ký tự ngoài `[A-Za-z0-9 ]` trước khi tính c-TF-IDF, biến `không` thành `khng` và `chương_trình` thành `chngtrnh`. Pipeline của đồ án luôn truyền mô hình nhúng vào `BERTopic` kể cả khi vector đã tính sẵn, và có một kiểm thử đơn vị xác nhận `language` của mô hình là `None`.
 
@@ -221,14 +225,14 @@ Chia lại tập và huấn luyện lại với năm hạt giống 0 đến 4 ch
 
 ### 6.3. So với phiên bản đầu của đồ án
 
-Phiên bản đầu (đo lại ngày 18-09-2026 với cùng dữ liệu) cho tỉ lệ dự đoán đúng 76,83% và macro-F1 0,71 trên tập kiểm tra, F1 từng lớp 0,76 / 0,52 / 0,87; lần chia đó thuận lợi hơn trung bình, vì cùng cấu hình chạy trên hạt giống 0 đến 4 chỉ đạt 77,4%. Cross-validation 5-fold trên toàn tập cho 76,74% ± 0,57.
+Phiên bản đầu (đo lại ngày 18-09-2026 với cùng dữ liệu) cho tỉ lệ dự đoán đúng 76,83% và macro-F1 0,71 trên tập kiểm tra, F1 từng lớp 0,76 / 0,52 / 0,87. Cùng cấu hình đó (tiền xử lý cũ, C = 1) chạy trên hạt giống 0 đến 4 đạt trung bình 76,62% ± 0,40 (hàng "Cũ, C = 1,0" của bảng mục 3.5, `results/ab_preprocess.txt`), nên lần chia ban đầu cao hơn trung bình 0,2 điểm, trong phạm vi một độ lệch chuẩn. Cross-validation 5-fold trên toàn tập cho 76,74% ± 0,57.
 
 | | Phiên bản đầu | Phiên bản cuối |
 |---|---|---|
 | Tỉ lệ dự đoán đúng (accuracy), tập kiểm tra | 76,83% | 76,62% |
 | Macro-F1, tập kiểm tra | 0,71 | 0,7161 |
 | F1 lớp trung tính | 0,52 | 0,5354 |
-| Tỉ lệ dự đoán đúng, trung bình 5 hạt giống | 77,4% | 77,58% ± 0,44 |
+| Tỉ lệ dự đoán đúng, trung bình 5 hạt giống (0 đến 4) | 76,62% ± 0,40 | 77,58% ± 0,44 |
 | Chọn mô hình | không có đối chứng, C = 1 | 4 mô hình nền, dò C, chỉ trên tập huấn luyện |
 
 Đọc bảng này cần thận trọng. Về điểm số, hai phiên bản khác nhau trong phạm vi nhiễu của phép chia tập. Phần cải thiện macro-F1 có thể đo được nằm ở cross-validation và đến từ việc dò C (0,7054 ở C = 1 lên 0,7180 ở C = 0,3); thay đổi tiền xử lý là trung tính đối với bộ phân loại (mục 3.5). Điều thay đổi về chất là quy trình: mọi lựa chọn nay có đối chứng, chỉ dùng tập huấn luyện, và được lưu lại trong `results/metrics.json` để tái lập.
@@ -269,14 +273,14 @@ Các ảnh dưới đây chụp ứng dụng trên 1.000 dòng đầu của tậ
 
 ![Tab Cảm xúc: tỉ lệ ba sắc thái và cảm xúc theo chủ đề](docs/screenshots/05_tab_cam_xuc.png)
 
-Hạn chế vận hành. YouTube Data API v3 cấp mặc định 10.000 đơn vị quota mỗi ngày; mỗi lệnh `commentThreads.list`, `comments.list`, `videos.list` tốn 1 đơn vị. Bộ thu thập xin `part=snippet,replies` để dùng các phản hồi trả về kèm theo và chỉ gọi thêm `comments.list` khi một bình luận gốc còn phản hồi chưa lấy được. Trên thực tế YouTube ngừng phân trang ở khoảng 1.000 chuỗi bình luận gốc mỗi video, nên số bình luận thu được có trần dù thanh trượt cho phép tới 5.000. Ollama là tùy chọn: khi không chạy, ứng dụng bỏ qua bước tóm tắt và hiện một cảnh báo.
+Hạn chế vận hành. YouTube Data API v3 cấp mặc định 10.000 đơn vị quota mỗi ngày; mỗi lệnh `commentThreads.list`, `comments.list`, `videos.list` tốn 1 đơn vị. Bộ thu thập xin `part=snippet,replies` để dùng các phản hồi trả về kèm theo và chỉ gọi thêm `comments.list` khi một bình luận gốc còn phản hồi chưa lấy được. Theo kinh nghiệm cộng đồng, YouTube ngừng phân trang ở khoảng 1.000 chuỗi bình luận gốc mỗi video; điều này chưa được kiểm chứng trong đồ án, nhưng nếu đúng thì số bình luận thu được có trần dù thanh trượt cho phép tới 5.000. Ollama là tùy chọn: khi không chạy, ứng dụng bỏ qua bước tóm tắt và hiện một cảnh báo.
 
 ## 9. Hạn chế và hướng phát triển
 
 Hạn chế của phiên bản hiện tại:
 
-- Emoji bị xóa ở bước làm sạch dù có trong 71% bình luận và mang thông tin cảm xúc.
-- Bình luận không dấu không được khôi phục dấu; trong lần chạy CLI, chúng tự tạo thành một chủ đề riêng với từ khóa `bai`, `ng`, `gia`, `cua`, `nay`, `troi`.
+- Emoji bị xóa ở bước làm sạch dù có trong 34,5% bình luận và mang thông tin cảm xúc.
+- Bình luận không dấu không được khôi phục dấu; trong lần khảo sát mục 5.2 với tham số mặc định của BERTopic, chúng tự tạo thành một chủ đề riêng với từ khóa `hieuthuhai`, `bai`, `nay`, `gia`, `troi`, `ong`, `nhat`. `results/topic_ablation.txt` chỉ ghi cụm lớn nhất của mỗi cấu hình; danh sách đủ chủ đề của lần chạy này tái lập bằng `python src/topic_model.py --input data/dataset_chuan.csv --text-col text --limit 1500 --min-topic-size 10` (các tham số còn lại đúng bằng mặc định).
 - Dữ liệu chỉ thuộc một chương trình, nên mô hình cảm xúc học cả tên riêng và chủ đề của chương trình làm tín hiệu (mục 7); kết quả trên video khác chưa được đo.
 - Nguồn nhãn, hướng dẫn gán nhãn và độ đồng thuận giữa người gán chưa được ghi lại (mục 2.1).
 - Phần chủ đề chưa được đánh giá bằng độ mạch lạc (coherence) hay bởi người đọc; bảng ở mục 5.2 chỉ so số cụm và tỉ lệ nhiễu.
@@ -284,7 +288,7 @@ Hạn chế của phiên bản hiện tại:
 
 Hướng phát triển, theo thứ tự chi phí tăng dần:
 
-1. Giữ emoji làm token riêng trong TF-IDF và đo lại macro-F1 với cùng quy trình sáu hạt giống ở mục 3.5.
+1. Giữ emoji làm token riêng trong TF-IDF và đo lại macro-F1 với cùng quy trình năm hạt giống ở mục 3.5.
 2. Tính coherence `c_v` cho các cấu hình BERTopic trong bảng mục 5.2 và trên bình luận của ít nhất hai video thật, để chọn cấu hình theo số đo thay vì theo cảm nhận.
 3. Dùng vector câu của vietnamese-sbert làm đặc trưng cho LogisticRegression, hoặc tinh chỉnh PhoBERT trực tiếp cho ba lớp cảm xúc, và so với LinearSVC + TF-IDF trên cùng phép chia.
 4. Đánh giá câu tóm tắt bằng người chấm theo hai tiêu chí, trung thực với bình luận gốc và trôi chảy, trên một mẫu chủ đề cố định.
@@ -319,23 +323,36 @@ Mỗi mục cần kiểm tra lại trước khi nộp (năm, tên hội nghị, 
 
 ## Phụ lục A. Tái lập kết quả
 
-Môi trường: Python 3.11 hoặc 3.12, `pip install -r requirements-dev.txt` (xem `README.md`). Không lệnh nào dưới đây cần API key hay kết nối tới YouTube; lần chạy đầu cần tải mô hình nhúng câu từ Hugging Face Hub.
+Môi trường: Python 3.11.15 là phiên bản đã kiểm thử (3.12 dự kiến chạy được, chưa thử), `pip install -r requirements-dev.txt` (xem `README.md`). Không lệnh nào dưới đây cần API key hay kết nối tới YouTube. Lần chạy đầu của ứng dụng hoặc của `src/topic_model.py` tải mô hình nhúng câu từ Hugging Face Hub về cache; các lệnh gom cụm và hai kiểm thử đầu-cuối đọc mô hình từ cache đó, nên cần chạy một trong hai lệnh này trước khi ngắt mạng.
 
 ```bash
 # Huấn luyện lại mô hình cảm xúc, sinh lại toàn bộ results/ và models/ (khoảng 12 giây trên máy thử nghiệm)
 python src/train_sentiment.py
 
-# Gom cụm chủ đề trên 1.500 dòng đầu của tập dữ liệu với cấu hình mặc định của ứng dụng
+# Gom cụm chủ đề trên 1.500 dòng đầu của tập dữ liệu với cấu hình mặc định của ứng dụng.
+# Kết quả mong đợi: 1.493 bình luận hợp lệ, 26 chủ đề, 33,3% nhiễu (so với results/topic_cli_demo.txt)
 python src/topic_model.py --input data/dataset_chuan.csv --text-col text --limit 1500 --min-topic-size 15 --min-samples 1
 
-# 146 kiểm thử tự động, không cần mạng (khoảng 16 giây)
+# Bảng khảo sát tham số HDBSCAN của mục 5.2 (ghi results/topic_ablation.txt và .csv)
+python experiments/topic_ablation.py
+
+# So sánh hai phiên bản tiền xử lý của mục 3.5 (ghi results/ab_preprocess.txt và .csv)
+python experiments/ab_preprocess.py
+
+# Thống kê tập dữ liệu của mục 2.2 (ghi results/dataset_stats.json)
+python experiments/dataset_stats.py
+
+# 146 kiểm thử tự động (khoảng 16 giây); hai kiểm thử đầu-cuối cần mô hình nhúng đã có trong cache
 pytest
 ```
+
+UMAP với `random_state=42` cho kết quả xác định trên cùng một máy: hai lần chạy cùng lệnh cho cùng phép gán chủ đề từng dòng. Giữa các máy có bản dựng BLAS khác nhau, số chủ đề và tỉ lệ nhiễu có thể lệch nhỏ; đó là điều bình thường và không làm thay đổi kết luận của mục 5.2.
 
 Vị trí của từng con số trong báo cáo:
 
 | Con số | Tệp và khóa |
 |---|---|
+| Thống kê tập dữ liệu thô (mục 2.2: trùng lặp, độ dài, chữ lặp, emoji, dấu câu) | `results/dataset_stats.json`; script `experiments/dataset_stats.py` |
 | Số dòng sau tiền xử lý, số dòng mỗi nhãn | `results/metrics.json`: `dataset.n_rows`, `dataset.label_counts` |
 | Kích thước tập huấn luyện và kiểm tra, hạt giống | `results/metrics.json`: `split` |
 | Cấu hình TF-IDF | `results/metrics.json`: `features` |
@@ -345,9 +362,9 @@ Vị trí của từng con số trong báo cáo:
 | Độ ổn định theo hạt giống (mục 6.2) | `results/metrics.json`: `seed_robustness` |
 | Đặc trưng trọng số lớn nhất (mục 7) | `results/top_features.txt` |
 | Thẻ mô hình | `models/model_card.json` |
-| Bảng khảo sát BERTopic (mục 5.2) | `review_output/recon/A1-source-review.md`, mục 5 (ngoài thư mục mã nguồn) |
-| So sánh hai phiên bản tiền xử lý (mục 3.5) | `review_output/recon/ab_preprocess.log` (ngoài thư mục mã nguồn) |
-| Lần chạy CLI 31 chủ đề, 37,8% nhiễu | `review_output/recon/cli_demo.log` (ngoài thư mục mã nguồn) |
+| Bảng khảo sát BERTopic (mục 5.2), chủ đề bình luận không dấu (mục 9) | `results/topic_ablation.txt`, `results/topic_ablation.csv`; script `experiments/topic_ablation.py` |
+| So sánh hai phiên bản tiền xử lý (mục 3.5), trung bình cấu hình cũ (mục 6.3) | `results/ab_preprocess.txt`, `results/ab_preprocess.csv`; script `experiments/ab_preprocess.py` với `experiments/preprocess_baseline.py` |
+| Lần chạy CLI 26 chủ đề, 33,3% nhiễu (mục 5.2) | `results/topic_cli_demo.txt` |
 | Số liệu trên ảnh chụp ứng dụng (mục 8) | `docs/screenshots/03_tab_tong_quan.png`, `05_tab_cam_xuc.png` |
 
 Các số liệu về thời gian chạy (mã hóa 1.496 bình luận 3,4 giây, BERTopic 3 đến 7 giây, huấn luyện 12 giây, kiểm thử 16 giây) đo trên một máy Apple Silicon dùng MPS ngày 18-09-2026 và sẽ khác trên máy khác.
