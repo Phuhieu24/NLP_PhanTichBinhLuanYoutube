@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-17T19:13:49+00:00",
+  "generated_at": "2026-09-17T19:34:15+00:00",
   "sklearn_version": "1.9.1",
-  "code_commit": "1d937a0",
+  "code_commit": "fda9406",
   "dataset": {
     "path": "data/dataset_chuan.csv",
     "n_rows": 19997,
@@ -11,7 +11,7 @@
       "2": 9588
     }
   },
-  "preprocessing": "clean_text (bỏ URL, ký tự đặc biệt, chuẩn hóa teencode) -> pyvi ViTokenizer -> lowercase; loại 3 dòng rỗng sau tiền xử lý",
+  "preprocessing": "clean_text (chuẩn hóa NFC, bỏ URL và ký tự đặc biệt, gộp chữ lặp, chuẩn hóa teencode chính tả) -> pyvi ViTokenizer -> lowercase; loại 3 dòng rỗng sau tiền xử lý",
   "split": {
     "test_size": 0.2,
     "random_state": 42,
@@ -36,7 +36,7 @@
       "cv_accuracy_std": 7.341195032490818e-05,
       "cv_f1_macro_mean": 0.21605329733824835,
       "cv_f1_macro_std": 2.2360162908763393e-05,
-      "fit_seconds": 0.2762603759765625
+      "fit_seconds": 0.30039286613464355
     },
     {
       "model": "MultinomialNB",
@@ -44,7 +44,7 @@
       "cv_accuracy_std": 0.003803523019914692,
       "cv_f1_macro_mean": 0.5620207581539224,
       "cv_f1_macro_std": 0.004785168590480501,
-      "fit_seconds": 0.23249850273132325
+      "fit_seconds": 0.2595583438873291
     },
     {
       "model": "LogisticRegression",
@@ -52,7 +52,7 @@
       "cv_accuracy_std": 0.0048980601342914105,
       "cv_f1_macro_mean": 0.7170073695686245,
       "cv_f1_macro_std": 0.005438318245536855,
-      "fit_seconds": 0.5266030311584473
+      "fit_seconds": 0.5143582344055175
     },
     {
       "model": "LinearSVC",
@@ -60,7 +60,7 @@
       "cv_accuracy_std": 0.006793934996726462,
       "cv_f1_macro_mean": 0.705360919886256,
       "cv_f1_macro_std": 0.009487524886442018,
-      "fit_seconds": 0.3795651435852051
+      "fit_seconds": 0.40035581588745117
     },
     {
       "model": "LinearSVC (C=0.3, đã dò)",
@@ -68,7 +68,7 @@
       "cv_accuracy_std": 0.0038270997558615453,
       "cv_f1_macro_mean": 0.7180427806083267,
       "cv_f1_macro_std": 0.006581219707583459,
-      "fit_seconds": 0.3983260154724121
+      "fit_seconds": 0.37802934646606445
     }
   ],
   "selected_model": {
@@ -92,7 +92,7 @@
         "cv_f1_macro_std": 0.006598636550634617,
         "cv_accuracy_mean": 0.7702698108783994,
         "cv_accuracy_std": 0.0044356968317390815,
-        "fit_seconds": 0.37304105758666994
+        "fit_seconds": 0.3456458568572998
       },
       {
         "C": 0.3,
@@ -100,7 +100,7 @@
         "cv_f1_macro_std": 0.006581219707583459,
         "cv_accuracy_mean": 0.7748956900593935,
         "cv_accuracy_std": 0.0038270997558615453,
-        "fit_seconds": 0.3983260154724121
+        "fit_seconds": 0.37802934646606445
       },
       {
         "C": 1.0,
@@ -108,7 +108,7 @@
         "cv_f1_macro_std": 0.009487524886442018,
         "cv_accuracy_mean": 0.7656444787433573,
         "cv_accuracy_std": 0.006793934996726462,
-        "fit_seconds": 0.4833698749542236
+        "fit_seconds": 0.4278690338134766
       },
       {
         "C": 3.0,
@@ -116,7 +116,7 @@
         "cv_f1_macro_std": 0.007463754885920669,
         "cv_accuracy_mean": 0.7509540481400439,
         "cv_accuracy_std": 0.005998641351575831,
-        "fit_seconds": 0.4735206127166748
+        "fit_seconds": 0.4697271347045898
       }
     ],
     "best_c": 0.3
