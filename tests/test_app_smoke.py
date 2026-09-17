@@ -249,3 +249,77 @@ def test_tabs_still_render_when_no_topic_was_formed():
     assert len(app.tabs) == 5
     assert any("Chưa tách được chủ đề nào" in element.value for element in app.info)
     assert any("CSV: binh_luan.csv" in element.value for element in app.caption)
+
+
+@pytest.mark.slow
+def test_advanced_defaults_follow_the_ablation(app):
+    """Mặc định của thanh bên là 15/1, không phải mặc định của BERTopic."""
+    assert _slider(app, "Kích thước cụm tối thiểu").value == 15
+
+    numbers = [element for element in app.sidebar.number_input if element.label == "min_samples"]
+    assert len(numbers) == 1
+    assert numbers[0].value == 1
+
+    helps = [element.help for element in app.sidebar.slider
+             if element.label == "Kích thước cụm tối thiểu"]
+    assert any("91%" in str(value) for value in helps)
+
+
+def _fake_youtube_comments(n_rows=60):
+    """Bảng đúng 8 cột hợp đồng của crawler, văn bản lấy từ tệp dữ liệu mẫu."""
+    source = pd.read_csv(SAMPLE_PATH, nrows=n_rows, encoding="utf-8-sig")
+    texts = source["text"].astype(str).tolist()
+    return pd.DataFrame(
+        {
+            "comment_id": [f"Ugy{index:04d}" for index in range(len(texts))],
+            "parent_id": [None] * len(texts),
+            "is_reply": [False] * len(texts),
+            "author": [f"Người xem {index}" for index in range(len(texts))],
+            "published_at": ["2024-05-01T10:00:00Z"] * len(texts),
+            "like_count": [index % 7 for index in range(len(texts))],
+            "reply_count": [0] * len(texts),
+            "text": texts,
+        }
+    )
+
+
+@pytest.mark.slow
+def test_youtube_source_runs_end_to_end_with_a_stubbed_crawler(monkeypatch):
+    """Đường đi tốn kém nhất: link YouTube, crawler giả, mô hình thật trên máy."""
+    import crawler
+
+    frame = _fake_youtube_comments()
+    metadata = {
+        "title": "Anh Trai Say Hi tập 10",
+        "channel_title": "VieChannel",
+        "published_at": "2024-05-01T00:00:00Z",
+        "view_count": 1234567,
+        "like_count": 4321,
+        "comment_count": 9876,
+        "thumbnail_url": "",
+    }
+    monkeypatch.setattr(crawler, "get_video_comments", lambda *args, **kwargs: frame.copy())
+    monkeypatch.setattr(crawler, "get_video_metadata", lambda *args, **kwargs: dict(metadata))
+    # App đọc khóa API từ biến môi trường; đặt sẵn để không phụ thuộc tệp .env.
+    monkeypatch.setenv("YOUTUBE_API_KEY", "khoa-gia-danh-cho-kiem-thu")
+
+    app = AppTest.from_file(APP_PATH, default_timeout=600)
+    app.run(timeout=600)
+    url_input = [element for element in app.sidebar.text_input
+                 if element.label == "Link video YouTube"][0]
+    url_input.set_value("https://www.youtube.com/watch?v=abcdefghijk").run(timeout=600)
+    [element for element in app.button if element.label == "Bắt đầu phân tích"][0].click().run(timeout=600)
+
+    assert not app.exception, [str(error) for error in app.exception]
+    assert not app.error, [element.value for element in app.error]
+    assert "result" in app.session_state
+
+    result = app.session_state["result"]
+    assert result["video_id"] == "abcdefghijk"
+    assert result["n_raw"] == len(frame)
+    assert result["source"] == "YouTube: abcdefghijk"
+    assert result["metadata"]["title"] == metadata["title"]
+    assert [tab.label for tab in app.tabs] == ["Tổng quan", "Chủ đề", "Cảm xúc", "Dữ liệu", "Mô hình"]
+    # Thẻ video được dựng từ dữ liệu metadata giả.
+    assert any(metadata["title"] in element.value for element in app.markdown)
+    assert any("VieChannel" in element.value for element in app.caption)

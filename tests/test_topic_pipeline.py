@@ -218,8 +218,9 @@ def test_build_topic_model_stopwords_toggle():
 
     on = tp.build_topic_model(DummyEmbedder(), tp.TopicConfig(use_stopwords=True))
     stop_words = on.vectorizer_model.stop_words
-    # Danh sách từ dừng do bước B cung cấp; nếu chưa có thì phải là None chứ không lỗi.
-    assert stop_words is None or (isinstance(stop_words, list) and len(stop_words) > 0)
+    # Phải là danh sách từ dừng thật: nhận `None` ở đây thì mất hẳn tính năng lọc
+    # từ dừng mà kiểm thử vẫn xanh.
+    assert isinstance(stop_words, list) and len(stop_words) >= 150
 
 
 def test_token_pattern_keeps_vietnamese_words_and_drops_bare_numbers():
@@ -314,3 +315,162 @@ def test_comments_from_dataframe_handles_a_header_read_with_bom():
 
     assert list(frame.columns) == ["text", "label"]
     assert out["text"].tolist() == ["Bài hát rất hay", "Nghe chán quá"]
+
+
+# --------------------------------------------------------------------------
+# Bảng hiển thị: bảng tải về, chỉ số theo lớp, bảng so sánh và lưới C
+# --------------------------------------------------------------------------
+
+
+def _frame_for_export():
+    return pd.DataFrame(
+        {
+            "comment_id": ["Ugy0", "Ugy1"],
+            "published_at": ["2024-01-01T00:00:00Z", "2024-01-02T00:00:00Z"],
+            "is_reply": [False, True],
+            "reply_count": [3, 0],
+            "author": ["An", "Bình"],
+            "like_count": [7, 1],
+            "text": ["Bài hát rất hay", "Nghe chán quá"],
+            "Topic_Name": ["0: hay", "1: chán"],
+            "Sentiment_Label": ["🟢 Tích cực", "🔴 Tiêu cực"],
+        }
+    )
+
+
+def test_comments_table_stays_compact():
+    table = tp.comments_table(_frame_for_export())
+    assert list(table.columns) == ["Chủ đề", "Cảm xúc", "Tác giả", "Bình luận", "Lượt thích", "Trả lời?"]
+
+
+def test_comments_export_table_adds_the_traceable_columns():
+    export = tp.comments_export_table(_frame_for_export())
+
+    for title in ("Mã bình luận", "Thời điểm đăng", "Số trả lời", "Trả lời?"):
+        assert title in export.columns
+    assert export["Mã bình luận"].tolist() == ["Ugy0", "Ugy1"]
+    assert export["Số trả lời"].tolist() == [3, 0]
+    # Bảng hiển thị vẫn gọn như cũ.
+    assert len(export.columns) == len(tp.comments_table(_frame_for_export()).columns) + 3
+
+
+def test_comments_export_table_ignores_columns_that_are_missing():
+    df = pd.DataFrame({"text": ["Bài hát rất hay"], "Topic_Name": ["0: hay"], "like_count": [1],
+                       "author": ["An"]})
+    export = tp.comments_export_table(df, use_sentiment=False)
+    assert "Mã bình luận" not in export.columns
+    assert "Cảm xúc" not in export.columns
+
+
+def test_per_class_table_uses_vietnamese_headers_and_class_names():
+    per_class = {
+        "0": {"precision": 0.75, "recall": 0.76, "f1": 0.75, "support": 1400},
+        "1": {"precision": 0.53, "recall": 0.54, "f1": 0.54, "support": 682},
+        "2": {"precision": 0.87, "recall": 0.85, "f1": 0.86, "support": 1918},
+    }
+    table = tp.per_class_table(per_class)
+
+    assert list(table.columns) == ["Lớp", "Precision", "Recall", "F1", "Số mẫu"]
+    assert table["Lớp"].tolist() == ["Tiêu cực", "Trung tính", "Tích cực"]
+    assert table["Số mẫu"].tolist() == [1400, 682, 1918]
+    assert tp.per_class_table(None).empty
+
+
+def _comparison_records():
+    return [
+        {"model": "LogisticRegression", "cv_accuracy_mean": 0.7625, "cv_accuracy_std": 0.0049,
+         "cv_f1_macro_mean": 0.7170, "cv_f1_macro_std": 0.0054, "fit_seconds": 0.47},
+        {"model": "LinearSVC (C=0.3, đã dò)", "cv_accuracy_mean": 0.7749, "cv_accuracy_std": 0.0038,
+         "cv_f1_macro_mean": 0.7180, "cv_f1_macro_std": 0.0066, "fit_seconds": 0.34},
+    ]
+
+
+def _grid_records():
+    return [
+        {"C": 0.1, "cv_f1_macro_mean": 0.7124, "cv_f1_macro_std": 0.0066,
+         "cv_accuracy_mean": 0.7703, "cv_accuracy_std": 0.0044, "fit_seconds": 0.30},
+        {"C": 0.3, "cv_f1_macro_mean": 0.7180, "cv_f1_macro_std": 0.0066,
+         "cv_accuracy_mean": 0.7749, "cv_accuracy_std": 0.0038, "fit_seconds": 0.34},
+    ]
+
+
+def test_comparison_frame_translates_headers_and_scales_accuracy():
+    frame = tp.comparison_frame(_comparison_records())
+    assert list(frame.columns) == ["Mô hình", "CV accuracy", "± acc", "CV macro-F1", "± F1",
+                                   "Thời gian khớp (s)"]
+    assert frame["CV accuracy"].tolist() == pytest.approx([76.25, 77.49])
+    assert frame["CV macro-F1"].tolist() == pytest.approx([0.7170, 0.7180])
+
+
+def test_comparison_frame_passes_through_an_unexpected_shape():
+    frame = tp.comparison_frame([{"model": "X"}])
+    assert list(frame.columns) == ["model"]
+
+
+def test_c_grid_frame_keeps_the_grid_readable():
+    frame = tp.c_grid_frame(_grid_records())
+    assert list(frame.columns) == ["C", "CV macro-F1", "± F1", "CV accuracy"]
+    assert frame["C"].tolist() == [0.1, 0.3]
+    assert frame["CV accuracy"].tolist() == pytest.approx([77.03, 77.49])
+
+
+def test_c_grid_note_calls_a_tie_a_tie():
+    metrics = {"selected_model": {"c_grid_results": _grid_records()},
+               "model_comparison": _comparison_records()}
+    note = tp.c_grid_note(metrics)
+    assert "C=0.3" in note
+    assert "+0.0010" in note
+    assert "ngang nhau" in note
+
+
+def test_c_grid_note_reports_a_real_gap_as_a_gap():
+    metrics = {"selected_model": {"c_grid_results": _grid_records()},
+               "model_comparison": [{"model": "LogisticRegression", "cv_f1_macro_mean": 0.60,
+                                     "cv_f1_macro_std": 0.001}]}
+    note = tp.c_grid_note(metrics)
+    assert "ngang nhau" not in note
+    assert "+0.1180" in note
+
+
+def test_c_grid_note_is_empty_without_grid_results():
+    assert tp.c_grid_note({"selected_model": {}}) == ""
+    assert tp.c_grid_note({}) == ""
+
+
+def test_topic_config_line_spells_out_the_defaults():
+    line = tp.topic_config_line({"min_topic_size": 15, "min_samples": 1, "nr_topics": None,
+                                 "cluster_selection_method": "eom", "use_stopwords": True})
+    assert line == "min_topic_size=15 · min_samples=1 · eom · stopwords=bật · nr_topics=tự động"
+
+    other = tp.topic_config_line({"min_topic_size": 10, "min_samples": None, "nr_topics": 12,
+                                  "cluster_selection_method": "leaf", "use_stopwords": False})
+    assert other == "min_topic_size=10 · min_samples=mặc định · leaf · stopwords=tắt · nr_topics=12"
+    assert tp.topic_config_line({}) == ""
+
+
+def test_short_label_trims_long_topic_names_but_keeps_the_id_prefix():
+    name = "12: chương_trình, đội_trưởng, đoàn_kết, dễ_thương"
+    short = tp.short_label(name)
+    assert len(short) <= tp.MAX_LABEL_CHARS
+    assert short.startswith("12: chương_trình")
+    assert short.endswith("…")
+    assert tp.short_label("0: hay, bài") == "0: hay, bài"
+
+
+# --------------------------------------------------------------------------
+# Công cụ dòng lệnh
+# --------------------------------------------------------------------------
+
+
+def test_cli_defaults_to_the_raw_crawler_output():
+    import topic_model
+
+    args = topic_model.build_parser().parse_args([])
+    assert args.input.replace("\\", "/") == "data/comments.csv"
+    assert args.text_col == "text"
+
+    # `--help` phải nói ra bộ tham số khuyến nghị; so trên description vì
+    # argparse ngắt dòng phần in ra màn hình.
+    description = topic_model.build_parser().description
+    assert "--min-topic-size 15 --min-samples 1" in description
+    assert "Khuyến nghị" in topic_model.build_parser().format_help()
