@@ -1,3 +1,14 @@
+# Giao diện tối, bảng màu dùng chung với các biểu đồ trong app.py
 [theme]
-base="dark"
-primaryColor="#F43365"
+base = "dark"
+primaryColor = "#F43F5E"
+backgroundColor = "#0B1120"
+secondaryBackgroundColor = "#111B2E"
+textColor = "#E5E7EB"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
