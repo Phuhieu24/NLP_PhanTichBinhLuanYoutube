@@ -157,7 +157,13 @@ def compare_models(texts, labels, seed=42, n_jobs=-1):
 
 
 def tune_linear_svc(texts, labels, c_grid=None, seed=42, n_jobs=-1):
-    """Dò tham số C của LinearSVC theo macro-F1 cross-validation trên tập train."""
+    """Dò tham số C của LinearSVC theo macro-F1 cross-validation trên tập train.
+
+    Trả về `(C tốt nhất, danh sách kết quả từng C)`. Mỗi dòng ghi cả macro-F1
+    lẫn accuracy kèm độ lệch chuẩn giữa các fold, nhờ vậy bằng chứng lưu trong
+    `results/metrics.json` đủ để người đọc tự đối chiếu với bảng so sánh mô hình
+    thay vì phải tin vào một con số trên màn hình.
+    """
     c_grid = list(c_grid or C_GRID)
     records = []
     for c_value in c_grid:
@@ -172,13 +178,35 @@ def tune_linear_svc(texts, labels, c_grid=None, seed=42, n_jobs=-1):
         records.append(
             {
                 "C": float(c_value),
-                "cv_accuracy_mean": float(np.mean(scores["test_accuracy"])),
                 "cv_f1_macro_mean": float(np.mean(scores["test_f1_macro"])),
                 "cv_f1_macro_std": float(np.std(scores["test_f1_macro"])),
+                "cv_accuracy_mean": float(np.mean(scores["test_accuracy"])),
+                "cv_accuracy_std": float(np.std(scores["test_accuracy"])),
+                "fit_seconds": float(np.mean(scores["fit_time"])),
             }
         )
     best = max(records, key=lambda r: r["cv_f1_macro_mean"])
     return float(best["C"]), records
+
+
+def tuned_comparison_row(best_c, grid_records):
+    """Dòng bảng so sánh ứng với đúng cấu hình đem đi huấn luyện cuối cùng.
+
+    Bốn dòng đầu của bảng chạy LinearSVC ở C mặc định (1.0), còn mô hình được
+    lưu lại dùng C đã dò. Thiếu dòng này thì bảng đang mô tả một mô hình khác
+    với mô hình thực sự xuất xưởng.
+    """
+    for record in grid_records or []:
+        if float(record["C"]) == float(best_c):
+            return {
+                "model": f"LinearSVC (C={best_c:g}, đã dò)",
+                "cv_accuracy_mean": record["cv_accuracy_mean"],
+                "cv_accuracy_std": record["cv_accuracy_std"],
+                "cv_f1_macro_mean": record["cv_f1_macro_mean"],
+                "cv_f1_macro_std": record["cv_f1_macro_std"],
+                "fit_seconds": record["fit_seconds"],
+            }
+    return None
 
 
 # --------------------------------------------------------------------------- #
@@ -229,7 +257,7 @@ def evaluate(model, vectorizer, test_texts, test_labels):
     }
 
 
-def seed_robustness(df, c_value, seeds=None, n_jobs=-1):
+def seed_robustness(df, c_value, seeds=None):
     """Chia lại toàn bộ dữ liệu theo từng hạt giống rồi khớp lại cấu hình đã chọn.
 
     Mục đích: cho thấy chênh lệch giữa các lần chia ngẫu nhiên, thay vì báo cáo
@@ -261,12 +289,29 @@ def seed_robustness(df, c_value, seeds=None, n_jobs=-1):
 
 
 def top_features_per_class(model, vectorizer, top_n=TOP_FEATURES):
-    """Lấy các n-gram có trọng số dương lớn nhất của từng lớp từ `coef_`."""
+    """Lấy các n-gram có trọng số dương lớn nhất của từng lớp từ `coef_`.
+
+    Tra hàng trọng số theo `model.classes_` chứ không theo vị trí trong
+    `LABELS`: khi tập huấn luyện thiếu một lớp, `coef_` chỉ có hàng cho những
+    lớp thực sự xuất hiện, lấy theo vị trí sẽ gán nhầm trọng số của lớp này cho
+    lớp khác. Lớp vắng mặt bị bỏ qua thay vì lặp lại hàng của lớp khác.
+    """
     feature_names = np.asarray(vectorizer.get_feature_names_out())
     coefs = np.atleast_2d(model.coef_)
+    classes = [int(value) for value in getattr(model, "classes_", LABELS)]
     result = {}
-    for i, label in enumerate(LABELS):
-        row = coefs[i] if coefs.shape[0] > i else coefs[0]
+    for label in LABELS:
+        if label not in classes:
+            continue
+        index = classes.index(label)
+        if coefs.shape[0] == 1 and len(classes) == 2:
+            # Bài toán hai lớp: scikit-learn chỉ lưu một hàng, ứng với lớp thứ
+            # hai; lớp còn lại là hàng đó đổi dấu.
+            row = coefs[0] if index == 1 else -coefs[0]
+        elif index < coefs.shape[0]:
+            row = coefs[index]
+        else:  # pragma: no cover - chỉ xảy ra với mô hình có coef_ dị dạng
+            continue
         order = np.argsort(row)[::-1][:top_n]
         result[label] = [(str(feature_names[j]), float(row[j])) for j in order]
     return result
@@ -341,7 +386,10 @@ def _save_top_features(features, results_dir):
     ]
     for label in LABELS:
         lines.append(f"### {LABEL_NAMES[label]}")
-        for rank, (term, weight) in enumerate(features.get(label, []), start=1):
+        rows = features.get(label, [])
+        if not rows:
+            lines.append("(lớp này không xuất hiện trong tập huấn luyện)")
+        for rank, (term, weight) in enumerate(rows, start=1):
             lines.append(f"{rank:2d}. {term:<30} {weight:+.4f}")
         lines.append("")
     with open(path, "w", encoding="utf-8") as fh:
@@ -417,6 +465,59 @@ def build_metrics(
     }
 
 
+def _build_notes(metrics, quick):
+    """Ghi chú của thẻ mô hình: nói đúng vai trò của cross-validation.
+
+    Cross-validation không chọn ra họ mô hình (kế hoạch đã cố định LinearSVC),
+    nó chỉ so sánh bốn mô hình nền rồi dò tham số C. Ghi như vậy để người đọc
+    không hiểu nhầm bảng so sánh là căn cứ chọn mô hình.
+    """
+    if quick:
+        return (
+            "Chạy ở chế độ --quick: không so sánh mô hình nền, không dò tham số C "
+            "(dùng C mặc định), không kiểm tra độ ổn định theo hạt giống. Tập test "
+            "chỉ dùng đúng một lần."
+        )
+    selected = metrics["selected_model"]
+    best = next(
+        (row for row in selected.get("c_grid_results", [])
+         if float(row["C"]) == float(selected["best_c"])),
+        None,
+    )
+    logistic = next(
+        (row for row in metrics.get("model_comparison", [])
+         if row["model"] == "LogisticRegression"),
+        None,
+    )
+    notes = (
+        "So sánh 4 mô hình nền (MostFrequent, MultinomialNB, LogisticRegression, "
+        "LinearSVC) bằng cross-validation 5-fold trên tập train; giữ LinearSVC theo "
+        f"thiết kế rồi dò tham số C cũng bằng macro-F1 cross-validation (chọn "
+        f"C={selected['best_c']:g})."
+    )
+    if best is not None and logistic is not None:
+        gap = best["cv_f1_macro_mean"] - logistic["cv_f1_macro_mean"]
+        spread = max(best["cv_f1_macro_std"], logistic["cv_f1_macro_std"])
+        notes += (
+            f" Tại C đã chọn, macro-F1 CV của LinearSVC là {best['cv_f1_macro_mean']:.4f} "
+            f"± {best['cv_f1_macro_std']:.4f}, so với LogisticRegression "
+            f"{logistic['cv_f1_macro_mean']:.4f} ± {logistic['cv_f1_macro_std']:.4f}"
+        )
+        # Chỉ được nói "ngang nhau" khi con số cho phép nói như vậy.
+        if abs(gap) <= spread:
+            notes += (
+                f" (chênh lệch {gap:+.4f}, nhỏ hơn độ lệch chuẩn giữa các fold, "
+                "nên không kết luận được mô hình nào tốt hơn)."
+            )
+        else:
+            notes += f" (chênh lệch {gap:+.4f}, lớn hơn độ lệch chuẩn giữa các fold)."
+    notes += (
+        " Toàn bộ việc chọn lựa chỉ dùng tập train; tập test chỉ dùng đúng một lần. "
+        "Lớp trung tính là lớp yếu nhất, xem results/metrics.json."
+    )
+    return notes
+
+
 def build_model_card(metrics, notes):
     return {
         "model": "LinearSVC",
@@ -450,18 +551,22 @@ def print_summary(metrics, grid_records, quick):
 
     if metrics["model_comparison"]:
         print("\nSo sánh mô hình (cross-validation 5-fold trên tập train):")
-        print(f"{'Mô hình':<20}{'CV accuracy':>20}{'CV macro-F1':>22}{'Thời gian khớp':>18}")
+        print(f"{'Mô hình':<30}{'CV accuracy':>20}{'CV macro-F1':>22}{'Thời gian khớp':>18}")
         for row in metrics["model_comparison"]:
             acc = f"{row['cv_accuracy_mean'] * 100:.2f}% ± {row['cv_accuracy_std'] * 100:.2f}"
             f1m = f"{row['cv_f1_macro_mean']:.4f} ± {row['cv_f1_macro_std']:.4f}"
-            print(f"{row['model']:<20}{acc:>20}{f1m:>22}{row['fit_seconds']:>16.1f}s")
+            print(f"{row['model']:<30}{acc:>20}{f1m:>22}{row['fit_seconds']:>16.1f}s")
     else:
         print("\nSo sánh mô hình: bỏ qua (chế độ --quick).")
 
     if grid_records:
         print("\nDò tham số C cho LinearSVC (theo macro-F1 cross-validation):")
         for row in grid_records:
-            print(f"  C={row['C']:<5} macro-F1 = {row['cv_f1_macro_mean']:.4f}")
+            print(
+                f"  C={row['C']:<5} macro-F1 = {row['cv_f1_macro_mean']:.4f} "
+                f"± {row['cv_f1_macro_std']:.4f} | accuracy = "
+                f"{row['cv_accuracy_mean'] * 100:.2f}% ± {row['cv_accuracy_std'] * 100:.2f}"
+            )
     print(f"C được chọn: {metrics['selected_model']['best_c']}")
 
     test = metrics["test"]
@@ -578,6 +683,9 @@ def main(argv=None):
         best_c, grid_records = tune_linear_svc(
             train_df["text_clean"], train_df["label"], seed=args.seed, n_jobs=args.n_jobs
         )
+        tuned_row = tuned_comparison_row(best_c, grid_records)
+        if tuned_row is not None:
+            comparison.append(tuned_row)
 
     print(f"Đang huấn luyện mô hình cuối (LinearSVC, C={best_c}) trên toàn bộ tập train...")
     vectorizer, model = fit_final_model(
@@ -596,7 +704,7 @@ def main(argv=None):
     }
     if not args.quick:
         print(f"Đang kiểm tra độ ổn định theo các hạt giống {ROBUSTNESS_SEEDS}...")
-        robustness = seed_robustness(df, best_c, n_jobs=args.n_jobs)
+        robustness = seed_robustness(df, best_c)
 
     selected = {
         "name": "LinearSVC",
@@ -607,6 +715,7 @@ def main(argv=None):
             "random_state": args.seed,
         },
         "c_grid": [] if args.quick else list(C_GRID),
+        "c_grid_results": grid_records,
         "best_c": float(best_c),
     }
     metrics = build_metrics(
@@ -627,15 +736,7 @@ def main(argv=None):
     joblib.dump(model, model_path)
     joblib.dump(vectorizer, vec_path)
 
-    notes = (
-        "Chọn mô hình bằng cross-validation 5-fold trên tập train; tập test chỉ dùng "
-        "đúng một lần. Lớp trung tính là lớp yếu nhất, xem results/metrics.json."
-    )
-    if args.quick:
-        notes += (
-            " Chạy ở chế độ --quick: không so sánh mô hình, không dò C, "
-            "không kiểm tra độ ổn định theo hạt giống."
-        )
+    notes = _build_notes(metrics, args.quick)
     _dump_json(metrics, os.path.join(results_dir, "metrics.json"))
     _dump_json(build_model_card(metrics, notes), os.path.join(models_dir, "model_card.json"))
 
