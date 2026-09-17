@@ -1,5 +1,15 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 .env
+.DS_Store
 
+# Dữ liệu sinh ra khi chạy (dataset huấn luyện data/dataset_chuan.csv vẫn được commit)
+data/comments.csv
+data/comments_clean.csv
+data/comments_with_topics.csv
+
+# Biểu đồ HTML sinh ra bởi CLI (PNG/JSON kết quả đánh giá vẫn được commit)
+results/*.html
