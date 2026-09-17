@@ -148,7 +148,13 @@ def test_metrics_json_matches_schema(quick_run):
         "sublinear_tf",
         "vocab_size",
     }
-    assert set(metrics["selected_model"]) == {"name", "params", "c_grid", "best_c"}
+    assert set(metrics["selected_model"]) == {
+        "name",
+        "params",
+        "c_grid",
+        "c_grid_results",
+        "best_c",
+    }
     assert set(metrics["test"]) == {
         "accuracy",
         "f1_macro",
@@ -180,6 +186,7 @@ def test_quick_mode_leaves_optional_sections_empty(quick_run):
     assert metrics["seed_robustness"]["test_accuracy"] == []
     assert metrics["seed_robustness"]["test_f1_macro"] == []
     assert metrics["selected_model"]["best_c"] == 1.0
+    assert metrics["selected_model"]["c_grid_results"] == []
 
 
 def test_confusion_matrix_is_three_by_three_and_totals_test_size(quick_run):
@@ -251,3 +258,95 @@ def test_compare_models_reports_every_candidate_with_both_scores():
         assert 0.0 <= row["cv_f1_macro_mean"] <= 1.0
     dummy = records[0]["cv_f1_macro_mean"]
     assert records[-1]["cv_f1_macro_mean"] > dummy
+
+
+def test_tune_linear_svc_picks_best_macro_f1():
+    """Dò C phải chọn đúng giá trị có macro-F1 cross-validation cao nhất."""
+    df = ts.preprocess_corpus(_make_dataframe())
+    best_c, records = ts.tune_linear_svc(
+        df["text_clean"], df["label"], c_grid=[0.05, 3.0], seed=42, n_jobs=1
+    )
+
+    assert [row["C"] for row in records] == [0.05, 3.0]
+    for row in records:
+        assert set(row) == {
+            "C",
+            "cv_f1_macro_mean",
+            "cv_f1_macro_std",
+            "cv_accuracy_mean",
+            "cv_accuracy_std",
+            "fit_seconds",
+        }
+        assert 0.0 <= row["cv_f1_macro_mean"] <= 1.0
+        assert 0.0 <= row["cv_accuracy_mean"] <= 1.0
+    assert best_c == max(records, key=lambda row: row["cv_f1_macro_mean"])["C"]
+
+
+def test_tuned_comparison_row_reuses_the_numbers_of_the_selected_c():
+    """Dòng thứ năm của bảng so sánh phải là chính cấu hình được xuất xưởng."""
+    grid = [
+        {"C": 0.1, "cv_f1_macro_mean": 0.70, "cv_f1_macro_std": 0.01,
+         "cv_accuracy_mean": 0.75, "cv_accuracy_std": 0.02, "fit_seconds": 1.5},
+        {"C": 0.3, "cv_f1_macro_mean": 0.72, "cv_f1_macro_std": 0.006,
+         "cv_accuracy_mean": 0.76, "cv_accuracy_std": 0.01, "fit_seconds": 1.6},
+    ]
+    row = ts.tuned_comparison_row(0.3, grid)
+
+    assert row["model"] == "LinearSVC (C=0.3, đã dò)"
+    assert row["cv_f1_macro_mean"] == 0.72
+    assert row["cv_accuracy_std"] == 0.01
+    assert row["fit_seconds"] == 1.6
+    assert ts.tuned_comparison_row(0.3, []) is None
+
+
+def test_seed_robustness_returns_one_number_per_seed():
+    df = ts.preprocess_corpus(_make_dataframe())
+    result = ts.seed_robustness(df, 1.0, seeds=[0, 1])
+
+    assert result["seeds"] == [0, 1]
+    assert len(result["test_accuracy"]) == 2
+    assert len(result["test_f1_macro"]) == 2
+    assert result["f1_macro_mean"] == pytest.approx(
+        sum(result["test_f1_macro"]) / 2, abs=1e-9
+    )
+    assert result["f1_macro_std"] >= 0.0
+
+
+def _frame_without_the_neutral_class():
+    rows = []
+    for label, samples in ((0, NEGATIVE), (2, POSITIVE)):
+        for text in samples:
+            for suffix in SUFFIXES:
+                rows.append({"text": text + suffix, "label": label})
+    return pd.DataFrame(rows)
+
+
+def test_top_features_per_class_follows_model_classes(tmp_path):
+    """Thiếu một lớp trong tập huấn luyện thì không được gán nhầm trọng số."""
+    df = ts.preprocess_corpus(_frame_without_the_neutral_class())
+    vectorizer, model = ts.fit_final_model(df["text_clean"], df["label"], 1.0)
+    assert sorted(int(value) for value in model.classes_) == [0, 2]
+
+    features = ts.top_features_per_class(model, vectorizer, top_n=5)
+
+    # Lớp trung tính vắng mặt: bỏ qua hẳn thay vì lặp lại hàng của lớp khác.
+    assert set(features) == {0, 2}
+    terms_negative = [term for term, _ in features[0]]
+    terms_positive = [term for term, _ in features[2]]
+    assert terms_negative != terms_positive
+
+    path = ts._save_top_features(features, str(tmp_path))
+    content = open(path, encoding="utf-8").read()
+    for name in ts.LABEL_NAMES:
+        assert content.count(f"### {name}") == 1
+    assert "(lớp này không xuất hiện trong tập huấn luyện)" in content
+
+
+def test_top_features_per_class_gives_each_class_its_own_row():
+    df = ts.preprocess_corpus(_make_dataframe())
+    vectorizer, model = ts.fit_final_model(df["text_clean"], df["label"], 1.0)
+    features = ts.top_features_per_class(model, vectorizer, top_n=5)
+
+    assert set(features) == {0, 1, 2}
+    rows = [tuple(term for term, _ in features[label]) for label in (0, 1, 2)]
+    assert len(set(rows)) == 3
