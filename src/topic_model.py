@@ -28,8 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Gom cụm chủ đề bình luận tiếng Việt bằng BERTopic. Khuyến nghị chạy với "
-            "--min-topic-size 15 --min-samples 1: với tham số mặc định của BERTopic, "
-            "1.496 bình luận mẫu bị gom 91% vào một chủ đề duy nhất."
+            "--min-topic-size 15 --min-samples 1: trên 1.500 bình luận mẫu đầu tiên, mặc định "
+            "của BERTopic cho 23 chủ đề nhưng 49% nhiễu, min_samples=5 dồn 91% bình luận vào "
+            "một chủ đề, còn 15/1 cho 26 chủ đề với 33% nhiễu (results/topic_ablation.txt)."
         )
     )
     parser.add_argument("--input", default=os.path.join("data", "comments.csv"),

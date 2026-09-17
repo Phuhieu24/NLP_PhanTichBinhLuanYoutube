@@ -57,8 +57,9 @@ class DataSourceError(Exception):
 
 # Gợi ý hiển thị cạnh hai tham số HDBSCAN, lấy từ thí nghiệm trên tệp mẫu.
 TOPIC_TUNING_HELP = (
-    "Trên 1.000 đến 1.500 bình luận mẫu, mặc định của BERTopic gom 91% vào một chủ đề với 0% nhiễu; "
-    "15/1 cho 23 đến 31 chủ đề với 20 đến 38% nhiễu tùy tập."
+    "Trên 1.500 bình luận mẫu đầu tiên, mặc định của BERTopic cho 23 chủ đề nhưng 49% nhiễu, "
+    "min_samples=5 dồn 91% bình luận vào một chủ đề, còn 15/1 cho 26 chủ đề với 33% nhiễu "
+    "(results/topic_ablation.txt)."
 )
 
 
@@ -220,8 +221,9 @@ def render_sidebar() -> tuple[Settings, bool, bool]:
                 "2. Với nguồn **Link YouTube**: tạo file `.env` ở thư mục gốc với dòng "
                 "`YOUTUBE_API_KEY=...` rồi dán link video.\n"
                 "3. Lần chạy đầu tiên cần tải mô hình nhúng câu về máy.\n"
-                "4. Nếu chủ đề bị gom thành một cụm quá lớn, hãy giảm kích thước cụm tối thiểu "
-                "hoặc đổi sang `leaf` trong Cài đặt nâng cao."
+                "4. Nếu chủ đề bị gom thành một cụm quá lớn, hãy đặt `min_samples` bằng 1 trong "
+                "Cài đặt nâng cao: ablation cho thấy đây mới là tham số quyết định, còn kích thước "
+                "cụm tối thiểu và chế độ `leaf` gần như không gỡ được cụm khổng lồ."
             )
 
     cfg = tp.TopicConfig(min_topic_size=int(min_topic_size), nr_topics=nr_topics,

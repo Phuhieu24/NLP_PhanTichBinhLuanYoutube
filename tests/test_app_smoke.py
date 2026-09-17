@@ -262,7 +262,8 @@ def test_advanced_defaults_follow_the_ablation(app):
 
     helps = [element.help for element in app.sidebar.slider
              if element.label == "Kích thước cụm tối thiểu"]
-    assert any("91%" in str(value) for value in helps)
+    assert any("min_samples" in str(value) for value in helps)
+    assert any("49%" in str(value) for value in helps)
 
 
 def _fake_youtube_comments(n_rows=60):
