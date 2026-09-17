@@ -40,6 +40,24 @@ SENTIMENT_ICONS = {0: "🔴 Tiêu cực", 1: "⚪ Trung tính", 2: "🟢 Tích c
 
 OUTLIER_LABEL = "-1: Nhiễu (không thuộc chủ đề nào)"
 
+# Tên cột tiếng Việt cho bảng chỉ số theo lớp trong tab "Mô hình".
+PER_CLASS_HEADERS = {
+    "precision": "Precision",
+    "recall": "Recall",
+    "f1": "F1",
+    "support": "Số mẫu",
+}
+
+# Các cột chỉ xuất hiện trong tệp CSV tải về, không hiện trên bảng cho gọn.
+EXPORT_EXTRA_COLUMNS = {
+    "comment_id": "Mã bình luận",
+    "published_at": "Thời điểm đăng",
+    "reply_count": "Số trả lời",
+}
+
+# Nhãn chủ đề dài hơn mức này bị cắt bớt khi vẽ trục y của biểu đồ.
+MAX_LABEL_CHARS = 28
+
 # Hợp đồng cột của `crawler.get_video_comments`. Mọi nguồn dữ liệu khác (tệp CSV
 # người dùng tải lên, tệp mẫu trong `data/`) phải đưa về đúng thứ tự cột này thì
 # phần còn lại của pipeline mới dùng chung được một đường đi.
@@ -370,12 +388,120 @@ def comments_table(df: pd.DataFrame, use_sentiment: bool = True) -> pd.DataFrame
     return df[present].rename(columns={name: columns[name] for name in present})
 
 
+def comments_export_table(df: pd.DataFrame, use_sentiment: bool = True) -> pd.DataFrame:
+    """Bảng dành cho tệp CSV tải về.
+
+    Giữ nguyên các cột của bảng hiển thị rồi thêm những cột truy vết mà bảng
+    trên màn hình cố tình bỏ bớt cho gọn: mã bình luận, thời điểm đăng và số
+    lượt trả lời. Nhờ vậy người nhận tệp dò ngược được về bình luận gốc trên
+    YouTube.
+    """
+    table = comments_table(df, use_sentiment)
+    for column, title in EXPORT_EXTRA_COLUMNS.items():
+        if column in df.columns:
+            table[title] = df[column]
+    return table
+
+
+def topic_config_line(config) -> str:
+    """Một dòng mô tả cấu hình BERTopic đã sinh ra kết quả đang hiển thị.
+
+    Kết quả cố tình không bị xóa khi người dùng chỉnh thanh bên, nên phải nói rõ
+    kết quả trên màn hình được tính với cấu hình nào.
+    """
+    if not config:
+        return ""
+    min_samples = config.get("min_samples")
+    nr_topics = config.get("nr_topics")
+    parts = [
+        f"min_topic_size={config.get('min_topic_size', '?')}",
+        f"min_samples={min_samples if min_samples is not None else 'mặc định'}",
+        str(config.get("cluster_selection_method", "eom")),
+        "stopwords=" + ("bật" if config.get("use_stopwords", True) else "tắt"),
+        f"nr_topics={nr_topics if nr_topics is not None else 'tự động'}",
+    ]
+    return " · ".join(parts)
+
+
+COMPARISON_HEADERS = {
+    "model": "Mô hình",
+    "cv_accuracy_mean": "CV accuracy",
+    "cv_accuracy_std": "± acc",
+    "cv_f1_macro_mean": "CV macro-F1",
+    "cv_f1_macro_std": "± F1",
+    "fit_seconds": "Thời gian khớp (s)",
+}
+
+
+def comparison_frame(records) -> pd.DataFrame:
+    """Bảng so sánh mô hình với tiêu đề tiếng Việt, accuracy quy về phần trăm."""
+    frame = pd.DataFrame(records)
+    if not set(COMPARISON_HEADERS).issubset(frame.columns):
+        return frame
+    return pd.DataFrame(
+        {
+            "Mô hình": frame["model"],
+            "CV accuracy": frame["cv_accuracy_mean"] * 100,
+            "± acc": frame["cv_accuracy_std"] * 100,
+            "CV macro-F1": frame["cv_f1_macro_mean"],
+            "± F1": frame["cv_f1_macro_std"],
+            "Thời gian khớp (s)": frame["fit_seconds"],
+        }
+    )
+
+
+def c_grid_frame(records) -> pd.DataFrame:
+    """Bảng kết quả dò tham số C, cùng quy ước hiển thị với bảng so sánh."""
+    frame = pd.DataFrame(records)
+    needed = {"C", "cv_f1_macro_mean", "cv_f1_macro_std", "cv_accuracy_mean"}
+    if not needed.issubset(frame.columns):
+        return frame
+    return pd.DataFrame(
+        {
+            "C": frame["C"],
+            "CV macro-F1": frame["cv_f1_macro_mean"],
+            "± F1": frame["cv_f1_macro_std"],
+            "CV accuracy": frame["cv_accuracy_mean"] * 100,
+        }
+    )
+
+
+def c_grid_note(metrics) -> str:
+    """Một câu đọc thẳng từ số liệu: C nào được chọn và cách biệt tới đâu."""
+    grid = (metrics.get("selected_model") or {}).get("c_grid_results") or []
+    if not grid:
+        return ""
+    best = max(grid, key=lambda row: row["cv_f1_macro_mean"])
+    note = (f"C={best['C']:g} cho macro-F1 cross-validation cao nhất "
+            f"({best['cv_f1_macro_mean']:.4f} ± {best['cv_f1_macro_std']:.4f}) "
+            "và đó là cấu hình được lưu lại.")
+    other = next((row for row in metrics.get("model_comparison") or []
+                  if row["model"] == "LogisticRegression"), None)
+    if other is None:
+        return note
+    gap = best["cv_f1_macro_mean"] - other["cv_f1_macro_mean"]
+    spread = max(best["cv_f1_macro_std"], other["cv_f1_macro_std"])
+    if abs(gap) <= spread:
+        return note + (f" Chênh lệch so với LogisticRegression là {gap:+.4f}, nhỏ hơn độ "
+                       "lệch chuẩn giữa các fold, nên hai mô hình coi như ngang nhau.")
+    return note + f" Chênh lệch so với LogisticRegression là {gap:+.4f}."
+
+
 def per_class_table(per_class: dict) -> pd.DataFrame:
-    """Bảng precision/recall/F1 theo từng lớp, đọc từ results/metrics.json."""
+    """Bảng precision/recall/F1 theo từng lớp, đọc từ results/metrics.json.
+
+    Tên cột và tên lớp đều để tiếng Việt cho khớp phần còn lại của giao diện.
+    """
     rows = []
     for code, values in (per_class or {}).items():
-        row = {"Lớp": SENTIMENT_LABELS.get(int(code), str(code))}
-        row.update(values)
+        try:
+            name = SENTIMENT_LABELS.get(int(code), str(code))
+        except (TypeError, ValueError):
+            name = str(code)
+        row = {"Lớp": name}
+        for key, title in PER_CLASS_HEADERS.items():
+            if key in (values or {}):
+                row[title] = values[key]
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -383,6 +509,19 @@ def per_class_table(per_class: dict) -> pd.DataFrame:
 # --------------------------------------------------------------------------
 # Biểu đồ dùng chung cho giao diện (gom ở đây để app.py chỉ lo phần bố cục)
 # --------------------------------------------------------------------------
+
+
+def short_label(name, limit: int = MAX_LABEL_CHARS) -> str:
+    """Rút gọn nhãn chủ đề cho trục y.
+
+    Nhãn quá dài khiến plotly thu hẹp phần chữ đến mức chỉ còn một ký tự; cắt
+    sẵn ở đây rồi bật `automargin` thì nhãn luôn đọc được. Tiền tố `id:` được
+    giữ lại nên hai chủ đề không bao giờ bị rút gọn thành cùng một nhãn.
+    """
+    text = str(name)
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
 
 
 def topic_size_figure(topics_df: pd.DataFrame, top_n: int = 15):
@@ -394,17 +533,18 @@ def topic_size_figure(topics_df: pd.DataFrame, top_n: int = 15):
     figure = go.Figure(
         go.Bar(
             x=data["Count"],
-            y=data["Name"],
+            y=[short_label(name) for name in data["Name"]],
             orientation="h",
             marker=dict(color="#F43F5E"),
-            hovertemplate="%{y}<br>%{x} bình luận<extra></extra>",
+            customdata=data["Name"],
+            hovertemplate="%{customdata}<br>%{x} bình luận<extra></extra>",
         )
     )
     figure.update_layout(
         height=max(240, 34 * len(data) + 90),
-        margin=dict(l=8, r=8, t=30, b=8),
+        margin=dict(l=10, r=8, t=30, b=8),
         xaxis_title="Số bình luận",
-        yaxis_title=None,
+        yaxis=dict(automargin=True, title=None),
         showlegend=False,
     )
     return figure
@@ -451,7 +591,8 @@ def sentiment_by_topic_figure(df: pd.DataFrame, topics_df: pd.DataFrame, top_n: 
     top_topics = (
         topics_df[topics_df["Topic"] != -1].sort_values("Count", ascending=False).head(top_n)
     )
-    names = top_topics["Name"].tolist()[::-1]
+    full_names = top_topics["Name"].tolist()[::-1]
+    names = [short_label(name) for name in full_names]
     ids = top_topics["Topic"].tolist()[::-1]
 
     figure = go.Figure()
@@ -467,14 +608,18 @@ def sentiment_by_topic_figure(df: pd.DataFrame, topics_df: pd.DataFrame, top_n: 
                 name=SENTIMENT_LABELS[code],
                 orientation="h",
                 marker=dict(color=SENTIMENT_COLORS[code]),
-                hovertemplate="%{y}<br>" + SENTIMENT_LABELS[code] + ": %{x}<extra></extra>",
+                customdata=full_names,
+                hovertemplate="%{customdata}<br>" + SENTIMENT_LABELS[code] + ": %{x}<extra></extra>",
             )
         )
     figure.update_layout(
         barmode="stack",
         height=max(260, 34 * len(names) + 110),
-        margin=dict(l=8, r=8, t=30, b=8),
+        # `automargin` để plotly tự chừa đủ chỗ cho nhãn chủ đề bên trái thay vì
+        # cắt chúng còn một ký tự khi cửa sổ rộng.
+        margin=dict(l=10, r=8, t=30, b=8),
         xaxis_title="Số bình luận",
+        yaxis=dict(automargin=True),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
     )
     return figure

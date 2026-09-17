@@ -13,7 +13,6 @@ trên giao diện (đổi tab, lọc, tải CSV) không làm chạy lại phần
 from __future__ import annotations
 
 import hashlib
-import inspect
 import io
 import json
 import os
@@ -56,9 +55,11 @@ class DataSourceError(Exception):
     """Lỗi đọc dữ liệu ngoại tuyến: hiển thị bằng st.error, không đổ traceback."""
 
 
-# Bản `crawler.py` cũ chưa có hai tên này; giữ cho app chạy được với cả hai bản.
-CrawlError = getattr(crawler, "CrawlError", Exception)
-_get_video_metadata = getattr(crawler, "get_video_metadata", None)
+# Gợi ý hiển thị cạnh hai tham số HDBSCAN, lấy từ thí nghiệm trên tệp mẫu.
+TOPIC_TUNING_HELP = (
+    "Trên 1.496 bình luận mẫu, mặc định của BERTopic gom 91% vào một chủ đề; "
+    "15/1 cho 29 chủ đề với 26% nhiễu."
+)
 
 
 # --- Nạp mô hình và lấy dữ liệu (có bộ nhớ đệm) ---------------------------
@@ -71,46 +72,40 @@ def load_embedding_model(name: str):
 
 @st.cache_resource(show_spinner=False)
 def load_sentiment_models():
-    """Trả về cặp (mô hình, vectorizer) hoặc (None, None) nếu chưa huấn luyện."""
+    """Trả về (mô hình, vectorizer, lỗi).
+
+    Lỗi là `None` khi chưa có tệp mô hình, và là nội dung ngoại lệ khi có tệp
+    nhưng không nạp được (ví dụ pickle sinh bởi một phiên bản scikit-learn
+    khác). Hai trường hợp này cần hai lời khuyên khác nhau nên không được gộp.
+    """
     import joblib
 
     paths = [os.path.join(MODELS_DIR, name) for name in ("sentiment_model.pkl", "tfidf_vectorizer.pkl")]
     if not all(os.path.exists(path) for path in paths):
-        return None, None
+        return None, None, None
     try:
-        return joblib.load(paths[0]), joblib.load(paths[1])
-    except Exception:
-        return None, None
-
-
-def _call_crawler(api_key, video_id, max_comments, include_replies, order, on_progress):
-    """Gọi `get_video_comments` với đúng những tham số bản crawler hiện có hỗ trợ."""
-    extras = {"include_replies": include_replies, "order": order, "on_progress": on_progress}
-    try:
-        accepted = inspect.signature(crawler.get_video_comments).parameters
-        extras = {name: value for name, value in extras.items() if name in accepted}
-    except (TypeError, ValueError):
-        pass
-    try:
-        return crawler.get_video_comments(api_key, video_id, max_results=max_comments, **extras)
-    except TypeError:
-        return crawler.get_video_comments(api_key, video_id, max_results=max_comments)
+        return joblib.load(paths[0]), joblib.load(paths[1]), None
+    except Exception as error:
+        return None, None, str(error)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_comments(video_id, max_comments, include_replies, order, _api_key, _on_progress=None):
     """Khóa đệm chỉ gồm 4 tham số của video; API key không bao giờ nằm trong khóa."""
-    return _call_crawler(_api_key, video_id, max_comments, include_replies, order, _on_progress)
+    return crawler.get_video_comments(
+        _api_key,
+        video_id,
+        max_results=max_comments,
+        include_replies=include_replies,
+        order=order,
+        on_progress=_on_progress,
+    )
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_metadata(video_id, _api_key):
-    if _get_video_metadata is None:
-        return None
-    try:
-        return _get_video_metadata(_api_key, video_id)
-    except Exception:
-        return None
+    """Thông tin video; `crawler.get_video_metadata` trả về None khi hỏng."""
+    return crawler.get_video_metadata(_api_key, video_id)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -192,7 +187,9 @@ def render_sidebar() -> tuple[Settings, bool, bool]:
             order_label = st.selectbox("Thứ tự lấy bình luận", list(ORDER_CHOICES), index=0)
 
         with st.expander("Cài đặt nâng cao (BERTopic)"):
-            min_topic_size = st.slider("Kích thước cụm tối thiểu", 5, 50, 10)
+            # Mặc định 15/1 thay cho mặc định của BERTopic: xem TOPIC_TUNING_HELP.
+            min_topic_size = st.slider("Kích thước cụm tối thiểu", 5, 50, 15,
+                                       help=TOPIC_TUNING_HELP)
             nr_topics = None
             if not st.checkbox("Số chủ đề: tự động", value=True):
                 nr_topics = int(st.number_input("Số chủ đề mong muốn", 2, 50, 10))
@@ -201,8 +198,9 @@ def render_sidebar() -> tuple[Settings, bool, bool]:
             cluster_selection = st.selectbox("Cách chọn cụm (HDBSCAN)", ["eom", "leaf"], index=0,
                                              help="'eom' cho vài cụm lớn, 'leaf' cho nhiều cụm nhỏ hơn.")
             min_samples = None
-            if not st.checkbox("min_samples: mặc định", value=True):
-                min_samples = int(st.number_input("min_samples", 1, 50, 5))
+            if not st.checkbox("min_samples: để HDBSCAN tự chọn", value=False):
+                min_samples = int(st.number_input("min_samples", 1, 50, 1,
+                                                  help=TOPIC_TUNING_HELP))
 
         with st.expander("Cảm xúc"):
             use_sentiment = st.toggle("Phân loại cảm xúc (LinearSVC + TF-IDF)", value=True)
@@ -260,13 +258,17 @@ def _lap(timings: dict, key: str, started: float) -> float:
     return timings[key]
 
 
-def _summarize_topics(settings, topics_df, limit=8) -> dict:
-    """Gọi Ollama cho tối đa `limit` chủ đề lớn nhất; trả về {topic: câu tóm tắt}."""
+def _summarize_topics(settings, topics_df, limit=8) -> tuple[dict, str]:
+    """Gọi Ollama cho tối đa `limit` chủ đề lớn nhất.
+
+    Trả về ({topic: câu tóm tắt}, cảnh báo). Cảnh báo được trả về chứ không hiện
+    tại chỗ: khối `st.status` bao quanh bước này tự thu gọn khi chạy xong, nên
+    một `st.warning` đặt bên trong sẽ biến mất khỏi màn hình.
+    """
     summarizer = OllamaSummarizer(model=settings.llm_model, base_url=settings.llm_base_url)
     ready, message = summarizer.available()
     if not ready:
-        st.warning(message)
-        return {}
+        return {}, message
     targets = topics_df[topics_df["Topic"] != -1].head(limit)
     summaries, progress = {}, st.progress(0.0, text="Đang tóm tắt chủ đề bằng Ollama…")
     for position, (_, row) in enumerate(targets.iterrows(), start=1):
@@ -276,7 +278,7 @@ def _summarize_topics(settings, topics_df, limit=8) -> dict:
             summaries[int(row["Topic"])] = f"(không tóm tắt được: {error})"
         progress.progress(position / max(len(targets), 1))
     progress.empty()
-    return summaries
+    return summaries, ""
 
 
 def load_offline_comments(settings: Settings) -> tuple[pd.DataFrame, str]:
@@ -325,6 +327,7 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
             return None
 
     timings: dict[str, float] = {}
+    llm_warning = ""
     with st.status("Đang xử lý…", expanded=True) as status:
         try:
             started = time.perf_counter()
@@ -377,10 +380,13 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
             started, use_sentiment = time.perf_counter(), settings.use_sentiment
             if use_sentiment:
                 st.write("5/6 · Đang phân loại cảm xúc…")
-                s_model, s_vectorizer = load_sentiment_models()
+                s_model, s_vectorizer, load_error = load_sentiment_models()
                 if s_model is None or s_vectorizer is None:
-                    st.warning("Chưa có mô hình cảm xúc trong thư mục models/. "
-                               "Hãy chạy `python src/train_sentiment.py` trước.")
+                    if load_error:
+                        st.warning(f"Không nạp được mô hình cảm xúc: {load_error}")
+                    else:
+                        st.warning("Chưa có mô hình cảm xúc trong thư mục models/. "
+                                   "Hãy chạy `python src/train_sentiment.py` trước.")
                     use_sentiment = False
                 else:
                     features = s_vectorizer.transform(df["tokenized_text"])
@@ -393,13 +399,13 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
             started, summaries = time.perf_counter(), {}
             if settings.use_llm:
                 st.write("6/6 · Đang tóm tắt chủ đề bằng Ollama…")
-                summaries = _summarize_topics(settings, topics_df)
+                summaries, llm_warning = _summarize_topics(settings, topics_df)
             else:
                 st.write("6/6 · Bỏ qua bước tóm tắt bằng LLM.")
             _lap(timings, "LLM", started)
 
             figures = tp.bertopic_figures(topic_model)
-        except (CrawlError, DataSourceError) as error:
+        except (crawler.CrawlError, DataSourceError) as error:
             status.update(label="Lỗi khi lấy bình luận", state="error")
             st.error(str(error))
             return None
@@ -408,6 +414,10 @@ def run_analysis(settings: Settings, api_key: str) -> dict | None:
             st.error(f"Đã xảy ra lỗi: {error}")
             return None
         status.update(label="Phân tích hoàn tất", state="complete", expanded=False)
+
+    # Ngoài khối status: cảnh báo vẫn còn trên màn hình sau khi status thu gọn.
+    if llm_warning:
+        st.warning(llm_warning)
 
     metadata = fetch_metadata(video_id, _api_key=api_key) if settings.source == SOURCE_YOUTUBE else None
     return {"video_id": video_id, "source": source_label, "metadata": metadata,
@@ -456,6 +466,9 @@ def render_overview(result):
     timings = result["timings"]
     line = "Thời gian xử lý: " + " · ".join(f"{k} {v:.1f}s" for k, v in timings.items())
     line += f" · tổng {sum(timings.values()):.1f}s"
+    config_line = tp.topic_config_line(result.get("config"))
+    if config_line:
+        line += f" · Cấu hình BERTopic: {config_line}"
     st.caption(f"Nguồn: {source} · {line}" if source else line)
 
 
@@ -533,9 +546,13 @@ def render_data(result):
 
     view = tp.filter_comments(df, chosen_topics, chosen_sentiment, keyword)
     table = tp.comments_table(view, result["use_sentiment"])
-    st.caption(f"Đang hiển thị {len(table):,} / {len(df):,} bình luận.")
+    # Bảng trên màn hình giữ gọn; tệp tải về thêm mã bình luận, thời điểm đăng,
+    # cờ trả lời và số lượt trả lời để dò ngược được về YouTube.
+    export = tp.comments_export_table(view, result["use_sentiment"])
+    st.caption(f"Đang hiển thị {len(table):,} / {len(df):,} bình luận "
+               f"({len(export.columns)} cột trong tệp tải về).")
     st.dataframe(table, use_container_width=True, hide_index=True, height=460)
-    st.download_button("Tải CSV đang lọc", data=table.to_csv(index=False).encode("utf-8-sig"),
+    st.download_button("Tải CSV đang lọc", data=export.to_csv(index=False).encode("utf-8-sig"),
                        file_name=f"binh_luan_{result.get('video_id') or 'du_lieu'}.csv",
                        mime="text/csv")
 
@@ -548,7 +565,24 @@ def _read_json(path):
         return None
 
 
-def render_model(_result=None):
+def _table_config(frame) -> dict:
+    """Định dạng số: accuracy theo phần trăm, macro-F1 bốn chữ số thập phân."""
+    formats = {
+        "CV accuracy": "%.2f%%",
+        "± acc": "%.2f",
+        "CV macro-F1": "%.4f",
+        "± F1": "%.4f",
+        "Thời gian khớp (s)": "%.1f",
+        "C": "%g",
+    }
+    return {
+        name: st.column_config.NumberColumn(name, format=formats[name])
+        for name in frame.columns
+        if name in formats
+    }
+
+
+def render_model(result=None):
     """Tab này đọc các tệp trong models/ và results/ chứ không phụ thuộc lần chạy hiện tại."""
     st.markdown("##### Mô hình nhúng câu")
     st.markdown(
@@ -581,11 +615,26 @@ def render_model(_result=None):
         columns[2].metric("Weighted-F1 (test)", f"{test.get('f1_weighted', 0):.3f}")
         if metrics.get("model_comparison"):
             st.markdown("##### So sánh các mô hình (cross-validation trên tập huấn luyện)")
-            st.dataframe(pd.DataFrame(metrics["model_comparison"]), use_container_width=True, hide_index=True)
+            comparison = tp.comparison_frame(metrics["model_comparison"])
+            st.dataframe(comparison, use_container_width=True, hide_index=True,
+                         column_config=_table_config(comparison))
+        grid = (metrics.get("selected_model") or {}).get("c_grid_results")
+        if grid:
+            st.markdown("##### Dò tham số C của LinearSVC (cross-validation trên tập huấn luyện)")
+            grid_table = tp.c_grid_frame(grid)
+            st.dataframe(grid_table, use_container_width=True, hide_index=True,
+                         column_config=_table_config(grid_table))
+            note = tp.c_grid_note(metrics)
+            if note:
+                st.caption(note)
         per_class = tp.per_class_table(test.get("per_class"))
         if len(per_class):
             st.markdown("##### Kết quả theo từng lớp")
             st.dataframe(per_class, use_container_width=True, hide_index=True)
+        if str((result or {}).get("source", "")).startswith("Dữ liệu mẫu"):
+            st.caption("Các chỉ số trên được tính trên chính tệp data/dataset_chuan.csv mà "
+                       "bản demo vừa phân tích, nên tỷ lệ cảm xúc ở các tab khác lạc quan "
+                       "hơn so với dữ liệu mới.")
 
     image_path = os.path.join(RESULTS_DIR, "confusion_matrix.png")
     if os.path.exists(image_path):
