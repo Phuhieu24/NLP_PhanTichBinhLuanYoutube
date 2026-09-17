@@ -97,7 +97,7 @@ Danh sách này chỉ được đưa vào `CountVectorizer` của bước c-TF-I
 |---|---|---|---|---|
 | Cũ (hạ chữ thường trước, từ điển teencode cũ) | 0,3 | 77,58% ± 0,47 | 0,7199 ± 0,0052 | 0,5218 |
 | Mới (tách từ trước, từ điển chỉ chuẩn hóa chính tả) | 0,3 | 77,58% ± 0,50 | 0,7200 ± 0,0041 | 0,5222 |
-| Cũ | 1,0 | 76,62% ± 0,40 | 0,7079 ± 0,0052 | 0,5004 |
+| Cũ | 1,0 | 76,61% ± 0,40 | 0,7079 ± 0,0052 | 0,5004 |
 | Mới | 1,0 | 76,57% ± 0,43 | 0,7075 ± 0,0053 | 0,5007 |
 
 Script còn chạy riêng hạt giống 42 với phiên bản mới, C = 0,3: 76,62% và macro-F1 0,7161, trùng đúng với kết quả trên tập kiểm tra ở mục 6.1. Lưu ý về hai giá trị ±: `results/metrics.json` (khóa `seed_robustness`) tính độ lệch chuẩn trên cùng năm hạt giống với ddof = 0 và cho 77,58% ± 0,44, còn bảng này dùng ddof = 1 và cho ± 0,50; cùng năm con số, hai cách tính.
@@ -225,14 +225,14 @@ Chia lại tập và huấn luyện lại với năm hạt giống 0 đến 4 ch
 
 ### 6.3. So với phiên bản đầu của đồ án
 
-Phiên bản đầu (đo lại ngày 18-09-2026 với cùng dữ liệu) cho tỉ lệ dự đoán đúng 76,83% và macro-F1 0,71 trên tập kiểm tra, F1 từng lớp 0,76 / 0,52 / 0,87. Cùng cấu hình đó (tiền xử lý cũ, C = 1) chạy trên hạt giống 0 đến 4 đạt trung bình 76,62% ± 0,40 (hàng "Cũ, C = 1,0" của bảng mục 3.5, `results/ab_preprocess.txt`), nên lần chia ban đầu cao hơn trung bình 0,2 điểm, trong phạm vi một độ lệch chuẩn. Cross-validation 5-fold trên toàn tập cho 76,74% ± 0,57.
+Phiên bản đầu (đo lại ngày 18-09-2026 với cùng dữ liệu) cho tỉ lệ dự đoán đúng 76,83% và macro-F1 0,71 trên tập kiểm tra, F1 từng lớp 0,76 / 0,52 / 0,87. Cùng cấu hình đó (tiền xử lý cũ, C = 1) chạy trên hạt giống 0 đến 4 đạt trung bình 76,61% ± 0,40 (hàng "Cũ, C = 1,0" của bảng mục 3.5, `results/ab_preprocess.txt`), nên lần chia ban đầu cao hơn trung bình 0,2 điểm, trong phạm vi một độ lệch chuẩn. Cross-validation 5-fold trên toàn tập cho 76,74% ± 0,57.
 
 | | Phiên bản đầu | Phiên bản cuối |
 |---|---|---|
 | Tỉ lệ dự đoán đúng (accuracy), tập kiểm tra | 76,83% | 76,62% |
 | Macro-F1, tập kiểm tra | 0,71 | 0,7161 |
 | F1 lớp trung tính | 0,52 | 0,5354 |
-| Tỉ lệ dự đoán đúng, trung bình 5 hạt giống (0 đến 4) | 76,62% ± 0,40 | 77,58% ± 0,44 |
+| Tỉ lệ dự đoán đúng, trung bình 5 hạt giống (0 đến 4) | 76,61% ± 0,40 | 77,58% ± 0,44 |
 | Chọn mô hình | không có đối chứng, C = 1 | 4 mô hình nền, dò C, chỉ trên tập huấn luyện |
 
 Đọc bảng này cần thận trọng. Về điểm số, hai phiên bản khác nhau trong phạm vi nhiễu của phép chia tập. Phần cải thiện macro-F1 có thể đo được nằm ở cross-validation và đến từ việc dò C (0,7054 ở C = 1 lên 0,7180 ở C = 0,3); thay đổi tiền xử lý là trung tính đối với bộ phân loại (mục 3.5). Điều thay đổi về chất là quy trình: mọi lựa chọn nay có đối chứng, chỉ dùng tập huấn luyện, và được lưu lại trong `results/metrics.json` để tái lập.
