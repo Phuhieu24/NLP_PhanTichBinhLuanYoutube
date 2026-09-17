@@ -21,7 +21,7 @@ Các mục dưới đây không suy ra được từ mã nguồn hay từ chính
 
 ## Thống kê
 
-Kiểm tra ngày 18-09-2026 trên tệp đã commit.
+Kiểm tra ngày 18-09-2026 trên tệp đã commit; số liệu do `experiments/dataset_stats.py` tính và ghi vào `results/dataset_stats.json`.
 
 | Chỉ số | Giá trị |
 |---|---|
@@ -33,8 +33,10 @@ Kiểm tra ngày 18-09-2026 trên tệp đã commit.
 | Dòng trùng nội dung | 0 |
 | Dòng thiếu giá trị | 0 |
 | Độ dài bình luận | 5 đến 500 ký tự, trung vị 52 |
-| Bình luận có 3 ký tự chữ lặp liên tiếp trở lên | 21% |
-| Bình luận có emoji hoặc dấu câu | 71% |
+| Bình luận có 3 chữ cái giống nhau liên tiếp trở lên | 7,75% (20,7% nếu tính cả dấu câu và emoji lặp) |
+| Bình luận có emoji | 34,5% |
+| Bình luận có dấu câu | 51,5% |
+| Bình luận có emoji hoặc dấu câu | 71,2% |
 | Chủ đề | Toàn bộ bình luận nói về chương trình "Anh Trai Say Hi" |
 
 Hai ghi chú:
@@ -59,8 +61,9 @@ Hai ghi chú:
 | `comments.csv` | `python src/crawler.py --url <link video>` | Bình luận thô theo hợp đồng cột `comment_id`, `parent_id`, `is_reply`, `author`, `published_at`, `like_count`, `reply_count`, `text`. |
 | `comments_clean.csv` | `python src/preprocess.py` | `comments.csv` thêm hai cột `clean_text` và `tokenized_text`, bỏ dòng dưới 2 token. |
 | `comments_with_topics.csv` | `python src/topic_model.py --out-dir data` | Bình luận kèm cột `Topic` và `Topic_Name` (chỉ khi `--out-dir` trỏ vào đây; mặc định là `results/`). |
+| `topics_summary.csv` và ba tệp `.html` | cùng lệnh trên | Bảng từ khóa theo chủ đề và ba biểu đồ BERTopic; cũng chỉ xuất hiện ở đây khi `--out-dir data`. |
 
-Cả ba tệp nằm trong `.gitignore` vì chứa tên tác giả và nội dung bình luận thu thập trực tiếp từ YouTube. Không commit chúng.
+Các tệp này nằm trong `.gitignore`: ba tệp CSV đầu vì chứa tên tác giả và nội dung bình luận thu thập trực tiếp từ YouTube, các tệp còn lại vì là sản phẩm sinh ra khi chạy. Không commit chúng.
 
 ## Lưu ý khi dùng nguồn "Dữ liệu mẫu" trong ứng dụng
 
