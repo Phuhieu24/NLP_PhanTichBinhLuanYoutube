@@ -1,94 +1,119 @@
-# 🎥 Đồ Án: Phân Tích Chủ Đề Bình Luận YouTube (Topic Modeling)
+# Phân tích bình luận YouTube tiếng Việt: chủ đề và cảm xúc
 
-## 📌 Giới thiệu
-Dự án Xử lý ngôn ngữ tự nhiên (NLP) ứng dụng mô hình học máy để tự động thu thập, phân loại và gom cụm chủ đề các bình luận trên nền tảng YouTube.
+Đồ án môn CS221 (Xử lý ngôn ngữ tự nhiên, UIT). Ứng dụng nhận bình luận của một video YouTube, gom cụm chủ đề bằng BERTopic trên vector câu của `keepitreal/vietnamese-sbert` (mô hình Sentence-BERT tinh chỉnh từ PhoBERT-base, vector 768 chiều), phân loại cảm xúc ba lớp bằng LinearSVC trên đặc trưng TF-IDF, và tùy chọn tóm tắt từng chủ đề bằng một mô hình ngôn ngữ chạy nội bộ qua Ollama. Báo cáo đầy đủ, số liệu và phân tích nằm trong `BAO_CAO.md`.
 
-Hệ thống sử dụng **PhoBERT** kết hợp thuật toán **BERTopic** để phân nhóm dữ liệu tiếng Việt. Ngoài ra, dự án còn tích hợp **Ollama (Local LLM)** để tự động giải nghĩa và tóm tắt chủ đề thành các câu văn hoàn chỉnh. Toàn bộ hệ thống được đóng gói thành một giao diện web trực quan bằng **Streamlit**.
+## Yêu cầu
 
----
+- Python 3.11 hoặc 3.12. Python 3.13 chưa được kiểm thử (wheel của `hdbscan`, `umap-learn` và `torch` thường ra chậm hơn).
+- Đủ đĩa trống cho `torch` và mô hình nhúng câu (ước lượng vài GB; mô hình tải về một lần từ Hugging Face Hub, cần mạng ở lần chạy đầu).
+- Khóa YouTube Data API v3 chỉ cần khi phân tích video trực tiếp. Hai nguồn dữ liệu còn lại (tệp CSV, dữ liệu mẫu) chạy được không cần khóa.
+- Ollama là tùy chọn, chỉ cần cho tính năng tóm tắt chủ đề.
 
-## 🚀 Các tính năng chính
-1. **Crawl dữ liệu tự động:** Lấy hàng ngàn bình luận từ video YouTube bất kỳ qua YouTube Data API v3.
-2. **Tiền xử lý tiếng Việt:** Làm sạch văn bản, tách từ (word tokenization) sử dụng thư viện `pyvi`.
-3. **Gom cụm chủ đề (Clustering):** Sử dụng `vietnamese-sbert` (PhoBERT) và `BERTopic` để phân tích ngữ nghĩa. Thuật toán `UMAP` đã được khóa seed để đảm bảo tính nhất quán của kết quả.
-4. **Phân tích Cảm xúc Đa lớp (Multiclass Sentiment Analysis):** Tự động huấn luyện mô hình Máy Véc-tơ hỗ trợ (LinearSVC kết hợp TF-IDF N-grams) để phân loại bình luận thành 3 sắc thái: Tích cực / Trung tính / Tiêu cực. Hỗ trợ chuẩn hóa Teencode.
-5. **Tóm tắt bằng AI (GenAI):** Tích hợp Ollama (mô hình `qwen2`) để đọc hiểu và tóm tắt chủ đề.
-6. **Trực quan hóa:** Các biểu đồ Barchart, Bản đồ không gian 2D (Intertopic Distance Map), và Biểu đồ tròn Cảm xúc (Pie Chart) tương tác trực tiếp trên Web.
+## Cài đặt
 
----
-
-## ⚙️ Yêu cầu hệ thống
-- **Hệ điều hành:** Windows / macOS / Linux.
-- **Python:** Phiên bản 3.9 trở lên.
-- **Ollama:** Cài đặt sẵn trên máy tính để chạy tính năng tóm tắt AI offline (Tải tại [ollama.com](https://ollama.com/)).
-
----
-
-## 🛠️ Hướng dẫn Cài đặt
-
-### Bước 1: Thiết lập môi trường Python
-1. Mở Terminal / PowerShell tại thư mục dự án.
-2. Tạo môi trường ảo (khuyên dùng để tránh xung đột thư viện):
-   ```bash
-   python -m venv venv
-   ```
-3. Kích hoạt môi trường ảo:
-   - Trên Windows: `.\venv\Scripts\activate`
-   - Trên macOS/Linux: `source venv/bin/activate`
-4. Cài đặt các thư viện phụ thuộc:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Bước 2: Chuẩn bị mô hình Ollama
-Để sử dụng tính năng tóm tắt chủ đề bằng GenAI, bạn cần tải mô hình ngôn ngữ lớn (LLM) hỗ trợ tiếng Việt. Mở Terminal (không cần ở trong môi trường ảo) và chạy lệnh:
 ```bash
-ollama pull qwen2
+python -m venv venv
+source venv/bin/activate          # Windows: .\venv\Scripts\activate
+pip install -r requirements.txt   # hoặc requirements-dev.txt nếu muốn chạy kiểm thử
+cp .env.example .env              # rồi điền YOUTUBE_API_KEY=... (bỏ qua nếu không phân tích video trực tiếp)
 ```
-*(Lưu ý: Quá trình này sẽ tải về khoảng ~4.5GB dữ liệu mô hình)*
 
-### Bước 3: Cấu hình API Key
-1. Tại thư mục gốc của dự án, hãy tạo một file có tên là `.env`.
-2. Đăng nhập Google Cloud Console và lấy mã khóa của **YouTube Data API v3**.
-3. Điền cấu hình sau vào file `.env`:
-   ```env
-   YOUTUBE_API_KEY=điền_api_key_của_bạn_vào_đây
-   ```
+Các phiên bản thư viện đã kiểm thử được ghi ở đầu `requirements.txt`. Tệp `.env` nằm trong `.gitignore`.
 
----
+## Chạy
 
-## 🎮 Hướng dẫn Sử dụng
+### Ứng dụng web
 
-### 1. Huấn luyện Mô hình Cảm xúc (Chỉ làm 1 lần đầu tiên)
-Trước khi chạy Web, bạn cần tự tay Train mô hình Sentiment Analysis để dự án sinh ra các file AI (`.pkl`):
-```bash
-python src/train_sentiment.py
-```
-*Lưu ý: Quá trình này sẽ đọc file `data/dataset_chuan.csv` (20.000 mẫu) và tự động huấn luyện, đánh giá mô hình phân loại Đa lớp (Tích cực/Trung tính/Tiêu cực).*
-
-### 2. Khởi chạy Giao diện Web
-Để khởi chạy trang Web phân tích, hãy chắc chắn bạn đã kích hoạt môi trường ảo (chữ `(venv)` xuất hiện ở đầu dòng Terminal) và chạy lệnh:
 ```bash
 streamlit run src/app.py
 ```
 
-Trình duyệt sẽ tự động mở lên địa chỉ: **http://localhost:8501**. 
-1. Dán Link một video YouTube bất kỳ vào thanh cài đặt bên trái.
-2. Điều chỉnh giới hạn bình luận (Nên để 1000 - 2000 để tốc độ tải nhanh).
-3. Đánh dấu tích vào ô **"Bật AI tóm tắt chủ đề (Ollama)"** nếu muốn xem kết quả được dịch thành câu hoàn chỉnh.
-4. Bấm **Bắt đầu Phân tích**, chờ vài phút để mô hình AI xử lý và tận hưởng kết quả!
+Trình duyệt mở `http://localhost:8501`. Ở thanh bên, chọn một trong ba nguồn dữ liệu rồi bấm "Bắt đầu phân tích":
 
----
+| Nguồn | Cần API key | Ghi chú |
+|---|---|---|
+| Link YouTube | có | Hỗ trợ `youtube.com/watch?v=`, `youtu.be/`, `/shorts/`, `/live/` hoặc ID 11 ký tự. Có thể lấy cả bình luận trả lời và chọn thứ tự (phổ biến hoặc mới nhất). |
+| Tệp CSV | không | Tệp UTF-8 có một cột chứa nội dung bình luận; chọn cột trong thanh bên. |
+| Dữ liệu mẫu | không | Đọc N dòng đầu của `data/dataset_chuan.csv`. Tệp này là tập huấn luyện của mô hình cảm xúc, nên tỉ lệ cảm xúc hiển thị lạc quan hơn thực tế; chỉ phần chủ đề là minh họa công bằng. |
 
-## 📁 Cấu trúc Thư mục
-- `src/app.py`: Mã nguồn chính của giao diện Streamlit Web App.
-- `src/crawler.py`: Module kết nối API YouTube và cào dữ liệu.
-- `src/preprocess.py`: Module làm sạch và tách từ (Tokenization).
-- `src/topic_model.py`: Chứa mã nguồn dự phòng chạy BERTopic trên terminal.
-- `src/train_sentiment.py`: Mã nguồn tự huấn luyện mô hình Phân tích Cảm xúc bằng Scikit-Learn.
-- `data/`: Nơi lưu trữ các file dữ liệu `.csv` sinh ra trong quá trình chạy và tập dữ liệu huấn luyện.
-- `models/`: Chứa các file mô hình Machine Learning (`.pkl`) đã được huấn luyện.
-- `results/`: Nơi lưu trữ các file biểu đồ tĩnh (`.html`, `.png`).
-- `.streamlit/config.toml`: File cấu hình giao diện Dark Mode cho web.
-- `requirements.txt`: Danh sách các thư viện cần cài đặt.
-- `BAO_CAO.md`: Tài liệu giải thích lý thuyết các thuật toán.
+Phần "Cài đặt nâng cao (BERTopic)" cho phép chỉnh kích thước cụm tối thiểu (mặc định 15), `min_samples` (mặc định 1), cách chọn cụm `eom` hoặc `leaf`, số chủ đề và danh sách từ dừng. Với tham số mặc định của BERTopic, 1.496 bình luận mẫu bị gom 91% vào một chủ đề; xem `BAO_CAO.md` mục 5.2 trước khi đổi.
+
+Kết quả được giữ trong phiên làm việc: đổi tab, lọc bảng hay tải CSV không chạy lại bước thu thập và nhúng câu. Nút "Xóa kết quả" xóa phiên hiện tại.
+
+### Huấn luyện lại mô hình cảm xúc (tùy chọn)
+
+Mô hình và số liệu đã được commit trong `models/` và `results/`, nên bước này không bắt buộc. Chạy lại để tái lập toàn bộ `results/` (khoảng 12 giây trên máy thử nghiệm, không cần mạng):
+
+```bash
+python src/train_sentiment.py
+```
+
+Script so sánh bốn mô hình nền bằng cross-validation trên tập huấn luyện, dò tham số C cho LinearSVC, đánh giá một lần trên tập kiểm tra, kiểm tra độ ổn định theo năm hạt giống, rồi ghi `models/sentiment_model.pkl`, `models/tfidf_vectorizer.pkl`, `models/model_card.json` và các tệp trong `results/`. Tùy chọn: `--quick` bỏ qua so sánh mô hình và dò C, `--seed`, `--data`, `--out-models`, `--out-results`, `--n-jobs`.
+
+### Gom cụm chủ đề từ dòng lệnh
+
+```bash
+python src/topic_model.py --input data/dataset_chuan.csv --text-col text --limit 1500 --min-topic-size 15 --min-samples 1 --out-dir results
+```
+
+Dùng chung module `src/topic_pipeline.py` với ứng dụng web nên kết quả hai bên khớp nhau. Ghi `comments_with_topics.csv`, `topics_summary.csv` và ba biểu đồ HTML vào `--out-dir` (các tệp này nằm trong `.gitignore`). Mặc định `--input` là `data/comments.csv`, tức tệp thô do `src/crawler.py` tạo ra. `python src/topic_model.py --help` liệt kê đủ tham số.
+
+### Kiểm thử
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+146 kiểm thử, không cần mạng, khoảng 16 giây trên máy thử nghiệm. Các kiểm thử phủ tiền xử lý, bộ thu thập (giả lập API), pipeline chủ đề (kể cả kiểm tra `BERTopic` được dựng với `language` là `None`), script huấn luyện, lớp gọi Ollama và khởi động ứng dụng Streamlit.
+
+### Tóm tắt chủ đề bằng Ollama (tùy chọn)
+
+```bash
+ollama pull qwen2
+ollama serve   # nếu Ollama chưa chạy nền
+```
+
+Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và bật "Bật tóm tắt chủ đề". Có thể đổi tên mô hình và địa chỉ (mặc định `http://localhost:11434/v1`). Ứng dụng kiểm tra kết nối trước khi gọi; nếu Ollama không chạy, bước tóm tắt bị bỏ qua và một cảnh báo hiện ra, các bước khác vẫn hoàn tất.
+
+## Cấu trúc dự án
+
+| Đường dẫn | Nội dung |
+|---|---|
+| `src/app.py` | Ứng dụng Streamlit: thanh bên, sáu bước xử lý, năm tab kết quả. |
+| `src/crawler.py` | Thu thập bình luận qua YouTube Data API v3, tiết kiệm quota, lỗi có phân loại (`CrawlError`). |
+| `src/preprocess.py` | Làm sạch, chuẩn hóa teencode, tách từ bằng pyvi (tách từ trước, hạ chữ thường sau), đọc danh sách từ dừng. |
+| `src/topic_pipeline.py` | Toàn bộ logic BERTopic (UMAP, HDBSCAN, c-TF-IDF), bảng kết quả và biểu đồ; dùng chung cho app và CLI. |
+| `src/topic_model.py` | Công cụ dòng lệnh chạy pipeline chủ đề trên một tệp CSV. |
+| `src/train_sentiment.py` | Huấn luyện và đánh giá mô hình cảm xúc, ghi số liệu và thẻ mô hình. |
+| `src/llm_summary.py` | Lớp `OllamaSummarizer`: gửi từ khóa và bình luận tiêu biểu tới Ollama, nhận một câu tóm tắt. |
+| `src/resources/vietnamese_stopwords.txt` | 236 từ dừng tiếng Việt ở dạng đã tách từ, chỉ dùng cho từ khóa chủ đề. |
+| `data/dataset_chuan.csv` | 20.000 bình luận có nhãn dùng huấn luyện; nguồn gốc mô tả trong `data/README.md`. |
+| `data/README.md` | Nguồn gốc dữ liệu, định nghĩa nhãn, các tệp CLI ghi vào đây. |
+| `models/` | `sentiment_model.pkl`, `tfidf_vectorizer.pkl`, `model_card.json` (tạo bằng scikit-learn 1.9.1). |
+| `results/` | `metrics.json`, `model_comparison.csv`, `classification_report.txt`, `top_features.txt`, hai ảnh ma trận nhầm lẫn. |
+| `tests/` | Kiểm thử pytest cho từng module trong `src/`. |
+| `docs/screenshots/` | Ảnh chụp ứng dụng trên dữ liệu mẫu, dùng trong `BAO_CAO.md`. |
+| `.streamlit/config.toml` | Giao diện tối và cấu hình máy chủ Streamlit. |
+| `requirements.txt`, `requirements-dev.txt` | Thư viện chạy ứng dụng; bản dev thêm pytest. |
+| `BAO_CAO.md` | Báo cáo đồ án. |
+
+## Xử lý sự cố
+
+| Hiện tượng | Nguyên nhân và cách xử lý |
+|---|---|
+| Thông báo hết quota (`quotaExceeded`) | YouTube Data API v3 cấp 10.000 đơn vị mỗi ngày; mỗi trang bình luận tốn 1 đơn vị. Chờ quota được cấp lại vào ngày hôm sau, giảm số bình luận tối đa, hoặc dùng nguồn tệp CSV. |
+| Video đã tắt bình luận (`commentsDisabled`) | Không thu thập được; chọn video khác. |
+| Khóa API không hợp lệ | Kiểm tra `.env` có dòng `YOUTUBE_API_KEY=...`, khóa đã bật YouTube Data API v3 trong Google Cloud Console, và khởi động lại Streamlit sau khi sửa `.env`. |
+| Cảnh báo "Ollama chưa chạy hoặc không truy cập được" | Chạy `ollama serve`, kiểm tra `ollama list` có `qwen2`, và địa chỉ trong thanh bên đúng là `http://localhost:11434/v1`. Không ảnh hưởng các bước khác. |
+| Log in cảnh báo về `use_container_width` bị deprecated | Thông báo của Streamlit phiên bản mới, không ảnh hưởng kết quả. |
+| App không tự nạp lại khi sửa mã | `fileWatcherType = "none"` trong `.streamlit/config.toml`: bộ theo dõi tệp quét mọi module đã nạp, chạm vào các module ảnh của `transformers` và in traceback `No module named 'torchvision'` dù app không dùng tới. Đổi thành `"auto"` khi cần phát triển. |
+| Không nạp được `models/*.pkl` | Pickle được tạo bằng scikit-learn 1.9.1; nếu phiên bản cài khác nhiều, chạy `python src/train_sentiment.py` để tạo lại. |
+| Lần chạy đầu rất lâu | Đang tải `keepitreal/vietnamese-sbert` từ Hugging Face Hub; các lần sau dùng cache. |
+
+## Giới hạn đã biết
+
+- YouTube ngừng phân trang ở khoảng 1.000 chuỗi bình luận gốc mỗi video, nên số bình luận thu được có trần dù thanh trượt cho tới 5.000.
+- Quota 10.000 đơn vị mỗi ngày giới hạn số video phân tích được trong ngày.
+- Emoji bị xóa ở bước làm sạch; bình luận không dấu không được khôi phục dấu.
+- Mô hình cảm xúc huấn luyện trên bình luận của một chương trình duy nhất; độ chính xác trên video thuộc chủ đề khác chưa được đo. Chi tiết trong `BAO_CAO.md` mục 9.
