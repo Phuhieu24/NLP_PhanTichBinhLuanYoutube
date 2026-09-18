@@ -1,0 +1,120 @@
+PHÂN TÍCH LỖI THEO HIỆN TƯỢNG NGÔN NGỮ
+150 bình luận bị dự đoán sai trên tập kiểm tra
+========================================================================================
+Nguồn mẫu: results/error_sample_150.csv, lấy phân tầng theo nhãn thật từ 935 dòng sai
+(55 tiêu cực, 50 trung tính, 45 tích cực). Mỗi dòng được gán đúng một hiện tượng chính.
+Cách làm: một người đọc, một lượt. Kết quả là nhận định định tính, không phải phép đo.
+Nhãn từng dòng và ghi chú: results/error_analysis_150.csv.
+
+1. SỐ LƯỢNG THEO HIỆN TƯỢNG
+----------------------------------------------------------------------------------------
+Hiện tượng                   n       %   Tiêu cực  Trung tính   Tích cực
+ngu_canh_chuong_trinh       36   24.0%         15          11         10
+thuong_cam_tiec_nuoi        31   20.7%         11           9         11
+vua_khen_vua_che            23   15.3%          7          12          4
+phu_dinh                    19   12.7%          6           6          7
+teencode_ngoai_tu_dien      16   10.7%          5           4          7
+ten_rieng_va_emoji          11    7.3%          4           4          3
+nhan_goc_dang_ngo            7    4.7%          3           2          2
+cham_biem                    4    2.7%          3           1          0
+khong_dau                    2    1.3%          0           1          1
+khac                         1    0.7%          1           0          0
+Tổng                       150  100.0%         55          50         45
+
+2. ĐỊNH NGHĨA VÀ VÍ DỤ
+----------------------------------------------------------------------------------------
+
+[ngu_canh_chuong_trinh]  n = 36
+  Cần ngữ cảnh chương trình: thái độ nằm ở thứ hạng, luật chơi, tên bài, thành ngữ hoặc lối nói quá, không nằm ở từ vựng cảm xúc.
+  - "Bai ngân nga rối quá ❤"
+    thật = Tiêu cực -> đoán = Tích cực; tên bài lấn át từ chê "rối quá"
+  - "ATUS nói đúng, ảnh chỉ đứng hát"
+    thật = Tiêu cực -> đoán = Tích cực; "chỉ đứng hát" là chê, phải hiểu bối cảnh trình diễn
+
+[thuong_cam_tiec_nuoi]  n = 31
+  Thương cảm và tiếc nuối: từ ngữ buồn (tội, tiếc, thương, khóc) nhưng thái độ là đồng cảm hoặc ủng hộ, không phải chê.
+  - "Trả Nicky lại đi 😢"
+    thật = Tích cực -> đoán = Tiêu cực; tiếc vì thí sinh rời chương trình
+  - "dương domic tội quá"
+    thật = Tiêu cực -> đoán = Trung tính; "tội quá" là thương cảm với thí sinh
+
+[vua_khen_vua_che]  n = 23
+  Vừa khen vừa chê: hai cực cảm xúc trong cùng một bình luận, thường hướng tới hai đối tượng khác nhau.
+  - "Thích team khang nhưng k thich ht2"
+    thật = Tiêu cực -> đoán = Tích cực; thích đội này, không thích đội kia
+  - "Team erit đẹp mà giọng hát vòng 2 chưa hút"
+    thật = Trung tính -> đoán = Tích cực; khen ngoại hình, chê phần hát
+
+[phu_dinh]  n = 19
+  Phủ định: nghĩa bị đảo bởi không, chưa, đừng, đâu phải; mô hình đọc theo từ đứng cạnh.
+  - "Cảm giác chưa sung ta"
+    thật = Tiêu cực -> đoán = Trung tính; "chưa sung" là chê nhẹ qua phủ định
+  - "Vũ Thịnh nhảy đẹp vậy mà k vào"
+    thật = Tích cực -> đoán = Tiêu cực; "k vào" là tiếc cho thí sinh nhảy đẹp
+
+[teencode_ngoai_tu_dien]  n = 16
+  Teencode và tiếng lóng ngoài từ điển: viết tắt, biến thể chính tả, tiếng lóng của người hâm mộ mang toàn bộ sắc thái.
+  - "Nhớ nề gips vá😢😢😢"
+    thật = Trung tính -> đoán = Tích cực; tên thí sinh bị viết sai lệch hoàn toàn
+  - "Pháp kiều bêđê luôn h"
+    thật = Tiêu cực -> đoán = Tích cực; tiếng lóng miệt thị ngoài từ điển teencode
+
+[ten_rieng_va_emoji]  n = 11
+  Tên riêng lấn át hoặc mất emoji: sau khi làm sạch chỉ còn tên thí sinh, tên bài và câu mô tả; tín hiệu cảm xúc nằm ở emoji đã bị xóa.
+  - "nhóm ồn ào 😅"
+    thật = Trung tính -> đoán = Tiêu cực; ba từ, cảm xúc nằm ở emoji đã bị xóa
+  - "Chờ đội hth❤❤❤❤"
+    thật = Tích cực -> đoán = Tiêu cực; chỉ còn "chờ đội hth" sau khi xóa bốn trái tim
+
+[nhan_goc_dang_ngo]  n = 7
+  Nhãn gốc đáng ngờ: người đọc không đồng ý với nhãn của tập dữ liệu.
+  - "Giống Hàn quốc quá ❤❤❤❤❤❤❤"
+    thật = Tích cực -> đoán = Tiêu cực; so sánh với Hàn Quốc kèm trái tim là khen
+  - "Trời ơi, ông Hùng Huỳnh kinh khủng vậy"
+    thật = Tiêu cực -> đoán = Tích cực; "kinh khủng" trong khẩu ngữ fan thường là khen
+
+[cham_biem]  n = 4
+  Châm biếm: nói ngược hoặc ví von mỉa mai.
+  - "Nhìn ban đầu đã biết thái tử Vieon Quán Quân ời,cũng ko hi vọng gì nhìu"
+    thật = Tiêu cực -> đoán = Tích cực; "thái tử Vieon" là mỉa mai về kết quả
+  - "Khúc cuối mấy ổng mặc vest này nọ giống hội nghị bán hàng đa cấp dã man😂😂"
+    thật = Tiêu cực -> đoán = Trung tính; ví von mỉa mai với hội nghị bán hàng đa cấp
+
+[khong_dau]  n = 2
+  Không dấu: bình luận viết phần lớn hoặc toàn bộ không dấu.
+  - "Tội a tú voi ve coi lai chac hoi han"
+    thật = Tích cực -> đoán = Tiêu cực; phần lớn câu viết không dấu
+  - "Giai thuong cua chuong trinh qua nho be, chi la thuong tuong trung. Con k bang so tien cac thi sinh dau tu cho 1 bai hat. Nhung cai duoc cua CT nay..."
+    thật = Trung tính -> đoán = Tích cực; toàn bộ bình luận viết không dấu
+
+[khac]  n = 1
+  Khác: không thuộc các nhóm trên.
+  - "This is garbage."
+    thật = Tiêu cực -> đoán = Trung tính; bình luận tiếng Anh, ngoài phạm vi tiền xử lý tiếng Việt
+
+3. ĐỌC KẾT QUẢ
+----------------------------------------------------------------------------------------
+Hai nhóm lớn nhất là cần ngữ cảnh chương trình (36 dòng, 24.0%) và thương cảm
+tiếc nuối (31 dòng, 20.7%). Cả hai đều là giới hạn của cách biểu diễn túi từ: TF-IDF
+thấy từ nhưng không thấy đối tượng của thái độ. "Tội Vũ Thịnh", "tiếc cho team" mang
+từ buồn nhưng là đồng cảm với thí sinh, không phải chê.
+
+Với lớp trung tính, ba nhóm dẫn đầu là vua_khen_vua_che (12 dòng), ngu_canh_chuong_trinh
+(11 dòng) và thuong_cam_tiec_nuoi (9 dòng). Điều này khớp với F1 0,5354 của lớp
+trung tính: ranh giới giữa khen nhẹ, chê nhẹ và không khen không chê mờ ngay trong nhãn.
+
+Phủ định còn 19 dòng (12.7%) dù đặc trưng đã có bigram. Bigram bắt được
+"không hay", "không thích" nhưng không bắt được phủ định đứng xa từ bị phủ định, ví dụ
+"k thấy" ở cuối câu.
+
+Teencode ngoài từ điển (16 dòng) và tên riêng hoặc emoji (11 dòng) cùng chỉ về
+ba hướng sửa cụ thể: giữ emoji làm token, mở rộng từ điển teencode từ chính dữ liệu, và
+thêm đặc trưng n-gram ký tự cho phần bình luận không dấu.
+
+Nhãn gốc đáng ngờ 7 dòng (4.7%), đúng như tác giả bộ dữ liệu lưu ý về nhãn
+silver. Tỉ lệ này đo trên mẫu lỗi, không phải trên toàn bộ tập kiểm tra, nên không suy ra
+được tỉ lệ nhãn sai của cả bộ dữ liệu.
+
+Vừa khen vừa chê 23 dòng (15.3%) là nhóm không sửa được bằng tiền xử lý: một
+nhãn cho cả câu buộc phải chọn một bên. Đây chính là lý do bài toán phân tích cảm xúc theo
+khía cạnh tồn tại, và là hướng mở rộng tự nhiên của đồ án.
