@@ -6,7 +6,7 @@ tên riêng sẽ không được ghép lại: "Đông Hùng hát" -> "Đông_Hù
 còn "đông hùng hát" -> "đông hùng hát" (sai). Vì vậy `clean_text` giữ nguyên
 chữ hoa, và `tokenize_vietnamese` mới hạ chữ thường sau khi tách từ.
 
-Hàm dùng chung cho cả huấn luyện lẫn ứng dụng: `preprocess_text`.
+Hàm mà cả huấn luyện lẫn ứng dụng đều gọi: `preprocess_text`.
 """
 
 import functools

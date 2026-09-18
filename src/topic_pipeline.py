@@ -1,7 +1,7 @@
 """Pipeline gom cụm chủ đề cho bình luận tiếng Việt.
 
 Module này gom toàn bộ logic BERTopic vào một chỗ để giao diện Streamlit
-(`app.py`) và công cụ dòng lệnh (`topic_model.py`) dùng chung một đường đi,
+(`app.py`) và công cụ dòng lệnh (`topic_model.py`) đi cùng một đường,
 không còn hai bản sao lệch nhau.
 
 Quy ước quan trọng: các thư viện nặng (torch, sentence-transformers, bertopic,
@@ -60,7 +60,7 @@ MAX_LABEL_CHARS = 28
 
 # Hợp đồng cột của `crawler.get_video_comments`. Mọi nguồn dữ liệu khác (tệp CSV
 # người dùng tải lên, tệp mẫu trong `data/`) phải đưa về đúng thứ tự cột này thì
-# phần còn lại của pipeline mới dùng chung được một đường đi.
+# phần còn lại của pipeline mới đi được cùng một đường.
 COMMENT_COLUMNS = [
     "comment_id",
     "parent_id",
@@ -507,7 +507,7 @@ def per_class_table(per_class: dict) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------
-# Biểu đồ dùng chung cho giao diện (gom ở đây để app.py chỉ lo phần bố cục)
+# Biểu đồ cho giao diện (gom ở đây để app.py chỉ lo phần bố cục)
 # --------------------------------------------------------------------------
 
 
