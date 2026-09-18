@@ -9,9 +9,14 @@ size: 16:9
 
 Đồ án môn Xử lý ngôn ngữ tự nhiên
 
-Nhóm: [thành viên]
-
-[ngày báo cáo]
+Nhóm:
+- Lê Phú Hiếu | 26410038 | LT.K2026.1.TTNT	 
+- Nguyễn Thanh Duy | 26410030 | LT.K2026.1.TTNT	 
+- Nguyễn Thanh Phong | 26410090 | LT.K2026.1.TTNT	 
+- Nguyễn Thị Mai Thi | 26410117 | LT.K2026.1.TTNT	 
+- Hồ Viết Trịnh | 26410140 | LT.K2026.1.TTNT	 
+- Nguyễn Ngọc Bích | 25730012 | CN1.K2025.1.TTNT	 
+- Nguyễn Anh Tài | 25730063 | CN1.K2025.1.TTNT
 
 <!-- Ghi chú: Thưa thầy và các bạn, nhóm em xin trình bày đồ án phân tích bình luận YouTube tiếng Việt. Hệ thống nhận bình luận dưới một video và trả về hai thứ: người xem đang bàn chủ đề gì, và họ khen hay chê. Bài nói khoảng 10 phút theo đúng năm bước của môn, sau đó nhóm em chạy ứng dụng trực tiếp 3 phút. Nếu chỉ nhớ một câu, xin thầy nhớ câu này: mọi con số trong bài đều đọc lại được từ thư mục results của mã nguồn. -->
 
@@ -41,6 +46,8 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ## Dữ liệu: 20,000 bình luận có nhãn về một chương trình
 
+<style scoped>table { font-size: 0.8em; } ul { font-size: 0.86em; }</style>
+
 | Chỉ số | Giá trị |
 |---|---|
 | Số dòng | 20,000 |
@@ -50,10 +57,13 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 | Dòng trùng nội dung | 0 |
 | Dòng rỗng sau tiền xử lý | 3 (còn 19,997) |
 
-- Toàn bộ bình luận nói về một chương trình duy nhất, nên kết quả chỉ có giá trị trong miền đó
-- Nguồn video và cách gán nhãn đang được nhóm xác nhận lại trước khi nộp báo cáo
+- Nguồn: gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT); bình luận về Anh Trai Say Hi mùa 1, tập 1 đến 14
+- Nhãn silver: mô hình ngôn ngữ lớn gán theo đối tượng và khía cạnh rồi gộp; chưa kiểm tay, trung tính nhiễu nhất
+- Tác giả lấy mẫu lại từ dữ liệu gốc khoảng 88% tích cực: giữ hết trung tính, lấy 7,000 tiêu cực, bù tích cực; tỉ lệ không phải tỉ lệ thật trên YouTube
+- Một chương trình duy nhất, nên kết quả chỉ có giá trị trong miền đó
+- Điều kiện của tác giả: chỉ dùng cho học tập, không công bố lại
 
-<!-- Ghi chú: Tập dữ liệu có 20,000 bình luận, hai cột: văn bản và nhãn. Ba lớp lệch nhau: tích cực gần một nửa, trung tính chỉ 17%. Con số 17% này sẽ quay lại ở phần kết quả, vì trung tính là lớp yếu nhất. Hai điều nhóm em nói thẳng. Thứ nhất, mọi bình luận đều về một chương trình, nên mô hình học cả tên thí sinh làm tín hiệu. Thứ hai, số 7,000 tròn cho thấy dữ liệu đã qua một bước lấy mẫu; nguồn video và quy trình gán nhãn nhóm em đang xác nhận lại và sẽ ghi đủ vào mục 2.1 của báo cáo. Nhóm em không muốn khẳng định điều chưa kiểm được. -->
+<!-- Ghi chú: Tập dữ liệu có 20,000 bình luận, hai cột: văn bản và nhãn. Đây là hai cột text và label của gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA của Phạm Xuân Vĩnh Hà ở UIT; nhóm em chỉ dùng cho học tập theo đúng điều kiện của tác giả. Ba lớp lệch nhau: tích cực gần một nửa, trung tính chỉ 17%. Con số 17% này sẽ quay lại ở phần kết quả, vì trung tính là lớp yếu nhất. Ba điều nhóm em nói thẳng. Thứ nhất, mọi bình luận đều về một chương trình, nên mô hình học cả tên thí sinh làm tín hiệu. Thứ hai, tỉ lệ ba lớp là do tác giả lấy mẫu lại: dữ liệu gốc khoảng 88% tích cực, tác giả giữ hết trung tính, lấy đúng 7,000 tiêu cực rồi bù tích cực cho đủ 20,000; vì vậy số 7,000 tròn, và tỉ lệ này không phải tỉ lệ thật trên YouTube. Thứ ba, nhãn là nhãn silver do mô hình ngôn ngữ lớn gán theo từng đối tượng và khía cạnh rồi gộp lại, chưa có người kiểm từng dòng; chính tác giả ghi trung tính là lớp nhiễu nhất. Phần đọc tay 150 bình luận ở cuối bài cũng là để kiểm chất lượng nhãn. -->
 
 ---
 
@@ -187,7 +197,7 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 - Lớp trung tính dựa vào `nhưng` (+2.95), `tiếc`, `hay mà`, `hay nhưng`: đúng định nghĩa lớp, nhưng cho thấy ranh giới mờ ngay trong nhãn
 - Lớp tích cực dựa vào `đỉnh` (+3.36), `mê` (+3.20), và tên riêng `atus`, `negav`: đúng trong miền, không chuyển được sang video khác
 - Việc nhóm sẽ hoàn thành: đọc tay 150 bình luận sai trên tập kiểm tra, xếp theo hiện tượng ngôn ngữ (phủ định, teencode ngoài từ điển, không dấu, châm biếm, vừa khen vừa chê, chỉ còn emoji hoặc tên riêng, nhãn gốc đáng ngờ)
-- Hạn chế: emoji bị xóa, bình luận không dấu tự tạo cụm riêng, một miền dữ liệu, tóm tắt LLM chưa đánh giá, nguồn nhãn chưa xác nhận
+- Hạn chế: emoji bị xóa, bình luận không dấu tự tạo cụm riêng, một miền dữ liệu, tóm tắt LLM chưa đánh giá, nhãn silver do LLM gán, chưa kiểm tay
 
 <!-- Ghi chú: Nhóm em đọc trọng số của LinearSVC để hiểu mô hình dựa vào gì. Phần tốt: chữ "không" và các bigram phủ định là đặc trưng mạnh nhất của lớp tiêu cực, đúng như thiết kế bigram. Phần đáng lo: "quảng cáo" và "khán giả" cũng là đặc trưng tiêu cực, tức là mô hình học được rằng ai nhắc quảng cáo thì thường chê. Và tên hai thí sinh là đặc trưng tích cực. Tín hiệu đó đúng trong chương trình này, nhưng đem sang video khác sẽ sai. Phần phân tích định tính nhóm em chưa xong: sẽ đọc tay 150 bình luận sai và đếm theo từng hiện tượng, không ước lượng. Hạn chế lớn nhất theo nhóm em là emoji: có trong 34.5% bình luận, mang cảm xúc, mà bước làm sạch xóa mất. -->
 
@@ -223,6 +233,7 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 5. Nguyen, D. Q., Nguyen, A. T. (2020). PhoBERT: Pre-trained language models for Vietnamese. Findings of EMNLP 2020. Kiểm tra lại trước khi nộp.
 6. Thẻ mô hình `keepitreal/vietnamese-sbert`, Hugging Face Hub. Kiểm tra lại trước khi nộp.
 7. pyvi: Python Vietnamese toolkit. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. JMLR 12. Tài liệu Streamlit. Tài liệu YouTube Data API v3. Kiểm tra lại phiên bản trước khi nộp.
+8. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói ATSH-NLP-20k; README của tác giả tại `data/README_ATSH_NLP_20k_goc.md`.
 
 <!-- Ghi chú: Danh sách tài liệu tham khảo, trùng với mục 10.2 của báo cáo. Các mục ghi "kiểm tra lại trước khi nộp" nhóm em sẽ đối chiếu bản gốc về năm và nơi công bố trước ngày nộp. -->
 

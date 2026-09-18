@@ -18,7 +18,7 @@ Tháng 9 năm 2026
 
 Hệ thống đi qua năm bước: dữ liệu, tiền xử lý, biểu diễn, mô hình, đánh giá. Tiền xử lý chuẩn hóa Unicode, teencode và chữ lặp, rồi tách từ bằng pyvi trước khi hạ chữ thường. Hai bài toán con dùng hai cách biểu diễn: vector câu 768 chiều từ mô hình Sentence-BERT tiếng Việt cho gom cụm chủ đề bằng BERTopic, và TF-IDF unigram cộng bigram cho phân loại cảm xúc bằng LinearSVC. Mọi bước chọn mô hình chạy bằng cross-validation 5-fold trên 15.997 dòng huấn luyện; 4.000 dòng kiểm tra được đánh giá đúng một lần. Toàn bộ pipeline đóng gói thành ứng dụng Streamlit kèm 146 kiểm thử tự động.
 
-Ba kết quả chính. Một, mô hình cảm xúc đạt macro-F1 0,7161 trên tập kiểm tra và 0,7200 ± 0,0037 trên năm hạt giống; lớp trung tính là giới hạn với F1 0,5354. Hai, LinearSVC với C = 0,3 và LogisticRegression cách nhau 0,0010 macro-F1, nhỏ hơn độ lệch chuẩn giữa các fold; phần cải thiện đo được đến từ việc dò C (0,7054 lên 0,7180), còn thay đổi tiền xử lý là trung tính đối với bộ phân loại. Ba, `min_samples` của HDBSCAN quyết định kết quả chủ đề: tham số mặc định của BERTopic đẩy 49,2% bình luận vào nhiễu, còn cấu hình kích thước cụm tối thiểu 15 và `min_samples` 1 cho 26 chủ đề với 33,3% nhiễu trên 1.493 bình luận. Điểm còn mở duy nhất là nguồn và cách gán nhãn của dữ liệu, nhóm đang xác nhận (mục 2.1).
+Ba kết quả chính. Một, mô hình cảm xúc đạt macro-F1 0,7161 trên tập kiểm tra và 0,7200 ± 0,0037 trên năm hạt giống; lớp trung tính là giới hạn với F1 0,5354. Hai, LinearSVC với C = 0,3 và LogisticRegression cách nhau 0,0010 macro-F1, nhỏ hơn độ lệch chuẩn giữa các fold; phần cải thiện đo được đến từ việc dò C (0,7054 lên 0,7180), còn thay đổi tiền xử lý là trung tính đối với bộ phân loại. Ba, `min_samples` của HDBSCAN quyết định kết quả chủ đề: tham số mặc định của BERTopic đẩy 49,2% bình luận vào nhiễu, còn cấu hình kích thước cụm tối thiểu 15 và `min_samples` 1 cho 26 chủ đề với 33,3% nhiễu trên 1.493 bình luận. Hạn chế cần đọc kèm mọi con số: nhãn là nhãn silver do mô hình ngôn ngữ lớn gán tự động, chưa được người kiểm tra từng dòng, và theo chính tác giả dữ liệu thì lớp trung tính là lớp nhiễu nhất (mục 2.1). Phần đọc tay 150 bình luận ở mục 7 đồng thời là bước kiểm tra chất lượng nhãn mà tác giả khuyến nghị.
 
 \newpage
 
@@ -38,18 +38,22 @@ Bình luận YouTube tiếng Việt khó xử lý hơn văn bản báo chí vì 
 
 ### 2.1. Nguồn gốc và cách gán nhãn
 
-Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `text` và `label`. Phần mô tả nguồn gốc dưới đây chưa thể suy ra từ mã nguồn hay từ chính tệp dữ liệu, nhóm phải điền tay trước khi nộp.
+Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `text` và `label`. Tệp này là hai cột `text` và `label` của `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin về nguồn gốc dưới đây lấy từ README của tác giả gói dữ liệu, được sao chép nguyên văn tại `data/README_ATSH_NLP_20k_goc.md`.
 
-> **TODO nhóm điền trước khi nộp**
->
-> - Video hoặc kênh nguồn: (danh sách link video, số video, kênh)
-> - Thời điểm thu thập: (khoảng ngày)
-> - Cách gán nhãn: (gán tay, dùng LLM, hay heuristic; nếu có nhiều bước thì mô tả từng bước)
-> - Người gán nhãn: (ai, bao nhiêu người, mỗi bình luận có mấy người gán)
-> - Hướng dẫn gán nhãn: (tài liệu quy ước ba lớp mà người gán đã dùng)
-> - Độ đồng thuận giữa người gán (nếu có): (Cohen's kappa hoặc tỉ lệ trùng khớp trên tập kiểm tra chéo)
-> - Giấy phép và điều khoản sử dụng dữ liệu: (điều khoản YouTube Data API, phạm vi sử dụng cho mục đích học tập)
-> - Có bước lấy mẫu hay cân bằng lớp không: (xem ghi chú ở mục 2.2)
+"Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập."
+
+| Mục | Nội dung theo README của tác giả |
+|---|---|
+| Nguồn | Trích từ dự án nghiên cứu ATSH-ABSA của Phạm Xuân Vĩnh Hà (UIT, ĐHQG TP.HCM). Lấy từ bản gán nhãn tự động (silver), không lấy từ bản gán nhãn thủ công (gold); không có bình luận nào trùng với bộ gold. |
+| Nội dung | Bình luận YouTube tiếng Việt về chương trình Anh Trai Say Hi, mùa 1, tập 1 đến 14. |
+| Cách gán nhãn | Nhãn do mô hình ngôn ngữ lớn gán tự động theo một bộ hướng dẫn gán nhãn, theo từng đối tượng (chương trình hoặc nghệ sĩ) và từng khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng), rồi gộp thành một nhãn tổng thể (quy tắc gộp ở mục 2.3). Chưa được người kiểm tra từng dòng. Tác giả ghi nhãn trung tính là nhãn nhiễu nhất và khuyên kiểm tra thủ công 100 đến 200 dòng của tập test rồi ghi tỉ lệ nhãn đúng vào báo cáo. |
+| Lấy mẫu lại | Dữ liệu gốc khoảng 88% tích cực. Bộ này lấy toàn bộ bình luận trung tính hợp lệ, 7.000 bình luận tiêu cực, phần còn lại lấy từ bình luận tích cực; chọn mẫu với seed 42. Tỉ lệ nhãn vì vậy không phản ánh tỉ lệ thật trên YouTube. |
+| Bộ lọc | Không phải spam, có liên quan tới chương trình, có thể hiện cảm xúc, dài 5 đến 500 ký tự; đã loại bình luận trùng nhau và bình luận có chứa đường link. |
+| Dữ liệu cá nhân | Không có tên tài khoản hay thông tin của người bình luận. Tệp của nhóm chỉ giữ hai cột `text` và `label`. |
+| Phần còn lại của gói gốc | Cột `tap` (TAP1 đến TAP14), `doi_tuong` (`nghe_si`, `chuong_trinh`, `ca_hai`), `nghe_si` (tối đa 3 tên); bộ chia sẵn train/val/test 15.999 / 2.000 / 2.001 (80/10/10, phân tầng theo nhãn); `atsh_kol_aspect.csv` gồm 11.766 cặp bình luận và nghệ sĩ kèm nhãn cảm xúc theo 4 khía cạnh. Nhóm không dùng các phần này; phép chia ở mục 2.4 là của nhóm. |
+| Điều kiện sử dụng | "Chỉ dùng cho học tập trong khuôn khổ môn học. Không công bố lại, không đưa lên GitHub, Kaggle, Hugging Face hay bất kỳ nơi công khai nào, và không dùng cho bài báo khi chưa có sự đồng ý của tác giả." |
+
+Theo điều kiện trên, mã nguồn và tệp dữ liệu của đồ án chỉ nộp cho môn học, không đưa lên nơi công khai.
 
 ### 2.2. Thống kê
 
@@ -68,11 +72,11 @@ Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `
 | Bình luận có emoji hoặc dấu câu | 71,2% | cùng tệp |
 | Dòng rỗng sau tiền xử lý | 3 (còn 19.997 dòng, nhãn 2 còn 9.588) | `results/metrics.json`, khóa `dataset` |
 
-Hai điểm cần đọc kỹ. Số 7.000 tròn cho nhãn 0 và tổng 20.000 tròn cho thấy tập dữ liệu là kết quả của một bước lấy mẫu từ một tập lớn hơn, chứ không phải toàn bộ bình luận thu được; nhóm cần ghi rõ quy tắc lấy mẫu vào mục 2.1. Toàn bộ bình luận đều nói về một chương trình duy nhất, "Anh Trai Say Hi", nên các con số ở mục 6 chỉ có giá trị trong miền đó; hệ quả được bàn ở mục 9.
+Hai điểm cần đọc kỹ. Số 7.000 tròn cho nhãn 0 và tổng 20.000 tròn là kết quả của bước lấy mẫu lại do tác giả gói dữ liệu thực hiện (mục 2.1): giữ toàn bộ bình luận trung tính hợp lệ, lấy 7.000 bình luận tiêu cực, phần còn lại lấy từ bình luận tích cực, trong khi dữ liệu gốc khoảng 88% tích cực. Tỉ lệ ba lớp trong bảng vì vậy do tác giả chọn để giảm mất cân bằng, không phản ánh tỉ lệ thật trên YouTube, và mọi số đo ở mục 6 đều đo trên phân bố này. Toàn bộ bình luận đều nói về một chương trình duy nhất, "Anh Trai Say Hi", nên các con số ở mục 6 chỉ có giá trị trong miền đó; hệ quả được bàn ở mục 9.
 
 ### 2.3. Định nghĩa ba nhãn
 
-Ba nhãn dùng theo quy ước của tệp dữ liệu: `0` tiêu cực (chê, thất vọng, bức xúc), `1` trung tính (nhận xét không nghiêng về khen hay chê, câu hỏi, câu kể, hoặc vừa khen vừa chê), `2` tích cực (khen, yêu thích, cảm động). Đây là cách chúng tôi đọc lại từ dữ liệu; hướng dẫn gán nhãn gốc là mục TODO ở 2.1.
+Ba nhãn dùng theo quy ước của tệp dữ liệu: `0` tiêu cực, `1` trung tính, `2` tích cực. Theo README của tác giả, nhãn gốc được gán theo từng đối tượng (chương trình hoặc nghệ sĩ) và từng khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng), rồi gộp thành một nhãn tổng thể: có ít nhất một nhãn tích cực thì tích cực; không có nhãn tích cực nhưng có nhãn tiêu cực thì tiêu cực; chỉ có nhãn trung tính thì trung tính. Bình luận vừa có nhãn tích cực vừa có nhãn tiêu cực đã bị loại. Đọc lại từ dữ liệu, chúng tôi thấy lớp `0` là chê, thất vọng, bức xúc; lớp `2` là khen, yêu thích, cảm động; lớp `1` là nhận xét không nghiêng về khen hay chê, câu hỏi, câu kể, và cả những câu vừa khen vừa chê nhẹ. Điểm cuối khớp với ghi chú của tác giả rằng trung tính là nhãn nhiễu nhất: một số câu chê nhẹ hoặc khen nhẹ vẫn được gán trung tính.
 
 ### 2.4. Chia tập huấn luyện và kiểm tra
 
@@ -318,7 +322,7 @@ Hạn chế của phiên bản hiện tại:
 - Emoji bị xóa ở bước làm sạch dù có trong 34,5% bình luận và mang thông tin cảm xúc.
 - Bình luận không dấu không được khôi phục dấu; trong lần khảo sát mục 5.2 với tham số mặc định của BERTopic, chúng tự tạo thành một chủ đề riêng với từ khóa `hieuthuhai`, `bai`, `nay`, `gia`, `troi`, `ong`, `nhat`. `results/topic_ablation.txt` chỉ ghi cụm lớn nhất của mỗi cấu hình; danh sách đủ chủ đề của lần chạy này tái lập bằng `python src/topic_model.py --input data/dataset_chuan.csv --text-col text --limit 1500 --min-topic-size 10` (các tham số còn lại đúng bằng mặc định).
 - Dữ liệu chỉ thuộc một chương trình, nên mô hình cảm xúc học cả tên riêng và chủ đề của chương trình làm tín hiệu (mục 7); kết quả trên video khác chưa được đo.
-- Nguồn nhãn, hướng dẫn gán nhãn và độ đồng thuận giữa người gán chưa được ghi lại (mục 2.1).
+- Nhãn là nhãn silver do mô hình ngôn ngữ lớn gán tự động, chưa được người kiểm tra từng dòng; theo chính tác giả dữ liệu, lớp trung tính là lớp nhiễu nhất (mục 2.1). Phần đọc tay 150 bình luận dự đoán sai ở mục 7 đồng thời là bước kiểm tra chất lượng nhãn mà tác giả khuyến nghị (100 đến 200 dòng của tập kiểm tra, ghi tỉ lệ nhãn đúng).
 - Phần chủ đề chưa được đánh giá bằng độ mạch lạc (coherence) hay bởi người đọc; bảng ở mục 5.2 chỉ so số cụm và tỉ lệ nhiễu.
 - Phần tóm tắt bằng LLM chưa có đánh giá.
 
@@ -329,6 +333,7 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 3. Dùng vector câu của vietnamese-sbert làm đặc trưng cho LogisticRegression, hoặc tinh chỉnh PhoBERT trực tiếp cho ba lớp cảm xúc, và so với LinearSVC + TF-IDF trên cùng phép chia.
 4. Đánh giá câu tóm tắt bằng người chấm theo hai tiêu chí, trung thực với bình luận gốc và trôi chảy, trên một mẫu chủ đề cố định.
 5. Tổ chức lại bài toán thành phân tích cảm xúc theo khía cạnh (ABSA): cảm xúc gắn với từng thí sinh, tiết mục hay khâu tổ chức, thay vì một nhãn cho cả bình luận.
+6. Dùng nhãn khía cạnh có sẵn trong gói dữ liệu gốc cho hướng 5: `atsh_kol_aspect.csv` có 11.766 cặp bình luận và nghệ sĩ kèm nhãn cảm xúc theo 4 khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng), cùng điều kiện sử dụng ở mục 2.1, nên phần ABSA có dữ liệu có nhãn để huấn luyện và đánh giá mà không cần gán thêm.
 
 \newpage
 
@@ -363,6 +368,7 @@ Mỗi mục cần kiểm tra lại trước khi nộp (năm, tên hội nghị, 
 12. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. JMLR 12. Kiểm tra lại trước khi nộp.
 13. Tài liệu Streamlit. Kiểm tra lại phiên bản trước khi nộp.
 14. Tài liệu YouTube Data API v3: `commentThreads.list`, `comments.list`, quota. Kiểm tra lại trước khi nộp.
+15. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói dữ liệu ATSH-NLP-20k, tệp `atsh_sentiment_20k.csv`; README của tác giả sao chép tại `data/README_ATSH_NLP_20k_goc.md`.
 
 \newpage
 
