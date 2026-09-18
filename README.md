@@ -107,8 +107,9 @@ Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và b�
 | `docs/screenshots/` | Ảnh chụp ứng dụng trên dữ liệu mẫu, dùng trong báo cáo và slide. |
 | `.streamlit/config.toml` | Giao diện tối và cấu hình máy chủ Streamlit. |
 | `requirements.txt`, `requirements-dev.txt` | Thư viện chạy ứng dụng; bản dev thêm pytest. |
-| `report/` | Báo cáo đồ án (`BAO_CAO.md`, dựng ra `BAO_CAO.docx` bằng `scripts/build_report.py`) và slide thuyết trình (`slide.md`, định dạng Marp). |
+| `report/` | Báo cáo đồ án (`BAO_CAO.md`, dựng ra `BAO_CAO.docx` bằng `scripts/build_report.py`) và slide thuyết trình (`slide.md` định dạng Marp, `CS221_slide.pptx` dựng bằng `scripts/build_slides_pptx.py`). |
 | `scripts/build_report.py` | Dựng file Word từ báo cáo Markdown. |
+| `scripts/build_slides_pptx.py` | Dựng file PowerPoint của bài thuyết trình, kèm ghi chú người nói. |
 | `docs/diagrams/` | Sơ đồ SVG dùng trong báo cáo và slide. |
 
 ## Xử lý sự cố
