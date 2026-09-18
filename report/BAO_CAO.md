@@ -6,7 +6,15 @@ Lớp: CS221.F31.LT.TTNT
 
 Giảng viên: NCS.ThS Đặng Văn Thìn
 
-Nhóm: [danh sách thành viên và mã số sinh viên]
+Nhóm thực hiện:
+
+- Lê Phú Hiếu, 26410038, LT.K2026.1.TTNT
+- Nguyễn Thanh Duy, 26410030, LT.K2026.1.TTNT
+- Nguyễn Thanh Phong, 26410090, LT.K2026.1.TTNT
+- Nguyễn Thị Mai Thi, 26410117, LT.K2026.1.TTNT
+- Hồ Viết Trịnh, 26410140, LT.K2026.1.TTNT
+- Nguyễn Ngọc Bích, 25730012, CN1.K2025.1.TTNT
+- Nguyễn Anh Tài, 25730063, CN1.K2025.1.TTNT
 
 Tháng 9 năm 2026
 
