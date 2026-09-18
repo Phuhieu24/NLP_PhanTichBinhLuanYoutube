@@ -1,6 +1,6 @@
 # experiments/ - các thí nghiệm sinh ra bằng chứng cho báo cáo
 
-Ba script trong thư mục này sinh ra các tệp trong `results/` mà `BAO_CAO.md` trích dẫn.
+Các script trong thư mục này sinh ra các tệp trong `results/` mà `BAO_CAO.md` trích dẫn.
 Chúng chạy bằng đúng mã nguồn trong `src/`, không phụ thuộc mạng (ngoài lần đầu tải mô
 hình nhúng câu), nên người chấm chạy lại được và ra đúng những con số trong báo cáo.
 
