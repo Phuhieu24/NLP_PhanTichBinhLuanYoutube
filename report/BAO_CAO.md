@@ -26,7 +26,7 @@ Tháng 9 năm 2026
 
 Hệ thống đi qua năm bước: dữ liệu, tiền xử lý, biểu diễn, mô hình, đánh giá. Tiền xử lý chuẩn hóa Unicode, teencode và chữ lặp, rồi tách từ bằng pyvi trước khi hạ chữ thường. Hai bài toán con dùng hai cách biểu diễn: vector câu 768 chiều từ mô hình Sentence-BERT tiếng Việt cho gom cụm chủ đề bằng BERTopic, và TF-IDF unigram cộng bigram cho phân loại cảm xúc bằng LinearSVC. Mọi bước chọn mô hình chạy bằng cross-validation 5-fold trên 15.997 dòng huấn luyện; 4.000 dòng kiểm tra được đánh giá đúng một lần. Toàn bộ pipeline đóng gói thành ứng dụng Streamlit kèm 146 kiểm thử tự động.
 
-Ba kết quả chính. Một, mô hình cảm xúc đạt macro-F1 0,7161 trên tập kiểm tra và 0,7200 ± 0,0037 trên năm hạt giống; lớp trung tính là giới hạn với F1 0,5354. Hai, LinearSVC với C = 0,3 và LogisticRegression cách nhau 0,0010 macro-F1, nhỏ hơn độ lệch chuẩn giữa các fold; phần cải thiện đo được đến từ việc dò C (0,7054 lên 0,7180), còn thay đổi tiền xử lý là trung tính đối với bộ phân loại. Ba, `min_samples` của HDBSCAN quyết định kết quả chủ đề: tham số mặc định của BERTopic đẩy 49,2% bình luận vào nhiễu, còn cấu hình kích thước cụm tối thiểu 15 và `min_samples` 1 cho 26 chủ đề với 33,3% nhiễu trên 1.493 bình luận. Hạn chế cần đọc kèm mọi con số: nhãn là nhãn silver do mô hình ngôn ngữ lớn gán tự động, chưa được người kiểm tra từng dòng, và theo chính tác giả dữ liệu thì lớp trung tính là lớp nhiễu nhất (mục 2.1). Phần đọc tay 150 bình luận ở mục 7 đồng thời là bước kiểm tra chất lượng nhãn mà tác giả khuyến nghị.
+Ba kết quả chính. Một, mô hình cảm xúc đạt macro-F1 0,7161 trên tập kiểm tra và 0,7200 ± 0,0037 trên năm hạt giống; lớp trung tính là giới hạn với F1 0,5354. Hai, LinearSVC với C = 0,3 và LogisticRegression cách nhau 0,0010 macro-F1, nhỏ hơn độ lệch chuẩn giữa các fold; phần cải thiện đo được đến từ việc dò C (0,7054 lên 0,7180), còn thay đổi tiền xử lý là trung tính đối với bộ phân loại. Ba, `min_samples` của HDBSCAN quyết định kết quả chủ đề: tham số mặc định của BERTopic đẩy 49,2% bình luận vào nhiễu, còn cấu hình kích thước cụm tối thiểu 15 và `min_samples` 1 cho 26 chủ đề với 33,3% nhiễu trên 1.493 bình luận. Hạn chế cần đọc kèm mọi con số: nhãn là nhãn silver do mô hình ngôn ngữ lớn gán tự động, chưa được người kiểm tra từng dòng, và theo chính tác giả dữ liệu thì lớp trung tính là lớp nhiễu nhất (mục 2.1). Phần đọc tay 150 bình luận dự đoán sai ở mục 7 tìm thấy 7 dòng mà người đọc không đồng ý với nhãn gốc.
 
 \newpage
 
@@ -287,17 +287,32 @@ Ma trận nhầm lẫn cho thấy lớp trung tính là điểm yếu của mô 
 
 Danh sách đặc trưng trọng số lớn nhất (`results/top_features.txt`) giải thích một phần. Lớp tiêu cực dựa vào `không` (+2,93), `chán`, `không hay` (+2,29), `tức`, `không thích` (+2,10), `dở`, `nhạt`, `thất_vọng`, và cả `quảng_cáo`, `khán_giả`: hai từ sau là chủ đề, không phải cảm xúc, nghĩa là mô hình học được rằng bình luận về quảng cáo và về khán giả trong tập dữ liệu này phần lớn là chê. Lớp trung tính dựa vào `nhưng` (+2,95), `tiếc`, `tưởng`, `tội`, `ok`, `hơi`, `hay mà`, `hay nhưng`, `phải_chi`, `ước gì`: đây là dấu hiệu của câu vừa khen vừa chê hoặc tiếc nuối, đúng với định nghĩa lớp nhưng cũng cho thấy ranh giới với hai lớp kia mờ ngay trong nhãn. Lớp tích cực dựa vào `đỉnh` (+3,36), `mê` (+3,20), `hay quá`, `yêu`, `tuyệt_vời`, `dễ_thương`, `cuốn`, và tên riêng `atus`, `negav`: mô hình học được rằng bình luận nhắc tới hai thí sinh này thường là khen, một tín hiệu đúng trong miền nhưng không chuyển được sang video khác.
 
-Phần phân tích định tính cần nhóm hoàn thành bằng tay. Cách làm: lấy khoảng 150 bình luận dự đoán sai trên tập kiểm tra (chọn ngẫu nhiên, đủ cả ba lớp thật), đọc từng bình luận và xếp vào các hiện tượng ngôn ngữ sau, rồi báo cáo số lượng mỗi nhóm kèm hai ví dụ.
+Để biết mô hình sai ở đâu, nhóm xuất toàn bộ 935 bình luận bị dự đoán sai trên tập kiểm tra (`experiments/export_misclassified.py`, đầu ra `results/misclassified_test.csv`), lấy mẫu phân tầng 150 dòng theo nhãn thật (55 tiêu cực, 50 trung tính, 45 tích cực) rồi đọc từng dòng và xếp vào một hiện tượng ngôn ngữ chính. Kết quả từng dòng nằm ở `results/error_analysis_150.csv`, bảng tổng hợp và ví dụ ở `results/error_analysis_150.txt`. Việc gán nhãn do một người đọc một lượt, nên đây là nhận định định tính, không phải phép đo có độ tin cậy thống kê.
 
-- Phủ định (mô hình bỏ qua hoặc hiểu sai `không`, `chẳng`, `đâu có`).
-- Teencode ngoài từ điển.
-- Bình luận không dấu.
-- Châm biếm, nói ngược.
-- Vừa khen vừa chê trong một câu.
-- Chỉ có emoji hoặc chỉ có tên riêng sau khi làm sạch.
-- Nhãn gốc đáng ngờ (người đọc cũng không đồng ý với nhãn).
+| Hiện tượng | n | % | Tiêu cực | Trung tính | Tích cực |
+|---|---:|---:|---:|---:|---:|
+| Cần ngữ cảnh chương trình | 36 | 24,0 | 15 | 11 | 10 |
+| Thương cảm, tiếc nuối | 31 | 20,7 | 11 | 9 | 11 |
+| Vừa khen vừa chê | 23 | 15,3 | 7 | 12 | 4 |
+| Phủ định | 19 | 12,7 | 6 | 6 | 7 |
+| Teencode ngoài từ điển | 16 | 10,7 | 5 | 4 | 7 |
+| Tên riêng lấn át hoặc mất emoji | 11 | 7,3 | 4 | 4 | 3 |
+| Nhãn gốc đáng ngờ | 7 | 4,7 | 3 | 2 | 2 |
+| Châm biếm | 4 | 2,7 | 3 | 1 | 0 |
+| Không dấu | 2 | 1,3 | 0 | 1 | 1 |
+| Khác | 1 | 0,7 | 1 | 0 | 0 |
+| Tổng | 150 | 100,0 | 55 | 50 | 45 |
 
-TODO nhóm điền bảng số lượng theo nhóm sau khi đọc mẫu; không ước lượng.
+Hai nhóm lớn nhất chiếm gần nửa số lỗi và cùng chỉ về một giới hạn: túi từ thấy được từ ngữ nhưng không thấy đối tượng của thái độ.
+
+- *Cần ngữ cảnh chương trình* (36 dòng): thái độ nằm ở thứ hạng, luật chơi, tên bài hoặc thành ngữ. Ví dụ "Ủa alo, Ngáo Ngơ 4, Regret 5. Lộn hả khán giả ơi" (thật: tích cực, đoán: tiêu cực) chỉ đọc được nếu biết Ngáo Ngơ là tên bài và thứ hạng 4 bị người xem cho là thấp.
+- *Thương cảm, tiếc nuối* (31 dòng): từ ngữ buồn nhưng thái độ là đồng cảm. "Tiếc cho team của Captain ghê" (thật: tiêu cực, đoán: trung tính) và "thấy tội nghiệp atus ln" (thật: trung tính, đoán: tích cực) dùng cùng một lớp từ nhưng nhãn khác nhau, cho thấy ngay cả người gán nhãn cũng khó nhất quán ở nhóm này.
+- *Vừa khen vừa chê* (23 dòng) là nhóm lớn nhất của riêng lớp trung tính (12 trong 50 dòng trung tính). "Thích team khang nhưng k thich ht2" buộc một nhãn cho cả câu phải chọn một bên. Tiền xử lý không sửa được nhóm này; đây chính là chỗ bài toán phân tích cảm xúc theo khía cạnh ra đời.
+- *Phủ định* vẫn còn 19 dòng dù đặc trưng đã có bigram: bigram bắt được `không hay`, `không thích` nhưng không bắt được phủ định đứng xa từ bị phủ định, ví dụ "từ đầu chương trình tới giờ k thấy".
+- *Teencode ngoài từ điển* (16 dòng) và *tên riêng lấn át hoặc mất emoji* (11 dòng) là hai nhóm sửa được bằng kỹ thuật: giữ emoji làm token, mở rộng từ điển teencode từ chính dữ liệu, thêm đặc trưng n-gram ký tự cho phần không dấu.
+- *Nhãn gốc đáng ngờ* 7 dòng (4,7% của mẫu lỗi): người đọc không đồng ý với nhãn, ví dụ "Xem đi xem lại vẫn luỵ quá chưa dứt ra đc lun" được gán tiêu cực trong khi "luỵ" trong khẩu ngữ người hâm mộ nghĩa là mê. Tỉ lệ này đo trên mẫu lỗi chứ không phải trên toàn tập kiểm tra, nên không suy ra được tỉ lệ nhãn sai của cả bộ dữ liệu; nó chỉ xác nhận ghi chú của tác giả rằng nhãn silver có một phần sai và lớp trung tính nhiễu nhất.
+
+Đọc theo lớp, lớp trung tính có ba nhóm dẫn đầu là vừa khen vừa chê (12), cần ngữ cảnh (11) và thương cảm tiếc nuối (9). Ba nhóm này đều là những chỗ mà ranh giới giữa khen nhẹ, chê nhẹ và không khen không chê mờ ngay trong định nghĩa nhãn, nên con số F1 0,5354 của lớp trung tính ở mục 6.1 phản ánh độ khó của bài toán chứ không chỉ phản ánh mô hình.
 
 \newpage
 
@@ -329,10 +344,10 @@ Hạn chế của phiên bản hiện tại:
 
 - Emoji bị xóa ở bước làm sạch dù có trong 34,5% bình luận và mang thông tin cảm xúc.
 - Bình luận không dấu không được khôi phục dấu; trong lần khảo sát mục 5.2 với tham số mặc định của BERTopic, chúng tự tạo thành một chủ đề riêng với từ khóa `hieuthuhai`, `bai`, `nay`, `gia`, `troi`, `ong`, `nhat`. `results/topic_ablation.txt` chỉ ghi cụm lớn nhất của mỗi cấu hình; danh sách đủ chủ đề của lần chạy này tái lập bằng `python src/topic_model.py --input data/dataset_chuan.csv --text-col text --limit 1500 --min-topic-size 10` (các tham số còn lại đúng bằng mặc định).
-- Dữ liệu chỉ thuộc một chương trình, nên mô hình cảm xúc học cả tên riêng và chủ đề của chương trình làm tín hiệu (mục 7); kết quả trên video khác chưa được đo.
-- Nhãn là nhãn silver do mô hình ngôn ngữ lớn gán tự động, chưa được người kiểm tra từng dòng; theo chính tác giả dữ liệu, lớp trung tính là lớp nhiễu nhất (mục 2.1). Phần đọc tay 150 bình luận dự đoán sai ở mục 7 đồng thời là bước kiểm tra chất lượng nhãn mà tác giả khuyến nghị (100 đến 200 dòng của tập kiểm tra, ghi tỉ lệ nhãn đúng).
-- Phần chủ đề chưa được đánh giá bằng độ mạch lạc (coherence) hay bởi người đọc; bảng ở mục 5.2 chỉ so số cụm và tỉ lệ nhiễu.
-- Phần tóm tắt bằng LLM chưa có đánh giá.
+- Dữ liệu chỉ thuộc một chương trình, nên mô hình cảm xúc học cả tên riêng và chủ đề của chương trình làm tín hiệu (mục 7); phạm vi kết luận vì vậy giới hạn trong miền dữ liệu này.
+- Nhãn là nhãn silver do mô hình ngôn ngữ lớn gán tự động, chưa được người kiểm tra từng dòng; theo chính tác giả dữ liệu, lớp trung tính là lớp nhiễu nhất (mục 2.1). Phần đọc tay 150 bình luận dự đoán sai ở mục 7 tìm thấy 7 dòng (4,7% của mẫu lỗi) mà người đọc không đồng ý với nhãn gốc.
+- Phần chủ đề được so bằng số cụm, tỉ lệ nhiễu và kích thước cụm lớn nhất (mục 5.2); đồ án không dùng thêm độ đo mạch lạc (coherence).
+- Phần tóm tắt bằng LLM là thành phần tùy chọn, đồ án không đặt ra bài toán đánh giá chất lượng câu tóm tắt.
 
 Hướng phát triển, theo thứ tự chi phí tăng dần:
 
@@ -385,6 +400,10 @@ python experiments/ab_preprocess.py
 
 # Thống kê tập dữ liệu của mục 2.2 (ghi results/dataset_stats.json)
 python experiments/dataset_stats.py
+
+# Xuất 935 bình luận bị dự đoán sai và mẫu 150 dòng của mục 7
+# (ghi results/misclassified_test.csv và results/error_sample_150.csv)
+python experiments/export_misclassified.py
 
 # 146 kiểm thử tự động (khoảng 16 giây); hai kiểm thử đầu-cuối cần mô hình nhúng đã có trong cache
 pytest
