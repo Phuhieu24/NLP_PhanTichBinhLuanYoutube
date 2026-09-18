@@ -347,23 +347,20 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 
 ## 10. Tài liệu tham khảo
 
-
-Mỗi mục cần kiểm tra lại trước khi nộp (năm, tên hội nghị, phiên bản thư viện).
-
 1. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3 (các kỹ thuật tiền xử lý).
 2. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 4 (phương pháp biểu diễn văn bản).
 3. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 5 (phân tích cảm xúc trên bình luận phản hồi).
 4. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 6 (tách từ, phân loại văn bản và đánh giá theo lớp: độ chính xác, độ phủ, F1).
 5. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 8 (tóm tắt văn bản).
-6. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794. Kiểm tra lại trước khi nộp.
-7. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426. Kiểm tra lại trước khi nộp.
-8. Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. PAKDD 2013. Kiểm tra lại trước khi nộp.
-9. Nguyen, D. Q., Nguyen, A. T. (2020). PhoBERT: Pre-trained language models for Vietnamese. Findings of EMNLP 2020. Kiểm tra lại trước khi nộp.
-10. Thẻ mô hình `keepitreal/vietnamese-sbert` trên Hugging Face Hub. Kiểm tra lại trước khi nộp.
-11. pyvi: Python Vietnamese toolkit (thư viện tách từ). Kiểm tra lại phiên bản trước khi nộp.
-12. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. JMLR 12. Kiểm tra lại trước khi nộp.
-13. Tài liệu Streamlit. Kiểm tra lại phiên bản trước khi nộp.
-14. Tài liệu YouTube Data API v3: `commentThreads.list`, `comments.list`, quota. Kiểm tra lại trước khi nộp.
+6. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
+7. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426.
+8. Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. Trong: Advances in Knowledge Discovery and Data Mining (PAKDD 2013), LNCS 7819, Springer, tr. 160 đến 172.
+9. Nguyen, D. Q., Nguyen, A. T. (2020). PhoBERT: Pre-trained language models for Vietnamese. Trong: Findings of the Association for Computational Linguistics: EMNLP 2020, tr. 1037 đến 1042.
+10. Thẻ mô hình `keepitreal/vietnamese-sbert`, Hugging Face Hub (tệp `config.json` và cấu hình sentence-transformers của mô hình).
+11. Trần Việt Trung. pyvi: Python Vietnamese Core NLP Toolkit, phiên bản 0.1.1.
+12. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, tr. 2825 đến 2830. Phiên bản dùng trong đồ án: 1.9.1.
+13. Tài liệu Streamlit (phiên bản 1.64.0) và thư viện BERTopic 0.17.4, umap-learn 0.5.12, hdbscan 0.8.44, sentence-transformers 6.0.1.
+14. Google, Tài liệu YouTube Data API v3: `commentThreads.list`, `comments.list`, `videos.list` và hạn mức truy vấn.
 15. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói dữ liệu ATSH-NLP-20k, tệp `atsh_sentiment_20k.csv`; README của tác giả sao chép tại `data/README_ATSH_NLP_20k_goc.md`.
 
 \newpage

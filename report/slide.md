@@ -182,7 +182,7 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 - Bình luận và vector nhúng được cache; đổi tab hay lọc bảng không chạy lại
 - Ảnh: 1,000 dòng mẫu, 23 chủ đề, 20.6% nhiễu, 47.4% tích cực (tập huấn luyện, nên tỉ lệ cảm xúc lạc quan hơn thực tế)
 
-<!-- Ghi chú: Toàn bộ pipeline đóng thành một ứng dụng Streamlit. Bây giờ nhóm em chạy trực tiếp khoảng 3 phút. (mở ứng dụng, ở thanh bên chọn Tệp CSV với bình luận đã cào trước của [video demo]; nếu mạng hoặc tệp có vấn đề thì chọn Dữ liệu mẫu, 1,000 dòng; bấm Bắt đầu phân tích) Trong lúc chạy em nói qua sáu bước của ứng dụng: lấy dữ liệu, làm sạch, nhúng câu, gom cụm, phân loại, tóm tắt tùy chọn. (khi xong, mở tab Tổng quan) Đây là số chủ đề, tỉ lệ nhiễu và tỉ lệ tích cực. (mở tab Chủ đề, chỉ vào một cụm) Mỗi chủ đề có từ khóa và bình luận tiêu biểu; bản đồ khoảng cách cho thấy cụm nào gần nhau. (mở tab Cảm xúc) Cảm xúc theo từng chủ đề: chủ đề nào bị chê nhiều nhất. (mở tab Dữ liệu, lọc một từ khóa) Bảng có lọc theo chủ đề, cảm xúc, từ khóa và tải CSV. Tab Mô hình chỉ đọc lại thẻ mô hình và các bảng em vừa trình bày, em không mở để tiết kiệm thời gian. -->
+<!-- Ghi chú: Toàn bộ pipeline đóng thành một ứng dụng Streamlit. Bây giờ nhóm em chạy trực tiếp khoảng 3 phút. (mở ứng dụng, ở thanh bên chọn Dữ liệu mẫu, 1,000 dòng, hoặc Tệp CSV nếu nhóm đã cào sẵn bình luận của một video; bấm Bắt đầu phân tích) Trong lúc chạy em nói qua sáu bước của ứng dụng: lấy dữ liệu, làm sạch, nhúng câu, gom cụm, phân loại, tóm tắt tùy chọn. (khi xong, mở tab Tổng quan) Đây là số chủ đề, tỉ lệ nhiễu và tỉ lệ tích cực. (mở tab Chủ đề, chỉ vào một cụm) Mỗi chủ đề có từ khóa và bình luận tiêu biểu; bản đồ khoảng cách cho thấy cụm nào gần nhau. (mở tab Cảm xúc) Cảm xúc theo từng chủ đề: chủ đề nào bị chê nhiều nhất. (mở tab Dữ liệu, lọc một từ khóa) Bảng có lọc theo chủ đề, cảm xúc, từ khóa và tải CSV. Tab Mô hình chỉ đọc lại thẻ mô hình và các bảng em vừa trình bày, em không mở để tiết kiệm thời gian. -->
 
 ---
 
@@ -223,16 +223,16 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 
 ## Phụ lục B1. Tài liệu tham khảo
 
-1. Slide môn CS221 Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3 (tiền xử lý), bài 4 (biểu diễn văn bản), bài 5 (phân tích cảm xúc), bài 6 (độ đo đánh giá)
-2. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794. Kiểm tra lại trước khi nộp.
-3. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426. Kiểm tra lại trước khi nộp.
-4. Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. PAKDD 2013. Kiểm tra lại trước khi nộp.
-5. Nguyen, D. Q., Nguyen, A. T. (2020). PhoBERT: Pre-trained language models for Vietnamese. Findings of EMNLP 2020. Kiểm tra lại trước khi nộp.
-6. Thẻ mô hình `keepitreal/vietnamese-sbert`, Hugging Face Hub. Kiểm tra lại trước khi nộp.
-7. pyvi: Python Vietnamese toolkit. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. JMLR 12. Tài liệu Streamlit. Tài liệu YouTube Data API v3. Kiểm tra lại phiên bản trước khi nộp.
+1. Slide môn CS221 Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3, 4, 5, 6.
+2. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
+3. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426.
+4. Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. PAKDD 2013, LNCS 7819.
+5. Nguyen, D. Q., Nguyen, A. T. (2020). PhoBERT: Pre-trained language models for Vietnamese. Findings of EMNLP 2020.
+6. Thẻ mô hình `keepitreal/vietnamese-sbert`, Hugging Face Hub.
+7. pyvi 0.1.1; scikit-learn 1.9.1 (Pedregosa và cộng sự, JMLR 2011); Streamlit 1.64.0; BERTopic 0.17.4; tài liệu YouTube Data API v3.
 8. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói ATSH-NLP-20k; README của tác giả tại `data/README_ATSH_NLP_20k_goc.md`.
 
-<!-- Ghi chú: Danh sách tài liệu tham khảo, trùng với mục 10 của báo cáo. Các mục ghi "kiểm tra lại trước khi nộp" nhóm em sẽ đối chiếu bản gốc về năm và nơi công bố trước ngày nộp. -->
+<!-- Ghi chú: Danh sách tài liệu tham khảo, trùng với mục 10 của báo cáo. Slide bài giảng của môn là nguồn cho pipeline năm bước, cách tách từ và cách báo kết quả theo lớp; các bài báo là nguồn cho BERTopic, UMAP, HDBSCAN và PhoBERT; dòng cuối là câu trích dẫn mà tác giả bộ dữ liệu yêu cầu. -->
 
 ---
 
