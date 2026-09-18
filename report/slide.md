@@ -46,22 +46,19 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ## Dữ liệu: 20,000 bình luận có nhãn về một chương trình
 
-<style scoped>table { font-size: 0.8em; } ul { font-size: 0.86em; }</style>
+<style scoped>table { font-size: 0.78em; } ul { font-size: 0.82em; }</style>
 
-| Chỉ số | Giá trị |
+| Nhãn | Số dòng |
 |---|---|
-| Số dòng | 20,000 |
 | Tiêu cực (0) | 7,000 (35.0%) |
 | Trung tính (1) | 3,409 (17.0%) |
 | Tích cực (2) | 9,591 (48.0%) |
-| Dòng trùng nội dung | 0 |
-| Dòng rỗng sau tiền xử lý | 3 (còn 19,997) |
+| Tổng, sau tiền xử lý | 20,000, còn 19,997 (3 dòng rỗng) |
 
-- Nguồn: gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT); bình luận về Anh Trai Say Hi mùa 1, tập 1 đến 14
-- Nhãn silver: mô hình ngôn ngữ lớn gán theo đối tượng và khía cạnh rồi gộp; chưa kiểm tay, trung tính nhiễu nhất
-- Tác giả lấy mẫu lại từ dữ liệu gốc khoảng 88% tích cực: giữ hết trung tính, lấy 7,000 tiêu cực, bù tích cực; tỉ lệ không phải tỉ lệ thật trên YouTube
-- Một chương trình duy nhất, nên kết quả chỉ có giá trị trong miền đó
-- Điều kiện của tác giả: chỉ dùng cho học tập, không công bố lại
+- Nguồn: gói ATSH-NLP-20k, dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT); bình luận về Anh Trai Say Hi mùa 1, tập 1 đến 14
+- Nhãn silver do mô hình ngôn ngữ lớn gán theo đối tượng và khía cạnh rồi gộp; chưa kiểm tay, trung tính nhiễu nhất
+- Tác giả lấy mẫu lại từ dữ liệu gốc khoảng 88% tích cực; tỉ lệ nhãn không phải tỉ lệ thật trên YouTube
+- Một chương trình duy nhất; chỉ dùng cho học tập, không công bố lại
 
 <!-- Ghi chú: Tập dữ liệu có 20,000 bình luận, hai cột: văn bản và nhãn. Đây là hai cột text và label của gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA của Phạm Xuân Vĩnh Hà ở UIT; nhóm em chỉ dùng cho học tập theo đúng điều kiện của tác giả. Ba lớp lệch nhau: tích cực gần một nửa, trung tính chỉ 17%. Con số 17% này sẽ quay lại ở phần kết quả, vì trung tính là lớp yếu nhất. Ba điều nhóm em nói thẳng. Thứ nhất, mọi bình luận đều về một chương trình, nên mô hình học cả tên thí sinh làm tín hiệu. Thứ hai, tỉ lệ ba lớp là do tác giả lấy mẫu lại: dữ liệu gốc khoảng 88% tích cực, tác giả giữ hết trung tính, lấy đúng 7,000 tiêu cực rồi bù tích cực cho đủ 20,000; vì vậy số 7,000 tròn, và tỉ lệ này không phải tỉ lệ thật trên YouTube. Thứ ba, nhãn là nhãn silver do mô hình ngôn ngữ lớn gán theo từng đối tượng và khía cạnh rồi gộp lại, chưa có người kiểm từng dòng; chính tác giả ghi trung tính là lớp nhiễu nhất. Phần đọc tay 150 bình luận ở cuối bài cũng là để kiểm chất lượng nhãn. -->
 
