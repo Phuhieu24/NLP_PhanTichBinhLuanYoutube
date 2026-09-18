@@ -343,7 +343,7 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 
 | Thành viên | Phần việc | Tệp chính |
 |---|---|---|
-| TODO | Thu thập dữ liệu và gán nhãn | `src/crawler.py`, `data/` |
+| TODO | Thu thập bình luận và chuẩn bị dữ liệu | `src/crawler.py`, `data/` |
 | TODO | Tiền xử lý và từ dừng | `src/preprocess.py`, `src/resources/` |
 | TODO | Gom cụm chủ đề | `src/topic_pipeline.py`, `src/topic_model.py` |
 | TODO | Phân loại cảm xúc và đánh giá | `src/train_sentiment.py`, `results/` |
