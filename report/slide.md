@@ -232,7 +232,7 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 7. pyvi: Python Vietnamese toolkit. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. JMLR 12. Tài liệu Streamlit. Tài liệu YouTube Data API v3. Kiểm tra lại phiên bản trước khi nộp.
 8. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói ATSH-NLP-20k; README của tác giả tại `data/README_ATSH_NLP_20k_goc.md`.
 
-<!-- Ghi chú: Danh sách tài liệu tham khảo, trùng với mục 10.2 của báo cáo. Các mục ghi "kiểm tra lại trước khi nộp" nhóm em sẽ đối chiếu bản gốc về năm và nơi công bố trước ngày nộp. -->
+<!-- Ghi chú: Danh sách tài liệu tham khảo, trùng với mục 10 của báo cáo. Các mục ghi "kiểm tra lại trước khi nộp" nhóm em sẽ đối chiếu bản gốc về năm và nơi công bố trước ngày nộp. -->
 
 ---
 
