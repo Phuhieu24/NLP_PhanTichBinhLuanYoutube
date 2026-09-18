@@ -4,20 +4,23 @@ Thư mục này chứa tập dữ liệu huấn luyện `dataset_chuan.csv` (đ�
 
 ## Nguồn gốc của `dataset_chuan.csv`
 
-Các mục dưới đây không suy ra được từ mã nguồn hay từ chính tệp dữ liệu. Nhóm điền trước khi nộp; mục nào không biết thì ghi "không rõ" thay vì bỏ trống.
+`dataset_chuan.csv` là hai cột `text` và `label` của tệp `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin dưới đây lấy từ README của tác giả gói dữ liệu, sao chép nguyên văn tại `data/README_ATSH_NLP_20k_goc.md`.
 
-| Mục | Nội dung |
+| Mục | Nội dung theo README của tác giả |
 |---|---|
-| Video hoặc kênh nguồn | TODO (danh sách link video, số video, kênh) |
-| Thời điểm thu thập | TODO (khoảng ngày) |
-| Công cụ thu thập | TODO (`src/crawler.py` ở phiên bản nào, hay công cụ khác) |
-| Quy tắc lấy mẫu từ tập thô | TODO (xem ghi chú về số tròn bên dưới) |
-| Cách gán nhãn | TODO (gán tay, dùng LLM, hay heuristic; nếu nhiều bước thì mô tả từng bước) |
-| Người gán nhãn | TODO (ai, bao nhiêu người, mỗi bình luận có mấy người gán) |
-| Hướng dẫn gán nhãn | TODO (đường dẫn tới tài liệu quy ước ba lớp) |
-| Độ đồng thuận giữa người gán | TODO (Cohen's kappa hoặc tỉ lệ trùng khớp, trên bao nhiêu mẫu; ghi "chưa đo" nếu chưa đo) |
-| Giấy phép và điều khoản sử dụng | TODO (điều khoản dịch vụ YouTube API, phạm vi sử dụng cho mục đích học tập) |
-| Xử lý dữ liệu cá nhân | Tệp chỉ có hai cột `text` và `label`; không có tên tác giả, mã bình luận hay thời điểm đăng. TODO xác nhận tệp thô (nếu còn giữ) có được lưu ngoài repo không. |
+| Nguồn | Trích từ dự án nghiên cứu ATSH-ABSA của Phạm Xuân Vĩnh Hà (UIT, ĐHQG TP.HCM). Lấy từ bản gán nhãn tự động (silver), không lấy từ bản gán nhãn thủ công (gold); không có bình luận nào trùng với bộ gold. |
+| Nội dung | Bình luận YouTube tiếng Việt về chương trình Anh Trai Say Hi, mùa 1, tập 1 đến 14. |
+| Cách gán nhãn | Nhãn do mô hình ngôn ngữ lớn gán tự động theo một bộ hướng dẫn gán nhãn, theo từng đối tượng (chương trình hoặc nghệ sĩ) và từng khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng). Chưa được người kiểm tra từng dòng. Tác giả ghi nhãn trung tính là nhãn nhiễu nhất và khuyên kiểm tra thủ công 100 đến 200 dòng của tập test rồi ghi tỉ lệ nhãn đúng vào báo cáo. |
+| Gộp nhãn tổng thể | Có ít nhất một nhãn tích cực: tích cực. Không có nhãn tích cực nhưng có nhãn tiêu cực: tiêu cực. Chỉ có nhãn trung tính: trung tính. Bình luận vừa có nhãn tích cực vừa có nhãn tiêu cực (hỗn hợp) đã bị loại. |
+| Lấy mẫu lại | Dữ liệu gốc khoảng 88% tích cực. Bộ này lấy toàn bộ bình luận trung tính hợp lệ, 7.000 bình luận tiêu cực, phần còn lại lấy từ bình luận tích cực; chọn mẫu với seed 42. Tỉ lệ nhãn vì vậy không phản ánh tỉ lệ thật trên YouTube. |
+| Bộ lọc | Không phải spam, có liên quan tới chương trình, có thể hiện cảm xúc, dài 5 đến 500 ký tự; đã loại bình luận trùng nhau và bình luận có chứa đường link. |
+| Dữ liệu cá nhân | Không có tên tài khoản hay thông tin của người bình luận. `dataset_chuan.csv` chỉ giữ hai cột `text` và `label`. |
+| Điều kiện sử dụng | "Chỉ dùng cho học tập trong khuôn khổ môn học. Không công bố lại, không đưa lên GitHub, Kaggle, Hugging Face hay bất kỳ nơi công khai nào, và không dùng cho bài báo khi chưa có sự đồng ý của tác giả." |
+| Câu trích dẫn bắt buộc | "Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập." |
+| Các cột và file khác trong gói gốc | Cột `id`, `tap` (TAP1 đến TAP14), `sentiment` (nhãn dạng chữ), `doi_tuong` (`nghe_si`, `chuong_trinh`, `ca_hai`), `nghe_si` (tối đa 3 tên), `split`; bộ chia sẵn train/val/test 15.999 / 2.000 / 2.001 (80/10/10, phân tầng theo nhãn); `atsh_kol_aspect.csv` gồm 11.766 cặp bình luận và nghệ sĩ kèm nhãn cảm xúc theo 4 khía cạnh. Nhóm không dùng các cột và tệp này; phép chia 80/20 với hạt giống 42 trong đánh giá là của nhóm, không phải bộ chia sẵn. |
+| Tệp README gốc | `data/README_ATSH_NLP_20k_goc.md` |
+
+Theo điều kiện sử dụng trên, repo này phải giữ ở chế độ riêng tư và `dataset_chuan.csv` không được đẩy lên bất kỳ nơi công khai nào.
 
 ## Thống kê
 
@@ -41,7 +44,7 @@ Kiểm tra ngày 18-09-2026 trên tệp đã commit; số liệu do `experiments
 
 Hai ghi chú:
 
-- Số 7.000 tròn cho nhãn 0 và tổng 20.000 tròn cho thấy tệp là kết quả của một bước lấy mẫu từ tập thô lớn hơn. Quy tắc lấy mẫu (ngẫu nhiên, theo lớp, theo video) cần ghi vào bảng nguồn gốc ở trên.
+- Số 7.000 tròn cho nhãn 0 và tổng 20.000 tròn là kết quả của bước lấy mẫu lại do tác giả gói dữ liệu thực hiện (bảng nguồn gốc ở trên): giữ toàn bộ bình luận trung tính hợp lệ, lấy đúng 7.000 bình luận tiêu cực, bù phần còn lại bằng bình luận tích cực cho đủ 20.000. Tỉ lệ ba lớp vì vậy do tác giả chọn để giảm mất cân bằng, không phải tỉ lệ thật trên YouTube (dữ liệu gốc khoảng 88% tích cực).
 - 3 dòng trở thành rỗng sau tiền xử lý (chỉ gồm emoji, dấu câu hoặc URL) và bị loại trước khi huấn luyện; 19.997 dòng còn lại được chia thành 15.997 dòng huấn luyện và 4.000 dòng kiểm tra (nhãn 2 còn 9.588). Xem `results/metrics.json`, khóa `dataset` và `split`.
 
 ## Định nghĩa nhãn
@@ -52,7 +55,7 @@ Hai ghi chú:
 | 1 | Trung tính | Nhận xét không nghiêng về khen hay chê, câu hỏi, câu kể, hoặc vừa khen vừa chê. |
 | 2 | Tích cực | Khen, yêu thích, cảm động. |
 
-Đây là cách nhóm đọc lại từ dữ liệu. Hướng dẫn gán nhãn gốc là mục TODO trong bảng nguồn gốc.
+Cột "Cách đọc từ dữ liệu" là cách nhóm đọc lại từ chính tệp. Quy tắc gốc của tác giả (`data/README_ATSH_NLP_20k_goc.md`): nhãn được gán theo từng đối tượng và từng khía cạnh, rồi gộp thành một nhãn tổng thể. Có ít nhất một nhãn tích cực thì tích cực; không có tích cực nhưng có tiêu cực thì tiêu cực; chỉ có trung tính thì trung tính. Bình luận vừa có nhãn tích cực vừa có nhãn tiêu cực đã bị loại. Tác giả cũng ghi nhãn trung tính là nhãn nhiễu nhất, một số câu chê nhẹ hoặc khen nhẹ vẫn được gán trung tính; điều này khớp với việc nhóm gặp câu vừa khen vừa chê trong lớp 1.
 
 ## Tệp sinh ra khi chạy (không commit)
 
