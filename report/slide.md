@@ -186,17 +186,26 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ---
 
-## Phân tích lỗi: mô hình học cả chủ đề và tên riêng làm tín hiệu cảm xúc
+## Phân tích lỗi: 150 bình luận sai, xếp theo hiện tượng
 
-<style scoped>ul { font-size: 0.86em; }</style>
+<style scoped>table { font-size: 0.68em; } ul { font-size: 0.76em; }</style>
 
-- Lớp tiêu cực dựa vào `không` (+2.93), `không hay` (+2.29), `không thích` (+2.10), và cả `quảng_cáo`, `khán_giả`: hai từ sau là chủ đề, không phải cảm xúc
-- Lớp trung tính dựa vào `nhưng` (+2.95), `tiếc`, `hay mà`, `hay nhưng`: đúng định nghĩa lớp, nhưng cho thấy ranh giới mờ ngay trong nhãn
-- Lớp tích cực dựa vào `đỉnh` (+3.36), `mê` (+3.20), và tên riêng `atus`, `negav`: đúng trong miền, không chuyển được sang video khác
-- Việc nhóm sẽ hoàn thành: đọc tay 150 bình luận sai trên tập kiểm tra, xếp theo hiện tượng ngôn ngữ (phủ định, teencode ngoài từ điển, không dấu, châm biếm, vừa khen vừa chê, chỉ còn emoji hoặc tên riêng, nhãn gốc đáng ngờ)
-- Hạn chế: emoji bị xóa, bình luận không dấu tự tạo cụm riêng, một miền dữ liệu, tóm tắt LLM chưa đánh giá, nhãn silver do LLM gán, chưa kiểm tay
+| Hiện tượng | n | Tiêu cực | Trung tính | Tích cực |
+|---|---:|---:|---:|---:|
+| Cần ngữ cảnh chương trình | 36 | 15 | 11 | 10 |
+| Thương cảm, tiếc nuối | 31 | 11 | 9 | 11 |
+| Vừa khen vừa chê | 23 | 7 | 12 | 4 |
+| Phủ định | 19 | 6 | 6 | 7 |
+| Teencode ngoài từ điển | 16 | 5 | 4 | 7 |
+| Tên riêng lấn át hoặc mất emoji | 11 | 4 | 4 | 3 |
+| Nhãn gốc đáng ngờ | 7 | 3 | 2 | 2 |
+| Châm biếm, không dấu, khác | 7 | 4 | 2 | 1 |
 
-<!-- Ghi chú: Nhóm em đọc trọng số của LinearSVC để hiểu mô hình dựa vào gì. Phần tốt: chữ "không" và các bigram phủ định là đặc trưng mạnh nhất của lớp tiêu cực, đúng như thiết kế bigram. Phần đáng lo: "quảng cáo" và "khán giả" cũng là đặc trưng tiêu cực, tức là mô hình học được rằng ai nhắc quảng cáo thì thường chê. Và tên hai thí sinh là đặc trưng tích cực. Tín hiệu đó đúng trong chương trình này, nhưng đem sang video khác sẽ sai. Phần phân tích định tính nhóm em chưa xong: sẽ đọc tay 150 bình luận sai và đếm theo từng hiện tượng, không ước lượng. Hạn chế lớn nhất theo nhóm em là emoji: có trong 34.5% bình luận, mang cảm xúc, mà bước làm sạch xóa mất. -->
+- Mẫu phân tầng từ 935 dòng sai; một người đọc, một lượt (`results/error_analysis_150.csv`)
+- Lớp trung tính: dẫn đầu là vừa khen vừa chê (12 trong 50 dòng), đúng với F1 0.5354
+- Mô hình học cả chủ đề và tên riêng làm tín hiệu cảm xúc, đúng trong miền này nhưng không chuyển được sang video khác
+
+<!-- Ghi chú: Nhóm em không dừng ở ma trận nhầm lẫn. Nhóm xuất toàn bộ 935 bình luận mà mô hình đoán sai, lấy mẫu phân tầng 150 dòng rồi đọc tay từng dòng, mỗi dòng xếp vào một hiện tượng. Hai nhóm lớn nhất chiếm gần một nửa và cùng nói một điều: TF-IDF thấy từ nhưng không thấy thái độ hướng về ai. "Tiếc cho team của Captain" mang từ buồn nhưng là đồng cảm, không phải chê. Nhóm thứ ba là vừa khen vừa chê, và đây là nhóm lớn nhất của riêng lớp trung tính: một nhãn cho cả câu thì buộc phải chọn một bên, nên lớp trung tính khó ngay từ định nghĩa. Bảy dòng là nhãn gốc mà người đọc không đồng ý; con số này đo trên mẫu lỗi nên không suy ra được tỉ lệ nhãn sai của cả bộ dữ liệu. Về đặc trưng, mô hình học được rằng ai nhắc quảng cáo thì thường chê, còn nhắc tên hai thí sinh thì thường khen: đúng trong chương trình này, không chuyển được sang video khác. -->
 
 ---
 
@@ -223,6 +232,8 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 
 ## Phụ lục B1. Tài liệu tham khảo
 
+<style scoped>ol { font-size: 0.72em; }</style>
+
 1. Slide môn CS221 Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3, 4, 5, 6.
 2. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
 3. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426.
@@ -237,6 +248,8 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 ---
 
 ## Phụ lục B2. c-TF-IDF: vì sao `hay` không bao giờ đứng đầu từ khóa
+
+<style scoped>table { font-size: 0.78em; } ul { font-size: 0.8em; } p { font-size: 0.85em; }</style>
 
 W(t, c) = tf(t, c) × log(1 + A / f(t)), với A là số từ trung bình của một cụm
 
