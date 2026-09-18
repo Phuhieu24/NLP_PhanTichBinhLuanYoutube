@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" font-family="Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1280" height="720" fill="#FAFAF9"/>
+
+  <text x="640" y="46" text-anchor="middle" font-size="23" font-weight="bold" fill="#0F172A">Quy trình đánh giá mô hình cảm xúc</text>
+  <text x="640" y="72" text-anchor="middle" font-size="13.5" fill="#64748B">Chọn mô hình trên tập huấn luyện, chấm một lần trên tập kiểm tra</text>
+
+  <!-- ===== Dữ liệu (Amber) ===== -->
+  <rect x="32" y="100" width="236" height="132" rx="12" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+  <path d="M32,112 a12,12 0 0 1 12,-12 h212 a12,12 0 0 1 12,12 v20 h-236 z" fill="#D97706"/>
+  <text x="48" y="125" font-size="12.5" font-weight="bold" fill="#FFFFFF">Dữ liệu</text>
+  <text x="48" y="158" font-size="12.5" font-weight="bold" fill="#92400E">19.997 bình luận</text>
+  <text x="48" y="178" font-size="11.5" fill="#B45309">sau khi tiền xử lý</text>
+  <text x="48" y="198" font-size="11.5" fill="#B45309">(3 dòng rỗng bị loại bỏ)</text>
+  <text x="48" y="218" font-size="11" font-style="italic" fill="#B45309">nhãn: tích cực / trung tính / tiêu cực</text>
+
+  <!-- nhánh chia tập -->
+  <line x1="268" y1="166" x2="286" y2="166" stroke="#64748B" stroke-width="2.2"/>
+  <line x1="286" y1="130" x2="286" y2="202" stroke="#64748B" stroke-width="2.2"/>
+  <line x1="286" y1="130" x2="292" y2="130" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="292,124 302,130 292,136" fill="#64748B"/>
+  <line x1="286" y1="202" x2="292" y2="202" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="292,196 302,202 292,208" fill="#64748B"/>
+
+  <!-- Tập huấn luyện (Slate) -->
+  <rect x="304" y="100" width="206" height="60" rx="11" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+  <text x="320" y="126" font-size="12.5" font-weight="bold" fill="#0F172A">Tập huấn luyện</text>
+  <text x="320" y="146" font-size="11.5" fill="#475569">15.997 dòng (80%)</text>
+
+  <!-- Tập kiểm tra (Cyan) -->
+  <rect x="304" y="172" width="206" height="60" rx="11" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <text x="320" y="198" font-size="12.5" font-weight="bold" fill="#155E75">Tập kiểm tra</text>
+  <text x="320" y="218" font-size="11.5" fill="#0E7490">4.000 dòng (20%)</text>
+
+  <text x="304" y="254" font-size="11" font-style="italic" fill="#64748B">chia phân tầng, random_state = 42</text>
+
+  <!-- ===== Vùng chọn mô hình (Violet) ===== -->
+  <rect x="550" y="88" width="460" height="212" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="566" y="114" font-size="12.5" font-weight="bold" fill="#4C1D95">Chọn mô hình chỉ trên tập huấn luyện (cross-validation 5-fold)</text>
+
+  <circle cx="574" cy="150" r="6" fill="#7C3AED"/>
+  <text x="590" y="146" font-size="11.5" font-weight="bold" fill="#4C1D95">So sánh 4 mô hình nền</text>
+  <text x="590" y="164" font-size="11" fill="#6D28D9">MostFrequent, MultinomialNB, LogisticRegression, LinearSVC</text>
+
+  <circle cx="574" cy="204" r="6" fill="#7C3AED"/>
+  <text x="590" y="200" font-size="11.5" font-weight="bold" fill="#4C1D95">Dò tham số C của LinearSVC</text>
+  <text x="590" y="218" font-size="11" fill="#6D28D9">trong {0,1; 0,3; 1,0; 3,0}, chấm theo macro-F1</text>
+
+  <circle cx="574" cy="258" r="6" fill="#7C3AED"/>
+  <text x="590" y="254" font-size="11.5" font-weight="bold" fill="#4C1D95">Chọn C = 0,3</text>
+  <text x="590" y="272" font-size="11" fill="#6D28D9">giá trị cho macro-F1 tốt nhất trên cross-validation</text>
+
+  <line x1="514" y1="130" x2="538" y2="130" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="538,124 548,130 538,136" fill="#64748B"/>
+
+  <!-- ===== Huấn luyện mô hình cuối (Slate) ===== -->
+  <rect x="1040" y="140" width="208" height="104" rx="12" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+  <path d="M1040,152 a12,12 0 0 1 12,-12 h184 a12,12 0 0 1 12,12 v20 h-208 z" fill="#475569"/>
+  <text x="1054" y="165" font-size="12.5" font-weight="bold" fill="#FFFFFF">Huấn luyện cuối</text>
+  <text x="1054" y="196" font-size="11.5" fill="#0F172A">Dựng lại mô hình với</text>
+  <text x="1054" y="214" font-size="11.5" fill="#0F172A">C = 0,3 trên toàn bộ</text>
+  <text x="1054" y="232" font-size="11.5" fill="#0F172A">15.997 dòng huấn luyện</text>
+
+  <line x1="1014" y1="192" x2="1030" y2="192" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="1030,186 1040,192 1030,198" fill="#64748B"/>
+
+  <line x1="1144" y1="244" x2="1144" y2="346" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="1138,346 1150,346 1144,358" fill="#64748B"/>
+
+  <!-- ===== Đánh giá trên tập kiểm tra (Emerald) ===== -->
+  <rect x="700" y="360" width="548" height="150" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <path d="M700,372 a12,12 0 0 1 12,-12 h524 a12,12 0 0 1 12,12 v20 h-548 z" fill="#059669"/>
+  <text x="716" y="385" font-size="12.5" font-weight="bold" fill="#FFFFFF">Đánh giá một lần trên tập kiểm tra</text>
+  <circle cx="724" cy="418" r="5" fill="#059669"/>
+  <text x="738" y="422" font-size="11.5" fill="#065F46">accuracy và macro-F1</text>
+  <circle cx="724" cy="448" r="5" fill="#059669"/>
+  <text x="738" y="452" font-size="11.5" fill="#065F46">precision / recall / F1 cho từng lớp</text>
+  <circle cx="724" cy="478" r="5" fill="#059669"/>
+  <text x="738" y="482" font-size="11.5" fill="#065F46">ma trận nhầm lẫn</text>
+  <rect x="1080" y="430" width="140" height="22" rx="11" fill="#FFFFFF" stroke="#059669" stroke-width="1.2"/>
+  <text x="1090" y="445" font-size="9.5" font-family="Menlo, Consolas, monospace" fill="#047857">results/metrics.json</text>
+
+  <!-- đường tập kiểm tra đi vào bước đánh giá -->
+  <path d="M510,202 H530 V430 H688" fill="none" stroke="#0891B2" stroke-width="2.2"/>
+  <polygon points="688,424 698,430 688,436" fill="#0891B2"/>
+  <text x="540" y="408" font-size="11" font-style="italic" fill="#0E7490">tập kiểm tra chỉ dùng ở đây</text>
+
+  <!-- ===== Kiểm tra độ ổn định (Cyan) ===== -->
+  <rect x="32" y="470" width="430" height="112" rx="12" fill="#ECFEFF" stroke="#0891B2" stroke-width="1.5"/>
+  <path d="M32,482 a12,12 0 0 1 12,-12 h406 a12,12 0 0 1 12,12 v20 h-430 z" fill="#0891B2"/>
+  <text x="48" y="495" font-size="12.5" font-weight="bold" fill="#FFFFFF">Kiểm tra độ ổn định</text>
+  <text x="48" y="524" font-size="11.5" fill="#155E75">Chia lại dữ liệu với 5 hạt giống 0..4, huấn luyện lại mỗi lần,</text>
+  <text x="48" y="542" font-size="11.5" fill="#155E75">báo cáo mean ± std của accuracy và macro-F1.</text>
+  <rect x="48" y="552" width="110" height="22" rx="11" fill="#FFFFFF" stroke="#0891B2" stroke-width="1.2"/>
+  <text x="58" y="567" font-size="9.5" font-family="Menlo, Consolas, monospace" fill="#0E7490">seed_robustness</text>
+
+  <path d="M760,512 V540 H478" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="7,5"/>
+  <polygon points="478,534 478,546 466,540" fill="#94A3B8"/>
+  <text x="620" y="534" text-anchor="middle" font-size="11" font-style="italic" fill="#64748B">bước xác nhận bổ sung</text>
+
+  <!-- ===== Nguyên tắc (Rose) ===== -->
+  <rect x="32" y="300" width="236" height="88" rx="12" fill="#FFF1F2" stroke="#FB7185" stroke-width="1.5"/>
+  <path d="M32,312 a12,12 0 0 1 12,-12 h212 a12,12 0 0 1 12,12 v20 h-236 z" fill="#E11D48"/>
+  <text x="48" y="325" font-size="12" font-weight="bold" fill="#FFFFFF">Nguyên tắc</text>
+  <text x="48" y="356" font-size="11.5" font-weight="bold" fill="#9F1239">Tập kiểm tra không tham</text>
+  <text x="48" y="374" font-size="11.5" font-weight="bold" fill="#9F1239">gia chọn mô hình.</text>
+
+  <!-- ===== Color key ===== -->
+  <text x="32" y="636" font-size="11" font-weight="bold" fill="#475569">Color key</text>
+  <rect x="32" y="646" width="14" height="14" rx="3" fill="#D97706"/>
+  <text x="52" y="657" font-size="11" fill="#475569">Dữ liệu</text>
+  <rect x="120" y="646" width="14" height="14" rx="3" fill="#475569"/>
+  <text x="140" y="657" font-size="11" fill="#475569">Bước cơ học</text>
+  <rect x="238" y="646" width="14" height="14" rx="3" fill="#7C3AED"/>
+  <text x="258" y="657" font-size="11" fill="#475569">Chọn mô hình</text>
+  <rect x="360" y="646" width="14" height="14" rx="3" fill="#059669"/>
+  <text x="380" y="657" font-size="11" fill="#475569">Kết quả</text>
+  <rect x="452" y="646" width="14" height="14" rx="3" fill="#0891B2"/>
+  <text x="472" y="657" font-size="11" fill="#475569">Đánh giá và kiểm tra</text>
+  <rect x="616" y="646" width="14" height="14" rx="3" fill="#E11D48"/>
+  <text x="636" y="657" font-size="11" fill="#475569">Nguyên tắc cần giữ</text>
+
+  <text x="640" y="702" text-anchor="middle" font-size="11.5" font-style="italic" fill="#78716C">Số liệu chi tiết trong results/metrics.json và results/ab_preprocess.txt.</text>
+</svg>

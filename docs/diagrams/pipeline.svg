@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" font-family="Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1280" height="720" fill="#FAFAF9"/>
+
+  <text x="640" y="46" text-anchor="middle" font-size="23" font-weight="bold" fill="#0F172A">Pipeline năm bước của hệ thống</text>
+  <text x="640" y="72" text-anchor="middle" font-size="13.5" fill="#64748B">Từ bình luận YouTube thô đến chủ đề, cảm xúc và tóm tắt</text>
+
+  <!-- ===== 1. Thu thập dữ liệu (Amber) ===== -->
+  <rect x="32" y="104" width="190" height="360" rx="12" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+  <path d="M32,116 a12,12 0 0 1 12,-12 h166 a12,12 0 0 1 12,12 v22 h-190 z" fill="#D97706"/>
+  <text x="48" y="127" font-size="12.5" font-weight="bold" fill="#FFFFFF">1. Thu thập dữ liệu</text>
+  <rect x="48" y="150" width="112" height="22" rx="11" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.2"/>
+  <text x="58" y="165" font-size="9.5" font-family="Menlo, Consolas, monospace" fill="#B45309">src/crawler.py</text>
+  <circle cx="50" cy="196" r="5" fill="#D97706"/>
+  <text x="64" y="200" font-size="11" fill="#92400E">YouTube Data API v3</text>
+  <circle cx="50" cy="230" r="5" fill="#D97706"/>
+  <text x="64" y="234" font-size="11" fill="#92400E">commentThreads và</text>
+  <text x="64" y="250" font-size="11" fill="#92400E">các phản hồi (replies)</text>
+  <circle cx="50" cy="284" r="5" fill="#D97706"/>
+  <text x="64" y="288" font-size="11" fill="#92400E">hoặc tệp CSV /</text>
+  <text x="64" y="304" font-size="11" fill="#92400E">dữ liệu mẫu</text>
+
+  <!-- ===== 2. Tiền xử lý (Slate) ===== -->
+  <rect x="256" y="104" width="190" height="360" rx="12" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+  <path d="M256,116 a12,12 0 0 1 12,-12 h166 a12,12 0 0 1 12,12 v22 h-190 z" fill="#475569"/>
+  <text x="272" y="127" font-size="12.5" font-weight="bold" fill="#FFFFFF">2. Tiền xử lý</text>
+  <rect x="272" y="150" width="124" height="22" rx="11" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.2"/>
+  <text x="282" y="165" font-size="9.5" font-family="Menlo, Consolas, monospace" fill="#475569">src/preprocess.py</text>
+  <circle cx="274" cy="192" r="5" fill="#475569"/>
+  <text x="288" y="196" font-size="11" fill="#0F172A">Chuẩn hoá NFC, bỏ URL</text>
+  <text x="288" y="212" font-size="11" fill="#0F172A">và ký tự đặc biệt</text>
+  <circle cx="274" cy="246" r="5" fill="#475569"/>
+  <text x="288" y="250" font-size="11" fill="#0F172A">Gộp chữ lặp, sửa</text>
+  <text x="288" y="266" font-size="11" fill="#0F172A">teencode và chính tả</text>
+  <circle cx="274" cy="300" r="5" fill="#475569"/>
+  <text x="288" y="304" font-size="11" fill="#0F172A">Tách từ bằng pyvi</text>
+  <text x="288" y="320" font-size="11" fill="#0F172A">rồi hạ chữ thường</text>
+
+  <!-- ===== 3. Biểu diễn (Violet) ===== -->
+  <rect x="480" y="104" width="190" height="360" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <path d="M480,116 a12,12 0 0 1 12,-12 h166 a12,12 0 0 1 12,12 v22 h-190 z" fill="#7C3AED"/>
+  <text x="496" y="127" font-size="12.5" font-weight="bold" fill="#FFFFFF">3. Biểu diễn</text>
+  <rect x="496" y="150" width="160" height="22" rx="11" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="506" y="165" font-size="9" font-family="Menlo, Consolas, monospace" fill="#6D28D9">TF-IDF (1,2)-gram 15.000</text>
+  <rect x="496" y="180" width="170" height="22" rx="11" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="506" y="195" font-size="9" font-family="Menlo, Consolas, monospace" fill="#6D28D9">vietnamese-sbert 768 chiều</text>
+  <circle cx="498" cy="234" r="5" fill="#7C3AED"/>
+  <text x="512" y="238" font-size="11" fill="#4C1D95">TF-IDF cho cảm xúc</text>
+  <circle cx="498" cy="268" r="5" fill="#7C3AED"/>
+  <text x="512" y="272" font-size="11" fill="#4C1D95">Vector câu cho chủ đề</text>
+
+  <!-- ===== 4. Mô hình (Violet đậm) ===== -->
+  <rect x="704" y="104" width="320" height="360" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5"/>
+  <path d="M704,116 a12,12 0 0 1 12,-12 h296 a12,12 0 0 1 12,12 v22 h-320 z" fill="#5B21B6"/>
+  <text x="720" y="127" font-size="12.5" font-weight="bold" fill="#FFFFFF">4. Mô hình</text>
+
+  <rect x="716" y="152" width="140" height="112" rx="10" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="728" y="174" font-size="11.5" font-weight="bold" fill="#4C1D95">Cảm xúc</text>
+  <text x="728" y="194" font-size="11" fill="#6D28D9">LinearSVC</text>
+  <text x="728" y="210" font-size="11" fill="#6D28D9">(C = 0,3)</text>
+  <rect x="728" y="224" width="124" height="20" rx="10" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="736" y="238" font-size="8" font-family="Menlo, Consolas, monospace" fill="#6D28D9">src/train_sentiment.py</text>
+
+  <rect x="872" y="152" width="140" height="112" rx="10" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="884" y="174" font-size="11.5" font-weight="bold" fill="#4C1D95">Chủ đề</text>
+  <text x="884" y="194" font-size="11" fill="#6D28D9">UMAP → HDBSCAN</text>
+  <text x="884" y="210" font-size="11" fill="#6D28D9">→ c-TF-IDF</text>
+  <rect x="884" y="224" width="120" height="20" rx="10" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="892" y="238" font-size="8" font-family="Menlo, Consolas, monospace" fill="#6D28D9">src/topic_pipeline.py</text>
+
+  <rect x="716" y="296" width="296" height="90" rx="10" fill="#FAF5FF" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="6,4"/>
+  <text x="732" y="322" font-size="11.5" font-weight="bold" fill="#4C1D95">Tóm tắt: Ollama (tùy chọn)</text>
+  <text x="732" y="342" font-size="10.5" font-style="italic" fill="#6D28D9">bước phụ, chạy cục bộ, không bắt buộc</text>
+  <rect x="732" y="352" width="126" height="20" rx="10" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.2"/>
+  <text x="740" y="366" font-size="8" font-family="Menlo, Consolas, monospace" fill="#6D28D9">src/llm_summary.py</text>
+
+  <!-- ===== 5. Đánh giá và ứng dụng (Emerald) ===== -->
+  <rect x="1058" y="104" width="190" height="360" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="1.5"/>
+  <path d="M1058,116 a12,12 0 0 1 12,-12 h166 a12,12 0 0 1 12,12 v22 h-190 z" fill="#059669"/>
+  <text x="1072" y="127" font-size="12" font-weight="bold" fill="#FFFFFF">5. Đánh giá và ứng dụng</text>
+  <rect x="1074" y="150" width="138" height="22" rx="11" fill="#FFFFFF" stroke="#059669" stroke-width="1.2"/>
+  <text x="1084" y="165" font-size="9.5" font-family="Menlo, Consolas, monospace" fill="#047857">results/metrics.json</text>
+  <rect x="1074" y="180" width="80" height="22" rx="11" fill="#FFFFFF" stroke="#059669" stroke-width="1.2"/>
+  <text x="1084" y="195" font-size="9.5" font-family="Menlo, Consolas, monospace" fill="#047857">src/app.py</text>
+  <circle cx="1076" cy="232" r="5" fill="#059669"/>
+  <text x="1090" y="236" font-size="11" fill="#065F46">macro-F1, F1 từng lớp,</text>
+  <text x="1090" y="252" font-size="11" fill="#065F46">ma trận nhầm lẫn</text>
+  <circle cx="1076" cy="286" r="5" fill="#059669"/>
+  <text x="1090" y="290" font-size="11" fill="#065F46">Ablation cho HDBSCAN</text>
+  <circle cx="1076" cy="320" r="5" fill="#059669"/>
+  <text x="1090" y="324" font-size="11" fill="#065F46">Giao diện 5 tab</text>
+
+  <!-- ===== Mũi tên giữa các bước ===== -->
+  <line x1="226" y1="284" x2="244" y2="284" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="244,278 254,284 244,290" fill="#64748B"/>
+  <line x1="450" y1="284" x2="468" y2="284" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="468,278 478,284 468,290" fill="#64748B"/>
+  <line x1="674" y1="284" x2="692" y2="284" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="692,278 702,284 692,290" fill="#64748B"/>
+  <line x1="1028" y1="284" x2="1046" y2="284" stroke="#64748B" stroke-width="2.2"/>
+  <polygon points="1046,278 1056,284 1046,290" fill="#64748B"/>
+
+  <!-- ===== Vòng phản hồi ===== -->
+  <path d="M1153,468 C1153,532 1000,544 640,544 C420,544 351,534 351,480" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="7,5"/>
+  <polygon points="345,482 357,482 351,468" fill="#94A3B8"/>
+  <text x="640" y="532" text-anchor="middle" font-size="11.5" font-style="italic" fill="#64748B">phân tích lỗi → sửa tiền xử lý</text>
+
+  <!-- ===== Color key ===== -->
+  <text x="32" y="644" font-size="11" font-weight="bold" fill="#475569">Color key</text>
+  <rect x="32" y="654" width="14" height="14" rx="3" fill="#D97706"/>
+  <text x="52" y="665" font-size="11" fill="#475569">Dữ liệu vào</text>
+  <rect x="140" y="654" width="14" height="14" rx="3" fill="#475569"/>
+  <text x="160" y="665" font-size="11" fill="#475569">Bước cơ học</text>
+  <rect x="256" y="654" width="14" height="14" rx="3" fill="#7C3AED"/>
+  <text x="276" y="665" font-size="11" fill="#475569">Biểu diễn và mô hình</text>
+  <rect x="430" y="654" width="14" height="14" rx="3" fill="#059669"/>
+  <text x="450" y="665" font-size="11" fill="#475569">Kết quả và ứng dụng</text>
+
+  <text x="640" y="702" text-anchor="middle" font-size="11.5" font-style="italic" fill="#78716C">Sơ đồ trung tính, không chứa số liệu; số liệu nằm trong results/.</text>
+</svg>
