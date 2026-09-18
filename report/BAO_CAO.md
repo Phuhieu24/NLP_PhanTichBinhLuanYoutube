@@ -345,20 +345,8 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 
 \newpage
 
-## 10. Phân công và tài liệu tham khảo
+## 10. Tài liệu tham khảo
 
-### 10.1. Phân công
-
-| Thành viên | Phần việc | Tệp chính |
-|---|---|---|
-| TODO | Thu thập bình luận và chuẩn bị dữ liệu | `src/crawler.py`, `data/` |
-| TODO | Tiền xử lý và từ dừng | `src/preprocess.py`, `src/resources/` |
-| TODO | Gom cụm chủ đề | `src/topic_pipeline.py`, `src/topic_model.py` |
-| TODO | Phân loại cảm xúc và đánh giá | `src/train_sentiment.py`, `results/` |
-| TODO | Ứng dụng và kiểm thử | `src/app.py`, `tests/` |
-| TODO | Báo cáo | `BAO_CAO.md`, `README.md` |
-
-### 10.2. Tài liệu tham khảo
 
 Mỗi mục cần kiểm tra lại trước khi nộp (năm, tên hội nghị, phiên bản thư viện).
 
