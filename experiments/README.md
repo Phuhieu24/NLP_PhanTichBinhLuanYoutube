@@ -17,6 +17,7 @@ python experiments/topic_ablation.py     # ~1 phút   -> results/topic_ablation.
 | `dataset_stats.py` | Thống kê mô tả `data/dataset_chuan.csv`: số dòng, phân bố nhãn, trùng lặp, độ dài, tỷ lệ bình luận có emoji / dấu câu / ký tự lặp, số dòng chưa chuẩn hóa NFC, số dòng rỗng sau tiền xử lý. Ghi kèm định nghĩa (biểu thức chính quy, cách nhận diện emoji) để kiểm chứng lại được. | `results/dataset_stats.json` |
 | `ab_preprocess.py` | So sánh A/B bản tiền xử lý gốc ở commit `afb1c3e` với bản đang xuất xưởng, giữ nguyên TF-IDF và LinearSVC, chạy trên các hạt giống 0-4 và 42, với C = 0.3 và C = 1.0. | `results/ab_preprocess.csv` (từng lần chạy), `results/ab_preprocess.txt` (bảng tổng hợp) |
 | `topic_ablation.py` | Năm cấu hình HDBSCAN trên 1.500 dòng đầu tiên, nhúng câu một lần rồi dùng lại, đi qua đúng `src/topic_pipeline.py`; kèm một lần chạy tắt từ dừng để kiểm tra xem danh sách từ dừng có làm đổi cột `Topic` hay không. | `results/topic_ablation.csv`, `results/topic_ablation.txt` |
+| `export_misclassified.py` | Dựng lại đúng tập test của `src/train_sentiment.py` (seed 42), dự đoán bằng mô hình đã lưu, đối chiếu accuracy với `results/metrics.json` rồi xuất 935 dòng bị phân loại sai kèm `margin` (điểm lớp dự đoán trừ điểm lớp đúng), thêm một mẫu phân tầng 150 dòng có cột trống `hien_tuong` để gán nhãn hiện tượng lỗi bằng tay. | `results/misclassified_test.csv`, `results/error_sample_150.csv` |
 
 `preprocess_baseline.py` là bản sao đóng băng phần tiền xử lý ở commit `afb1c3e`, chỉ
 phục vụ so sánh A/B. Không import tệp này ở bất kỳ đâu trong `src/`.
