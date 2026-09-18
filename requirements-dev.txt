@@ -2,3 +2,4 @@
 -r requirements.txt
 pytest>=8.0
 python-docx>=1.1   # dựng report/BAO_CAO.docx bằng scripts/build_report.py
+python-pptx>=1.0    # dựng report/CS221_slide.pptx bằng scripts/build_slides_pptx.py
