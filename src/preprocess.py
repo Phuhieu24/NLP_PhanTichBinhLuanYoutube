@@ -5,25 +5,82 @@ import sys
 from pyvi import ViTokenizer
 
 TEENCODE_DICT = {
+    # Phủ định / xác nhận
     "ko": "không",
     "k": "không",
     "khong": "không",
+    "kh": "không",
+    "hok": "không",
+    "hem": "không",
     "đc": "được",
     "dc": "được",
+    "đk": "được",
     "ok": "tốt",
     "oke": "tốt",
-    "cx": "cũng",
-    "sp": "sản phẩm",
+    "okay": "tốt",
+    # Đại từ / xưng hô
     "mk": "mình",
     "mik": "mình",
-    "ntn": "như thế nào",
+
+    "mn": "mọi người",
+    "ae": "anh em",
+    "ib": "nhắn tin",
+
+    # Trạng từ / liên từ
+    "cx": "cũng",
+    "cg": "cũng",
     "vs": "với",
+    "voi": "với",
     "ms": "mới",
-    "kb": "không biết",
+    "nma": "nhưng mà",
+    "nhma": "nhưng mà",
+    "mà": "mà",
+    "thui": "thôi",
+
+    "rr": "rồi",
+    "ntn": "như thế nào",
+    "sao": "sao",
+    "vay": "vậy",
+
+    "vậy": "vậy",
+    "ik": "đi",
+    "di": "đi",
+    # Cảm thán / đánh giá
     "vcl": "rất",
     "vl": "rất",
+    "vkl": "rất",
+    "wl": "rất",
+    "quá": "quá",
+    "wa": "quá",
+    "lm": "làm",
+    "bt": "bình thường",
+    "bth": "bình thường",
+    "nt": "nhắn tin",
+    # Sản phẩm / thương mại
+    "sp": "sản phẩm",
+    "đh": "đặt hàng",
+    "shop": "cửa hàng",
+    # Cảm ơn / xin lỗi
+    "tks": "cảm ơn",
+    "thks": "cảm ơn",
+    "thanks": "cảm ơn",
+    "ty": "cảm ơn",
+    "xl": "xin lỗi",
+    "sorry": "xin lỗi",
+    # Tiêu cực (kiểm duyệt nhẹ)
     "đkm": "tồi",
-    "vlol": "tồi"
+    "vlol": "tồi",
+    "cl": "tồi",
+    "dm": "tồi",
+    # Tích cực
+    "tuyệt": "tuyệt vời",
+    "hay": "hay",
+    "đỉnh": "xuất sắc",
+    "xịn": "tốt",
+    "chất": "chất lượng",
+    # Số / đơn vị phổ biến (chuẩn hóa)
+    "tr": "triệu",
+    "tỷ": "tỷ",
 }
 
 def normalize_teencode(text):
@@ -45,10 +102,13 @@ def clean_text(text):
     # \w trong Python 3 mặc định hỗ trợ Unicode tiếng Việt
     text = re.sub(r'[^\w\s]', ' ', text)
     
-    # 4. Chuẩn hóa teencode
+    # 4. Xóa các chuỗi số thuần túy (không mang nghĩa ngôn ngữ)
+    text = re.sub(r'\b\d+\b', '', text)
+    
+    # 5. Chuẩn hóa teencode
     text = normalize_teencode(text)
     
-    # 5. Xóa khoảng trắng thừa
+    # 6. Xóa khoảng trắng thừa
     text = re.sub(r'\s+', ' ', text).strip()
     
     return text

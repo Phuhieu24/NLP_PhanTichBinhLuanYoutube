@@ -4,6 +4,8 @@ import sys
 from bertopic import BERTopic
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
+from umap import UMAP
+from hdbscan import HDBSCAN
 
 if __name__ == "__main__":
     if sys.stdout.encoding != 'utf-8':
@@ -29,13 +31,41 @@ if __name__ == "__main__":
     embeddings = sentence_model.encode(docs, show_progress_bar=True)
     
     print("4. Cấu hình vectorizer để giữ nguyên các từ ghép tiếng Việt...")
-    # Regex này giúp giữ lại các từ có dấu gạch dưới (ví dụ: 'âm_nhạc')
-    vectorizer_model = CountVectorizer(token_pattern=r'(?u)\b\w+\b')
-    
-    print("5. Bắt đầu chạy thuật toán BERTopic (Tự động xác định số lượng chủ đề)...")
+    VIETNAMESE_STOPWORDS = [
+        "là", "và", "của", "có", "trong", "được", "cho", "với", "các", "này",
+        "đã", "một", "những", "không", "như", "khi", "vào", "về", "từ", "thì",
+        "mà", "để", "hay", "ra", "lại", "cũng", "đây", "đó", "thế", "nên",
+        "rất", "cần", "bị", "vì", "tuy", "nhưng", "nếu", "hơn", "nhất", "rồi",
+        "đến", "lên", "theo", "bởi", "qua", "sau", "trước", "trên", "dưới",
+        "nào", "ai", "gì", "sao", "vậy", "đâu", "đi", "thôi", "thật", "ơi",
+        "ạ", "à", "ừ", "uh", "ha", "he", "hihi", "haha", "hehe",
+        "tôi", "mình", "bạn", "em", "anh", "chị", "họ", "nó", "ta", "chúng",
+        "mọi", "người", "cái", "con", "bao", "nhiêu", "lắm", "quá", "vẫn",
+        "thêm", "chỉ", "cả", "đều", "sẽ", "đang", "còn", "nữa", "mới",
+        "phải", "muốn", "thấy", "biết", "làm", "nói", "nghĩ", "thích", "dùng",
+    ]
+    vectorizer_model = CountVectorizer(
+        token_pattern=r'(?u)\b\w+\b',
+        stop_words=VIETNAMESE_STOPWORDS,
+        min_df=2
+    )
+
+    min_size = max(5, len(docs) // 100)
+
+    print("5. Bắt đầu chạy thuật toán BERTopic (random_state=42 để kết quả nhất quán)...")
+    umap_model = UMAP(
+        n_neighbors=10, n_components=5, min_dist=0.0,
+        metric='cosine', random_state=42
+    )
+    hdbscan_model = HDBSCAN(
+        min_cluster_size=min_size, min_samples=3,
+        metric='euclidean', prediction_data=True
+    )
     topic_model = BERTopic(
         embedding_model=sentence_model,
         vectorizer_model=vectorizer_model,
+        umap_model=umap_model,
+        hdbscan_model=hdbscan_model,
         verbose=True
     )
     

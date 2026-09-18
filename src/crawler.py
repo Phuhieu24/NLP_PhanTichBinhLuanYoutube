@@ -1,7 +1,9 @@
 import os
 import sys
+import time
 import pandas as pd
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 import re
 
@@ -23,7 +25,7 @@ def get_video_comments(api_key, video_id, max_results=500):
     
     while request and len(comments) < max_results:
         try:
-            response = request.execute()
+            response = _execute_with_retry(request)
             
             for item in response['items']:
                 top_comment_snippet = item['snippet']['topLevelComment']['snippet']
@@ -44,7 +46,7 @@ def get_video_comments(api_key, video_id, max_results=500):
                             textFormat="plainText"
                         )
                         while replies_request and len(comments) < max_results:
-                            replies_response = replies_request.execute()
+                            replies_response = _execute_with_retry(replies_request)
                             for reply_item in replies_response.get('items', []):
                                 reply_snippet = reply_item['snippet']
                                 comments.append([
@@ -79,13 +81,40 @@ def get_video_comments(api_key, video_id, max_results=500):
             else:
                 break
                 
-        except Exception as e:
-            raise Exception(f"Lỗi gọi API YouTube: {e}")
+        except HttpError as e:
+            reason = ""
+            if e.error_details:
+                reason = e.error_details[0].get("reason", "")
+            if reason == "commentsDisabled":
+                raise Exception("Video này đã tắt tính năng bình luận. Vui lòng thử một video khác.")
+            elif reason == "videoNotFound":
+                raise Exception("Không tìm thấy video. Vui lòng kiểm tra lại URL.")
+            else:
+                raise Exception(f"Lỗi gọi API YouTube: {e}")
             
     df = pd.DataFrame(comments, columns=['author', 'published_at', 'like_count', 'text'])
     df = df.head(max_results)
     print(f"Đã lấy thành công tổng cộng {len(df)} bình luận.")
     return df
+
+
+def _execute_with_retry(request, max_retries=3):
+    """Thực thi request với cơ chế retry tự động khi gặp lỗi 429 (rate limit)."""
+    for attempt in range(max_retries):
+        try:
+            return request.execute()
+        except HttpError as e:
+            status_code = e.resp.status if hasattr(e, 'resp') else 0
+            if status_code == 429:
+                wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
+                print(f"API bị giới hạn tốc độ (429). Thử lại sau {wait_time} giây... (Lần {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+                if attempt == max_retries - 1:
+                    raise Exception(f"Đã vượt quá số lần thử lại ({max_retries}). Vui lòng thử lại sau.")
+            else:
+                raise
+    raise Exception(f"Đã vượt quá số lần thử lại ({max_retries}).")
+
 
 def extract_video_id(url):
     match = re.search(r'(?:v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})', url)
