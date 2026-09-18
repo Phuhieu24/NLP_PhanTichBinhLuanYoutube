@@ -56,7 +56,7 @@ Script so sánh bốn mô hình nền bằng cross-validation trên tập huấn
 python src/topic_model.py --input data/dataset_chuan.csv --text-col text --limit 1500 --min-topic-size 15 --min-samples 1 --out-dir results
 ```
 
-Dùng chung module `src/topic_pipeline.py` với ứng dụng web nên kết quả hai bên khớp nhau. Lệnh trên cho 1.493 bình luận hợp lệ, 26 chủ đề và 33,3% nhiễu trên máy thử nghiệm (`results/topic_cli_demo.txt`); UMAP có hạt giống cố định nên hai lần chạy trên cùng máy cho cùng kết quả, giữa các máy có thể lệch nhỏ. Ghi `comments_with_topics.csv`, `topics_summary.csv` và ba biểu đồ HTML vào `--out-dir` (các tệp này nằm trong `.gitignore`). Mặc định `--input` là `data/comments.csv`, tức tệp thô do `src/crawler.py` tạo ra. `python src/topic_model.py --help` liệt kê đủ tham số.
+CLI và ứng dụng web gọi cùng một module `src/topic_pipeline.py` nên kết quả hai bên khớp nhau. Lệnh trên cho 1.493 bình luận hợp lệ, 26 chủ đề và 33,3% nhiễu trên máy thử nghiệm (`results/topic_cli_demo.txt`); UMAP có hạt giống cố định nên hai lần chạy trên cùng máy cho cùng kết quả, giữa các máy có thể lệch nhỏ. Ghi `comments_with_topics.csv`, `topics_summary.csv` và ba biểu đồ HTML vào `--out-dir` (các tệp này nằm trong `.gitignore`). Mặc định `--input` là `data/comments.csv`, tức tệp thô do `src/crawler.py` tạo ra. `python src/topic_model.py --help` liệt kê đủ tham số.
 
 ### Tái lập các bảng thực nghiệm của báo cáo
 
@@ -93,7 +93,7 @@ Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và b�
 | `src/app.py` | Ứng dụng Streamlit: thanh bên, sáu bước xử lý, năm tab kết quả. |
 | `src/crawler.py` | Thu thập bình luận qua YouTube Data API v3, tiết kiệm quota, lỗi có phân loại (`CrawlError`). |
 | `src/preprocess.py` | Làm sạch, chuẩn hóa teencode, tách từ bằng pyvi (tách từ trước, hạ chữ thường sau), đọc danh sách từ dừng. |
-| `src/topic_pipeline.py` | Toàn bộ logic BERTopic (UMAP, HDBSCAN, c-TF-IDF), bảng kết quả và biểu đồ; dùng chung cho app và CLI. |
+| `src/topic_pipeline.py` | Toàn bộ logic BERTopic (UMAP, HDBSCAN, c-TF-IDF), bảng kết quả và biểu đồ; cả app và CLI đều gọi. |
 | `src/topic_model.py` | Công cụ dòng lệnh chạy pipeline chủ đề trên một tệp CSV. |
 | `src/train_sentiment.py` | Huấn luyện và đánh giá mô hình cảm xúc, ghi số liệu và thẻ mô hình. |
 | `src/llm_summary.py` | Lớp `OllamaSummarizer`: gửi từ khóa và bình luận tiêu biểu tới Ollama, nhận một câu tóm tắt. |
