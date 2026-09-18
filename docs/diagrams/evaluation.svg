@@ -104,8 +104,8 @@
   <text x="48" y="356" font-size="11.5" font-weight="bold" fill="#9F1239">Tập kiểm tra không tham</text>
   <text x="48" y="374" font-size="11.5" font-weight="bold" fill="#9F1239">gia chọn mô hình.</text>
 
-  <!-- ===== Color key ===== -->
-  <text x="32" y="636" font-size="11" font-weight="bold" fill="#475569">Color key</text>
+  <!-- ===== Chú giải màu ===== -->
+  <text x="32" y="636" font-size="11" font-weight="bold" fill="#475569">Chú giải màu</text>
   <rect x="32" y="646" width="14" height="14" rx="3" fill="#D97706"/>
   <text x="52" y="657" font-size="11" fill="#475569">Dữ liệu</text>
   <rect x="120" y="646" width="14" height="14" rx="3" fill="#475569"/>
