@@ -28,11 +28,11 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.oxml.ns import qn
 
 C = dict(
-    bg="FAFAF9", ink="0F172A", body="334155", muted="64748B", faint="94A3B8",
-    teal="0D9488", teal_dk="0F766E", teal_50="F0FDFA", teal_100="CCFBF1",
-    row_alt="F8FAFC", white="FFFFFF", line="E2E8F0",
-    amber="D97706", violet="7C3AED", rose="E11D48",
-    neg="EF4444", neu="9CA3AF", pos="22C55E",
+    bg="0B1220", ink="F2F6FB", body="C5D2E4", muted="93A6C0", faint="55688A",
+    teal="2DD4BF", teal_dk="5EEAD4", teal_50="12303A", teal_100="164E4A",
+    row_alt="121E30", white="0E1929", line="253750",
+    amber="FBBF24", violet="A78BFA", rose="FB7185",
+    neg="F87171", neu="9CA3AF", pos="4ADE80",
 )
 def rgb(k): return RGBColor.from_string(C[k] if k in C else k)
 
@@ -184,9 +184,9 @@ def picture(slide, path, x=None, y=CONTENT_TOP, w=None, h=None):
 
 REPO = Path(__file__).resolve().parents[1]
 IMG = dict(
-    pipeline=str(REPO / "docs/diagrams/pipeline.png"),
-    evaluation=str(REPO / "docs/diagrams/evaluation.png"),
-    cm=str(REPO / "results/confusion_matrix_normalized.png"),
+    pipeline=str(REPO / "docs/diagrams/pipeline_dark.png"),
+    evaluation=str(REPO / "docs/diagrams/evaluation_dark.png"),
+    cm=str(REPO / "docs/diagrams/confusion_dark.png"),
     app=str(REPO / "docs/screenshots/03_tab_tong_quan.png"),
 )
 for k, v in IMG.items():
@@ -209,10 +209,20 @@ def new(kick=None, ttl=None, tsize=29, number=True):
     if number and n > 1: page_number(s, n)
     return s
 
+def full_bleed(path):
+    """Sơ đồ phủ kín khung hình: hình đã có tiêu đề riêng nên slide không cần tiêu đề."""
+    global n
+    s = prs.slides.add_slide(BLANK)
+    set_bg(s)
+    n += 1
+    s.shapes.add_picture(path, 0, 0, width=Inches(SW), height=Inches(SH))
+    page_number(s, n)
+    return s
+
 # ---------------------------------------------------------------- 1. Bìa
 s = new(number=False)
 from pptx.enum.shapes import MSO_SHAPE
-band = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(0.34), Inches(SH))
+band = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(0.42), Inches(SH))
 band.fill.solid(); band.fill.fore_color.rgb = rgb("teal_100"); band.line.fill.background()
 band.shadow.inherit = False
 _, tf = textbox(s, 1.35, 1.95, 10.6, 1.9)
@@ -246,10 +256,7 @@ bullets(s, [
 notes(s, "Bài toán xuất phát từ nhu cầu thật: một video có vài nghìn bình luận, không ai đọc nổi từng dòng. Nhóm em muốn trả lời hai câu: người xem đang nói về cái gì, và họ thấy thế nào. Dữ liệu này khó hơn văn bản báo chí. Một phần ba bình luận có emoji. Trung vị chỉ 52 ký tự, tức là một câu ngắn, ít ngữ cảnh. Và rất nhiều câu kiểu \"hay mà tiếc\", vừa khen vừa chê. Thêm cái khó riêng của tiếng Việt: từ ghép không có ranh giới, nên tách từ sai thì từ khóa chủ đề sai và đặc trưng phân loại cũng sai.")
 
 # ---------------------------------------------------------------- 3. Pipeline
-s = new("Tổng quan", "Pipeline năm bước theo bài giảng, mỗi bước một module")
-picture(s, IMG["pipeline"], x=2.89, y=1.92, h=4.25)
-caption(s, "Thu thập (src/crawler.py, ba nguồn dữ liệu) · tiền xử lý (src/preprocess.py) · biểu diễn (TF-IDF và vector câu) · "
-           "thuật toán (LinearSVC, BERTopic trong src/topic_pipeline.py) · đánh giá (results/, experiments/)", y=6.35)
+s = full_bleed(IMG["pipeline"])
 notes(s, "Nhóm em xếp đồ án theo đúng quy trình năm bước của bài 5 trong môn: thu thập và phân tích dữ liệu, tiền xử lý, biểu diễn, thuật toán, rồi đánh giá và phân tích lỗi. Sơ đồ này cho thấy mỗi bước nằm ở module nào trong mã nguồn. Điểm khác so với bài phân loại thuần: từ bước biểu diễn, pipeline tách làm hai nhánh. Nhánh cảm xúc dùng TF-IDF và LinearSVC. Nhánh chủ đề dùng vector câu và BERTopic. Hai nhánh gặp lại nhau ở ứng dụng, khi cảm xúc được hiển thị theo từng chủ đề. Phần còn lại của bài đi lần lượt qua năm bước này.")
 
 # ---------------------------------------------------------------- 4. Dữ liệu
@@ -259,13 +266,13 @@ table(s, [["Nhãn", "Số dòng", "Tỉ lệ"],
           ["Trung tính (1)", "3.409", "17,0%"],
           ["Tích cực (2)", "9.591", "48,0%"],
           ["Tổng, sau tiền xử lý", "19.997", "3 dòng rỗng"]],
-      x=ML, y=2.05, w=5.5, col_w=[2.5, 1.5, 1.5], size=13.5, row_h=0.46, align_right_from=1)
+      x=ML, y=2.05, w=5.5, col_w=[2.5, 1.5, 1.5], size=15, row_h=0.60, align_right_from=1)
 bullets(s, [
     "Gói ATSH-NLP-20k, dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT); bình luận về Anh Trai Say Hi mùa 1, tập 1 đến 14",
     "Nhãn silver do mô hình ngôn ngữ lớn gán theo đối tượng và khía cạnh rồi gộp; chưa kiểm tay, trung tính nhiễu nhất",
     "Tác giả lấy mẫu lại từ dữ liệu gốc khoảng 88% tích cực; tỉ lệ nhãn không phải tỉ lệ thật trên YouTube",
     "Một chương trình duy nhất; chỉ dùng cho học tập, không công bố lại",
-], x=6.85, y=2.05, w=5.7, size=15.5, gap=16)
+], x=6.85, y=2.05, w=5.7, size=17.5, gap=20)
 notes(s, "Tập dữ liệu có 20.000 bình luận, hai cột: văn bản và nhãn. Đây là hai cột text và label của gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA của Phạm Xuân Vĩnh Hà ở UIT; nhóm em chỉ dùng cho học tập theo đúng điều kiện của tác giả. Ba lớp lệch nhau: tích cực gần một nửa, trung tính chỉ 17%. Con số 17% này sẽ quay lại ở phần kết quả, vì trung tính là lớp yếu nhất. Ba điều nhóm em nói thẳng. Thứ nhất, mọi bình luận đều về một chương trình, nên mô hình học cả tên thí sinh làm tín hiệu. Thứ hai, tỉ lệ ba lớp là do tác giả lấy mẫu lại: dữ liệu gốc khoảng 88% tích cực, tác giả giữ hết trung tính, lấy đúng 7.000 tiêu cực rồi bù tích cực cho đủ 20.000; vì vậy số 7.000 tròn, và tỉ lệ này không phải tỉ lệ thật trên YouTube. Thứ ba, nhãn là nhãn silver do mô hình ngôn ngữ lớn gán theo từng đối tượng và khía cạnh rồi gộp lại, chưa có người kiểm từng dòng; chính tác giả ghi trung tính là lớp nhiễu nhất. Phần đọc tay 150 bình luận ở cuối bài cũng là để kiểm chất lượng nhãn.")
 
 # ---------------------------------------------------------------- 5. Tiền xử lý
@@ -304,8 +311,7 @@ bullets(s, [
 notes(s, "Hai bài toán con cần hai cách biểu diễn. Với cảm xúc, nhóm em dùng TF-IDF có bigram. Nếu chỉ dùng unigram, chữ \"hay\" sẽ kéo cả \"không hay\" lẫn \"hay nhưng\" về lớp tích cực. Bigram giữ được cặp phủ định. Với chủ đề, mỗi bình luận thành một vector 768 chiều từ một mô hình Sentence-BERT tiếng Việt. Thẻ mô hình không ghi mô hình gốc, nhóm em đọc file config trên Hugging Face và suy ra nó tinh chỉnh từ PhoBERT-base. Điều đó có hệ quả thực tế: PhoBERT học trên văn bản đã tách từ, nên bước pyvi phía trước vừa phục vụ từ khóa, vừa là định dạng đầu vào mà mô hình nhúng mong đợi.")
 
 # ---------------------------------------------------------------- 8. Quy trình đánh giá
-s = new("Bước 5 · Đánh giá", "Chọn trên tập huấn luyện, chấm một lần trên tập kiểm tra", tsize=28)
-picture(s, IMG["evaluation"], x=2.44, y=1.95, h=4.75)
+s = full_bleed(IMG["evaluation"])
 notes(s, "Trước khi xem con số, em nói cách chấm. Dữ liệu chia phân tầng 80 trên 20 với hạt giống 42. Mọi việc chọn lựa, so bốn mô hình nền và dò tham số C, chỉ chạy bằng cross-validation năm phần trên 15.997 dòng huấn luyện. Tập kiểm tra 4.000 dòng để dành, chấm đúng một lần với mô hình cuối. Sau đó nhóm em chia lại với năm hạt giống khác để xem con số có ổn định không. Quy trình này là lý do nhóm em tin các số ở hai slide sau.")
 
 # ---------------------------------------------------------------- 9. Mô hình cảm xúc
@@ -330,14 +336,13 @@ table(s, [["Lớp", "Độ chính xác", "Độ phủ", "F1"],
           ["Tiêu cực (1.400)", "0,7458", "0,7564", "0,7511"],
           ["Trung tính (682)", "0,5270", "0,5440", "0,5354"],
           ["Tích cực (1.918)", "0,8715", "0,8525", "0,8619"]],
-      x=ML, y=2.08, w=6.6, col_w=[2.4, 1.6, 1.3, 1.3], size=13.5, row_h=0.45, align_right_from=1, highlight_row=2)
-pic = picture(s, IMG["cm"], x=7.85, y=2.0, w=4.6)
-pic.line.color.rgb = rgb("line"); pic.line.width = Pt(0.75)
+      x=ML, y=2.08, w=5.6, col_w=[2.2, 1.25, 1.1, 1.05], size=14.5, row_h=0.56, align_right_from=1, highlight_row=2)
+picture(s, IMG["cm"], x=6.68, y=1.98, w=5.75)
 bullets(s, [
     "Tỉ lệ dự đoán đúng 76,62% và macro-F1 0,7161 trên 4.000 dòng, chấm một lần; độ chính xác là precision, độ phủ là recall",
     "Năm hạt giống 0 đến 4: 77,58% ± 0,44 và macro-F1 0,7200 ± 0,0037",
     "Trung tính: đúng 371/682; 203 bị gán tiêu cực, 108 bị gán tích cực",
-], x=ML, y=4.15, w=6.6, size=14.5, gap=13)
+], x=ML, y=4.52, w=5.95, size=15, gap=16)
 notes(s, "Đây là kết quả trên tập kiểm tra, chấm đúng một lần với mô hình đã chọn. Tỉ lệ dự đoán đúng 76,62%, macro-F1 0,7161. Chạy lại với năm hạt giống chia tập khác thì được 77,58%, nên con số 76,62% là ước lượng thận trọng. Mời thầy nhìn hàng giữa của ma trận nhầm lẫn bên phải: lớp trung tính chỉ nhận ra 54%, còn lại chia đều về hai phía, 203 sang tiêu cực, 108 sang tích cực. Hai lớp tiêu cực và tích cực hiếm khi nhầm sang nhau, chỉ 133 và 158 trên gần 3.300 mẫu. Nói gọn: mô hình phân biệt khen với chê tốt, nhưng không chắc đâu là \"không khen không chê\".")
 
 # ---------------------------------------------------------------- 11. Chủ đề
@@ -358,14 +363,14 @@ notes(s, "Sang nhánh chủ đề. BERTopic gồm UMAP giảm 768 chiều xuốn
 
 # ---------------------------------------------------------------- 12. Ứng dụng
 s = new("Ứng dụng", "Năm tab, ba nguồn dữ liệu, không cần API key để chấm")
-pic = picture(s, IMG["app"], x=7.25, y=2.15, w=5.3)
+pic = picture(s, IMG["app"], x=6.10, y=2.02, w=6.43)
 pic.line.color.rgb = rgb("line"); pic.line.width = Pt(0.75)
 bullets(s, [
     [("Ba nguồn: ", {"bold": True, "color": "ink"}), ("Link YouTube (cần API key), Tệp CSV, Dữ liệu mẫu", {})],
     [("Năm tab: ", {"bold": True, "color": "ink"}), ("Tổng quan, Chủ đề, Cảm xúc, Dữ liệu, Mô hình", {})],
     [("Bình luận và vector nhúng được cache; đổi tab hay lọc bảng không chạy lại", {})],
     [("Ảnh: 1.000 dòng mẫu, 23 chủ đề, 20,6% nhiễu, 47,4% tích cực (tập huấn luyện, nên tỉ lệ cảm xúc lạc quan hơn thực tế)", {})],
-], x=ML, y=2.15, w=6.1, size=16.5, gap=20)
+], x=ML, y=2.08, w=5.05, size=16, gap=20)
 notes(s, "Toàn bộ pipeline đóng thành một ứng dụng Streamlit. Bây giờ nhóm em chạy trực tiếp khoảng 3 phút. (mở ứng dụng, ở thanh bên chọn Dữ liệu mẫu, 1.000 dòng, hoặc Tệp CSV nếu nhóm đã cào sẵn bình luận của một video; bấm Bắt đầu phân tích) Trong lúc chạy em nói qua sáu bước của ứng dụng: lấy dữ liệu, làm sạch, nhúng câu, gom cụm, phân loại, tóm tắt tùy chọn. (khi xong, mở tab Tổng quan) Đây là số chủ đề, tỉ lệ nhiễu và tỉ lệ tích cực. (mở tab Chủ đề, chỉ vào một cụm) Mỗi chủ đề có từ khóa và bình luận tiêu biểu; bản đồ khoảng cách cho thấy cụm nào gần nhau. (mở tab Cảm xúc) Cảm xúc theo từng chủ đề: chủ đề nào bị chê nhiều nhất. (mở tab Dữ liệu, lọc một từ khóa) Bảng có lọc theo chủ đề, cảm xúc, từ khóa và tải CSV. Tab Mô hình chỉ đọc lại thẻ mô hình và các bảng em vừa trình bày, em không mở để tiết kiệm thời gian.")
 
 # ---------------------------------------------------------------- 13. Phân tích lỗi
@@ -379,12 +384,12 @@ table(s, [["Hiện tượng", "n", "Tiêu cực", "Trung tính", "Tích cực"],
           ["Tên riêng lấn át hoặc mất emoji", "11", "4", "4", "3"],
           ["Nhãn gốc đáng ngờ", "7", "3", "2", "2"],
           ["Châm biếm, không dấu, khác", "7", "4", "2", "1"]],
-      x=ML, y=1.98, w=7.9, col_w=[3.5, 0.9, 1.2, 1.2, 1.1], size=12.5, row_h=0.38, align_right_from=1)
+      x=ML, y=1.98, w=7.9, col_w=[3.5, 0.9, 1.2, 1.2, 1.1], size=14, row_h=0.50, align_right_from=1)
 bullets(s, [
     "Mẫu phân tầng từ 935 dòng sai; một người đọc, một lượt",
     "Lớp trung tính: dẫn đầu là vừa khen vừa chê (12 trong 50 dòng), đúng với F1 0,5354",
     "Mô hình học cả chủ đề và tên riêng làm tín hiệu cảm xúc, đúng trong miền này nhưng không chuyển được sang video khác",
-], x=8.95, y=1.98, w=3.6, size=14, gap=16)
+], x=8.95, y=1.98, w=3.6, size=15.5, gap=18)
 notes(s, "Nhóm em không dừng ở ma trận nhầm lẫn. Nhóm xuất toàn bộ 935 bình luận mà mô hình đoán sai, lấy mẫu phân tầng 150 dòng rồi đọc tay từng dòng, mỗi dòng xếp vào một hiện tượng. Hai nhóm lớn nhất chiếm gần một nửa và cùng nói một điều: TF-IDF thấy từ nhưng không thấy thái độ hướng về ai. \"Tiếc cho team của Captain\" mang từ buồn nhưng là đồng cảm, không phải chê. Nhóm thứ ba là vừa khen vừa chê, và đây là nhóm lớn nhất của riêng lớp trung tính: một nhãn cho cả câu thì buộc phải chọn một bên, nên lớp trung tính khó ngay từ định nghĩa. Bảy dòng là nhãn gốc mà người đọc không đồng ý; con số này đo trên mẫu lỗi nên không suy ra được tỉ lệ nhãn sai của cả bộ dữ liệu. Về đặc trưng, mô hình học được rằng ai nhắc quảng cáo thì thường chê, còn nhắc tên hai thí sinh thì thường khen: đúng trong chương trình này, không chuyển được sang video khác.")
 
 # ---------------------------------------------------------------- 14. Kết luận
