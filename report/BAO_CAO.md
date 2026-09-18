@@ -2,6 +2,10 @@
 
 **Báo cáo đồ án môn Xử lý ngôn ngữ tự nhiên**
 
+Lớp: CS221.F31.LT.TTNT
+
+Giảng viên: NCS.ThS Đặng Văn Thìn
+
 Nhóm: [danh sách thành viên và mã số sinh viên]
 
 Tháng 9 năm 2026

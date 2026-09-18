@@ -31,7 +31,7 @@ Nhóm: [thành viên]
 
 ## Pipeline năm bước theo bài giảng, mỗi bước một module
 
-![w:1100](../docs/diagrams/pipeline.svg)
+![h:490](../docs/diagrams/pipeline.png)
 
 Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/preprocess.py`), biểu diễn (TF-IDF và vector câu), thuật toán (LinearSVC, BERTopic trong `src/topic_pipeline.py`), đánh giá (`results/`, `experiments/`)
 
@@ -96,7 +96,17 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ---
 
+## Quy trình đánh giá: chọn trên tập huấn luyện, chấm một lần trên tập kiểm tra
+
+![h:520](../docs/diagrams/evaluation.png)
+
+<!-- Ghi chú: Trước khi xem con số, em nói cách chấm. Dữ liệu chia phân tầng 80 trên 20 với hạt giống 42. Mọi việc chọn lựa, so bốn mô hình nền và dò tham số C, chỉ chạy bằng cross-validation năm phần trên 15,997 dòng huấn luyện. Tập kiểm tra 4,000 dòng để dành, chấm đúng một lần với mô hình cuối. Sau đó nhóm em chia lại với năm hạt giống khác để xem con số có ổn định không. Quy trình này là lý do nhóm em tin các số ở hai slide sau. -->
+
+---
+
 ## Mô hình cảm xúc: bốn mô hình nền, dò C, chỉ trên tập huấn luyện
+
+<style scoped>table { font-size: 0.78em; } ul { font-size: 0.85em; }</style>
 
 | Mô hình | Tỉ lệ dự đoán đúng (accuracy), CV | Macro-F1, CV |
 |---|---|---|
@@ -114,17 +124,19 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ---
 
-## Kết quả trên tập kiểm tra: macro-F1 0.7161, lớp trung tính là điểm yếu
+## Tập kiểm tra: macro-F1 0.7161, lớp trung tính là điểm yếu
 
-![bg right:45%](../results/confusion_matrix_normalized.png)
+![bg right:42% fit](../results/confusion_matrix_normalized.png)
 
-| Lớp | Độ chính xác (precision) | Độ phủ (recall) | F1 |
+<style scoped>table { font-size: 0.8em; } ul { font-size: 0.9em; }</style>
+
+| Lớp | Độ chính xác | Độ phủ | F1 |
 |---|---|---|---|
 | Tiêu cực (1,400) | 0.7458 | 0.7564 | 0.7511 |
 | Trung tính (682) | 0.5270 | 0.5440 | 0.5354 |
 | Tích cực (1,918) | 0.8715 | 0.8525 | 0.8619 |
 
-- Tỉ lệ dự đoán đúng (accuracy) 76.62%, macro-F1 0.7161, 4,000 dòng kiểm tra, chấm một lần
+- Tỉ lệ dự đoán đúng (accuracy) 76.62%, macro-F1 0.7161 trên 4,000 dòng, chấm một lần; độ chính xác là precision, độ phủ là recall
 - Năm hạt giống 0 đến 4: 77.58% ± 0.44, macro-F1 0.7200 ± 0.0037
 - Trung tính: đúng 371/682; 203 bị gán tiêu cực, 108 bị gán tích cực
 
@@ -132,9 +144,11 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ---
 
-## Gom cụm chủ đề: tham số HDBSCAN quyết định kết quả hơn cả từ dừng
+## Gom cụm chủ đề: tham số HDBSCAN quyết định hơn cả từ dừng
 
-| Cách chọn cụm | Kích thước cụm tối thiểu | min_samples | Số chủ đề | Nhiễu (-1) | Cụm lớn nhất |
+<style scoped>table { font-size: 0.78em; } ul { font-size: 0.9em; }</style>
+
+| Chọn cụm | Cụm tối thiểu | min_samples | Chủ đề | Nhiễu (-1) | Cụm lớn nhất |
 |---|---|---|---|---|---|
 | eom (mặc định BERTopic) | 10 | mặc định | 23 | 735 (49.2%) | 81 (5.4%) |
 | eom | 20 | 5 | 3 | 0 (0%) | 1,359 (91.0%) |
@@ -152,19 +166,22 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ## Ứng dụng: năm tab, ba nguồn dữ liệu, không cần API key để chấm
 
-![bg right:55%](../docs/screenshots/03_tab_tong_quan.png)
+![bg right:48%](../docs/screenshots/03_tab_tong_quan.png)
 
-- Nguồn: Link YouTube (cần API key), Tệp CSV, hoặc Dữ liệu mẫu
+<style scoped>ul { font-size: 0.9em; }</style>
+
+- Ba nguồn: Link YouTube (cần API key), Tệp CSV, Dữ liệu mẫu
 - Năm tab: Tổng quan, Chủ đề, Cảm xúc, Dữ liệu, Mô hình
-- Vector nhúng và bình luận thu thập được lưu cache; đổi tab hay lọc bảng không chạy lại
-- Ảnh: 1,000 dòng mẫu đầu, 995 hợp lệ, 23 chủ đề, 20.6% nhiễu, 47.4% tích cực
-- Với Dữ liệu mẫu, ứng dụng nhắc rằng đây là tập huấn luyện, nên tỉ lệ cảm xúc lạc quan hơn thực tế
+- Bình luận và vector nhúng được cache; đổi tab hay lọc bảng không chạy lại
+- Ảnh: 1,000 dòng mẫu, 23 chủ đề, 20.6% nhiễu, 47.4% tích cực (tập huấn luyện, nên tỉ lệ cảm xúc lạc quan hơn thực tế)
 
 <!-- Ghi chú: Toàn bộ pipeline đóng thành một ứng dụng Streamlit. Bây giờ nhóm em chạy trực tiếp khoảng 3 phút. (mở ứng dụng, ở thanh bên chọn Tệp CSV với bình luận đã cào trước của [video demo]; nếu mạng hoặc tệp có vấn đề thì chọn Dữ liệu mẫu, 1,000 dòng; bấm Bắt đầu phân tích) Trong lúc chạy em nói qua sáu bước của ứng dụng: lấy dữ liệu, làm sạch, nhúng câu, gom cụm, phân loại, tóm tắt tùy chọn. (khi xong, mở tab Tổng quan) Đây là số chủ đề, tỉ lệ nhiễu và tỉ lệ tích cực. (mở tab Chủ đề, chỉ vào một cụm) Mỗi chủ đề có từ khóa và bình luận tiêu biểu; bản đồ khoảng cách cho thấy cụm nào gần nhau. (mở tab Cảm xúc) Cảm xúc theo từng chủ đề: chủ đề nào bị chê nhiều nhất. (mở tab Dữ liệu, lọc một từ khóa) Bảng có lọc theo chủ đề, cảm xúc, từ khóa và tải CSV. Tab Mô hình chỉ đọc lại thẻ mô hình và các bảng em vừa trình bày, em không mở để tiết kiệm thời gian. -->
 
 ---
 
 ## Phân tích lỗi: mô hình học cả chủ đề và tên riêng làm tín hiệu cảm xúc
+
+<style scoped>ul { font-size: 0.86em; }</style>
 
 - Lớp tiêu cực dựa vào `không` (+2.93), `không hay` (+2.29), `không thích` (+2.10), và cả `quảng_cáo`, `khán_giả`: hai từ sau là chủ đề, không phải cảm xúc
 - Lớp trung tính dựa vào `nhưng` (+2.95), `tiếc`, `hay mà`, `hay nhưng`: đúng định nghĩa lớp, nhưng cho thấy ranh giới mờ ngay trong nhãn
