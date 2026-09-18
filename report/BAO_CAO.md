@@ -215,9 +215,9 @@ Ma trận nhầm lẫn (hàng là nhãn thật, cột là dự đoán, thứ t�
 | Thật trung tính (682) | 203 | 371 | 108 |
 | Thật tích cực (1.918) | 158 | 125 | 1.635 |
 
-![Ma trận nhầm lẫn](results/confusion_matrix.png)
+![Ma trận nhầm lẫn](../results/confusion_matrix.png)
 
-![Ma trận nhầm lẫn chuẩn hóa theo hàng](results/confusion_matrix_normalized.png)
+![Ma trận nhầm lẫn chuẩn hóa theo hàng](../results/confusion_matrix_normalized.png)
 
 ### 6.2. Độ ổn định theo hạt giống
 
@@ -265,13 +265,13 @@ Năm tab: Tổng quan (số bình luận, số chủ đề, tỉ lệ nhiễu, t
 
 Các ảnh dưới đây chụp ứng dụng trên 1.000 dòng đầu của tập dữ liệu mẫu với cấu hình mặc định (kích thước cụm tối thiểu 15, `min_samples` 1): 995 bình luận hợp lệ, 23 chủ đề, 20,6% nhiễu, 47,4% tích cực.
 
-![Màn hình khởi đầu với thanh bên chọn nguồn dữ liệu](docs/screenshots/01_man_hinh_khoi_dau.png)
+![Màn hình khởi đầu với thanh bên chọn nguồn dữ liệu](../docs/screenshots/01_man_hinh_khoi_dau.png)
 
-![Tab Tổng quan sau khi phân tích dữ liệu mẫu](docs/screenshots/03_tab_tong_quan.png)
+![Tab Tổng quan sau khi phân tích dữ liệu mẫu](../docs/screenshots/03_tab_tong_quan.png)
 
-![Tab Chủ đề: từ khóa theo chủ đề và bản đồ khoảng cách](docs/screenshots/04_tab_chu_de.png)
+![Tab Chủ đề: từ khóa theo chủ đề và bản đồ khoảng cách](../docs/screenshots/04_tab_chu_de.png)
 
-![Tab Cảm xúc: tỉ lệ ba sắc thái và cảm xúc theo chủ đề](docs/screenshots/05_tab_cam_xuc.png)
+![Tab Cảm xúc: tỉ lệ ba sắc thái và cảm xúc theo chủ đề](../docs/screenshots/05_tab_cam_xuc.png)
 
 Hạn chế vận hành. YouTube Data API v3 cấp mặc định 10.000 đơn vị quota mỗi ngày; mỗi lệnh `commentThreads.list`, `comments.list`, `videos.list` tốn 1 đơn vị. Bộ thu thập xin `part=snippet,replies` để dùng các phản hồi trả về kèm theo và chỉ gọi thêm `comments.list` khi một bình luận gốc còn phản hồi chưa lấy được. Theo kinh nghiệm cộng đồng, YouTube ngừng phân trang ở khoảng 1.000 chuỗi bình luận gốc mỗi video; điều này chưa được kiểm chứng trong đồ án, nhưng nếu đúng thì số bình luận thu được có trần dù thanh trượt cho phép tới 5.000. Ollama là tùy chọn: khi không chạy, ứng dụng bỏ qua bước tóm tắt và hiện một cảnh báo.
 

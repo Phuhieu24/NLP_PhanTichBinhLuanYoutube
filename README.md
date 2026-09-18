@@ -61,7 +61,7 @@ Dùng chung module `src/topic_pipeline.py` với ứng dụng web nên kết qu�
 ### Tái lập các bảng thực nghiệm của báo cáo
 
 ```bash
-python experiments/dataset_stats.py    # thống kê tập dữ liệu (BAO_CAO.md mục 2.2) -> results/dataset_stats.json
+python experiments/dataset_stats.py    # thống kê tập dữ liệu (report/BAO_CAO.md mục 2.2) -> results/dataset_stats.json
 python experiments/ab_preprocess.py    # so sánh hai phiên bản tiền xử lý (mục 3.5) -> results/ab_preprocess.txt, .csv
 python experiments/topic_ablation.py   # khảo sát tham số HDBSCAN (mục 5.2) -> results/topic_ablation.txt, .csv
 ```
@@ -104,10 +104,12 @@ Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và b�
 | `experiments/` | Script tái lập các bảng thực nghiệm của báo cáo: `dataset_stats.py`, `ab_preprocess.py` (với `preprocess_baseline.py`), `topic_ablation.py`. |
 | `results/` | Kết quả huấn luyện: `metrics.json`, `model_comparison.csv`, `classification_report.txt`, `top_features.txt`, hai ảnh ma trận nhầm lẫn. Bằng chứng cho các bảng thực nghiệm: `dataset_stats.json`, `ab_preprocess.txt` và `.csv`, `topic_ablation.txt` và `.csv`, `topic_cli_demo.txt`. |
 | `tests/` | Kiểm thử pytest cho từng module trong `src/`. |
-| `docs/screenshots/` | Ảnh chụp ứng dụng trên dữ liệu mẫu, dùng trong `BAO_CAO.md`. |
+| `docs/screenshots/` | Ảnh chụp ứng dụng trên dữ liệu mẫu, dùng trong báo cáo và slide. |
 | `.streamlit/config.toml` | Giao diện tối và cấu hình máy chủ Streamlit. |
 | `requirements.txt`, `requirements-dev.txt` | Thư viện chạy ứng dụng; bản dev thêm pytest. |
-| `BAO_CAO.md` | Báo cáo đồ án. |
+| `report/` | Báo cáo đồ án (`BAO_CAO.md`, dựng ra `BAO_CAO.docx` bằng `scripts/build_report.py`) và slide thuyết trình (`slide.md`, định dạng Marp). |
+| `scripts/build_report.py` | Dựng file Word từ báo cáo Markdown. |
+| `docs/diagrams/` | Sơ đồ SVG dùng trong báo cáo và slide. |
 
 ## Xử lý sự cố
 
@@ -127,4 +129,4 @@ Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và b�
 - Theo kinh nghiệm cộng đồng, YouTube ngừng phân trang ở khoảng 1.000 chuỗi bình luận gốc mỗi video (chưa kiểm chứng trong đồ án); nếu đúng, số bình luận thu được có trần dù thanh trượt cho tới 5.000.
 - Quota 10.000 đơn vị mỗi ngày giới hạn số video phân tích được trong ngày.
 - Emoji bị xóa ở bước làm sạch; bình luận không dấu không được khôi phục dấu.
-- Mô hình cảm xúc huấn luyện trên bình luận của một chương trình duy nhất; hiệu năng trên video thuộc chủ đề khác chưa được đo. Chi tiết trong `BAO_CAO.md` mục 9.
+- Mô hình cảm xúc huấn luyện trên bình luận của một chương trình duy nhất; hiệu năng trên video thuộc chủ đề khác chưa được đo. Chi tiết trong `report/BAO_CAO.md` mục 9.

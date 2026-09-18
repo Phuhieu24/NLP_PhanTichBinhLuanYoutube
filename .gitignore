@@ -19,3 +19,6 @@ data/*.html
 results/comments_with_topics.csv
 results/topics_summary.csv
 data/topics_summary.csv
+
+# File Word dựng từ report/BAO_CAO.md; commit lại khi báo cáo chốt
+report/BAO_CAO.docx

@@ -1,3 +1,4 @@
 # Thư viện chỉ dùng khi phát triển / kiểm thử (không cần để chạy app)
 -r requirements.txt
 pytest>=8.0
+python-docx>=1.1   # dựng report/BAO_CAO.docx bằng scripts/build_report.py
