@@ -12,8 +12,8 @@ bản sáng, giữ nguyên hình học) và confusion_dark.png (ma trận nhầm
 results/metrics.json). Bản sáng trong docs/diagrams/ và results/ không bị đụng tới vì báo cáo
 Word vẫn dùng chúng.
 
-Bước đổi SVG sang PNG 2560x1440 cần playwright và chromium; nếu máy không có, hai tệp PNG đã
-được commit sẵn nên bài thuyết trình vẫn dựng được.
+Bước đổi SVG sang PNG 2560x1440 dùng playwright, và lùi về rsvg-convert (brew install librsvg)
+nếu không có playwright; thiếu cả hai thì các tệp PNG đã commit vẫn dùng được.
 """
 import argparse
 from pathlib import Path
@@ -54,6 +54,16 @@ STROKE = {
  "0D9488": "2DD4BF",
 }
 STROKE["475569"] = "5E749A"
+
+# Theme slate dùng lại toàn bộ ánh xạ của theme dark, chỉ nâng các tông bề mặt lên cho
+# khớp nền slide #1E293B. Nếu giữ tông của theme dark thì các thẻ trong sơ đồ sẽ tối hơn
+# chính nền slide, nhìn như bị thụt xuống. Màu nhấn và màu chữ giữ nguyên.
+if ARGS.theme == "slate":
+    SHAPE.update({
+        "FAFAF9": "1E293B", "FFFFFF": "2B3A50", "F1F5F9": "334155",
+        "FFFBEB": "3E301A", "F5F3FF": "332A55", "FAF5FF": "332A55",
+        "ECFDF5": "20423A", "ECFEFF": "1E3C49", "FFF1F2": "422637",
+    })
 TEXT = {
  "0F172A": "F1F5F9", "64748B": "9AAABF", "78716C": "8A97A8", "475569": "B7C4D6",
  "FFFFFF": "FFFFFF", "92400E": "FCD34D", "B45309": "FBBF24", "4C1D95": "C4B5FD",
@@ -80,7 +90,7 @@ for name in (("pipeline", "evaluation") if not ARGS.skip_svg else ()):
         out.append(conv(m.group(0), m.group(1) == "text"))
         pos = m.end()
     out.append(s[pos:])
-    dst = REPO / f"docs/diagrams/{name}_dark.svg"
+    dst = REPO / f"docs/diagrams/{name}_{ARGS.theme}.svg"
     dst.write_text("".join(out), encoding="utf-8")
     print("->", dst, dst.stat().st_size, "bytes")
 
@@ -126,23 +136,46 @@ fig.savefig(out, facecolor=BG, bbox_inches="tight", pad_inches=0.22)
 print("->", out)
 
 
+def _pairs():
+    for name in ("pipeline", "evaluation"):
+        yield (REPO / f"docs/diagrams/{name}_{ARGS.theme}.svg",
+               REPO / f"docs/diagrams/{name}_{ARGS.theme}.png")
+
+
+def render_rsvg():
+    """Đổi SVG sang PNG 2560x1440 bằng rsvg-convert (librsvg, cài qua Homebrew)."""
+    import shutil, subprocess
+    exe = shutil.which("rsvg-convert")
+    if not exe:
+        raise FileNotFoundError("rsvg-convert")
+    for src, dst in _pairs():
+        subprocess.run([exe, "-w", "2560", "-h", "1440", "-o", str(dst), str(src)], check=True)
+        print("->", dst)
+
+
 def render_png():
-    """Đổi hai SVG bản tối sang PNG 2560x1440 (cần playwright)."""
+    """Đổi SVG sang PNG 2560x1440 bằng playwright."""
     from playwright.sync_api import sync_playwright
     import time
     with sync_playwright() as p:
         b = p.chromium.launch()
         pg = b.new_page(viewport={"width": 1280, "height": 720}, device_scale_factor=2)
-        for name in ("pipeline", "evaluation"):
-            pg.goto((REPO / f"docs/diagrams/{name}_dark.svg").as_uri())
+        for src, dst in _pairs():
+            pg.goto(src.as_uri())
             time.sleep(0.8)
-            pg.screenshot(path=str(REPO / f"docs/diagrams/{name}_dark.png"))
-            print("->", REPO / f"docs/diagrams/{name}_dark.png")
+            pg.screenshot(path=str(dst))
+            print("->", dst)
         b.close()
 
 
 if __name__ == "__main__":
+    if ARGS.skip_svg:
+        raise SystemExit(0)
     try:
         render_png()
     except ImportError:
-        print("Bỏ qua bước render PNG: chưa cài playwright. Hai tệp PNG đã commit vẫn dùng được.")
+        try:
+            render_rsvg()
+        except (FileNotFoundError, OSError):
+            print("Bỏ qua bước render PNG: không có playwright lẫn rsvg-convert. "
+                  "Các tệp PNG đã commit vẫn dùng được.")
