@@ -3,6 +3,10 @@
 
     .venv/bin/python scripts/build_dark_assets.py
 
+Cờ --theme chọn nền cho ma trận nhầm lẫn: dark (#0B1220, mặc định) hoặc slate (#1E293B),
+khớp theme cùng tên của scripts/build_slides_pptx.py. Cờ --skip-svg chỉ vẽ lại ma trận và
+không ghi đè hai tệp SVG đã commit.
+
 Ba đầu ra trong docs/diagrams/: pipeline_dark.svg, evaluation_dark.svg (đổi màu từ hai sơ đồ
 bản sáng, giữ nguyên hình học) và confusion_dark.png (ma trận nhầm lẫn vẽ lại từ
 results/metrics.json). Bản sáng trong docs/diagrams/ và results/ không bị đụng tới vì báo cáo
@@ -11,8 +15,27 @@ Word vẫn dùng chúng.
 Bước đổi SVG sang PNG 2560x1440 cần playwright và chromium; nếu máy không có, hai tệp PNG đã
 được commit sẵn nên bài thuyết trình vẫn dựng được.
 """
+import argparse
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
+
+# Nền ảnh phải khớp nền slide của theme tương ứng trong scripts/build_slides_pptx.py,
+# nếu không ma trận hiện thành một vệt chữ nhật khác màu giữa slide.
+CM_THEMES = {
+    "dark":  dict(bg="#0B1220", fg="#E8EDF5", muted="#93A6C0",
+                  ramp=["#0E1B2C", "#12484A", "#15776E", "#2DD4BF"],
+                  out="docs/diagrams/confusion_dark.png"),
+    "slate": dict(bg="#1E293B", fg="#F8FAFC", muted="#94A3B8",
+                  ramp=["#243247", "#1B4F52", "#177C72", "#2DD4BF"],
+                  out="docs/diagrams/confusion_slate.png"),
+}
+_ap = argparse.ArgumentParser(description="Sinh hình nền tối cho bài thuyết trình.")
+_ap.add_argument("--theme", choices=sorted(CM_THEMES), default="dark",
+                 help="nền của ma trận nhầm lẫn: dark (mặc định) hoặc slate")
+_ap.add_argument("--skip-svg", action="store_true",
+                 help="chỉ vẽ lại ma trận nhầm lẫn, không ghi đè hai SVG bản tối")
+ARGS = _ap.parse_args()
+T = CM_THEMES[ARGS.theme]
 
 
 import re, sys
@@ -48,7 +71,7 @@ def conv(tag_src, is_text):
         return f'{attr}="#{table.get(val, m.group(2).lstrip("#"))}"'
     return re.sub(r'(fill|stroke)="#([0-9A-Fa-f]{6})"', sub_attr, tag_src)
 
-for name in ("pipeline", "evaluation"):
+for name in (("pipeline", "evaluation") if not ARGS.skip_svg else ()):
     src = REPO / f"docs/diagrams/{name}.svg"
     s = src.read_text(encoding="utf-8")
     out, pos = [], 0
@@ -72,10 +95,10 @@ m = json.loads((REPO / "results/metrics.json").read_text(encoding="utf-8"))
 cm = np.array(m["test"]["confusion_matrix"], dtype=float)
 norm = cm / cm.sum(axis=1, keepdims=True)
 labels = ["Tiêu cực", "Trung tính", "Tích cực"]
-BG, FG, MUTED, ACC = "#0B1220", "#E8EDF5", "#93A6C0", "#2DD4BF"
+BG, FG, MUTED, ACC = T["bg"], T["fg"], T["muted"], "#2DD4BF"
 
 from matplotlib.colors import LinearSegmentedColormap
-cmap = LinearSegmentedColormap.from_list("teal_dark", ["#0E1B2C", "#12484A", "#15776E", "#2DD4BF"])
+cmap = LinearSegmentedColormap.from_list("teal_dark", T["ramp"])
 
 fig, ax = plt.subplots(figsize=(6.4, 5.0), dpi=200)
 fig.patch.set_facecolor(BG); ax.set_facecolor(BG)
@@ -98,7 +121,7 @@ ax.tick_params(length=0, colors=FG)
 cb = fig.colorbar(im, ax=ax, fraction=0.045, pad=0.03)
 cb.outline.set_visible(False); cb.ax.tick_params(colors=MUTED, labelsize=10)
 fig.tight_layout()
-out = str(REPO / "docs/diagrams/confusion_dark.png")
+out = str(REPO / T["out"])
 fig.savefig(out, facecolor=BG, bbox_inches="tight", pad_inches=0.22)
 print("->", out)
 

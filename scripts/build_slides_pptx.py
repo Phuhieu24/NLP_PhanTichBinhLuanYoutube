@@ -6,14 +6,22 @@ Chạy từ thư mục gốc của repo:
     .venv/bin/python scripts/build_slides_pptx.py
 
 Script tự vẽ toàn bộ slide bằng python-pptx nên kiểm soát được màu, phông chữ, bảng và
-ghi chú người nói. Bảng màu: nền ngà #FAFAF9, chữ #0F172A và #334155, nhấn xanh mòng két
-#0D9488; phông Calibri Light cho tiêu đề và Calibri cho phần thân (hai phông này có sẵn
-trong bộ Office trên cả macOS lẫn Windows và hiển thị đủ dấu tiếng Việt).
+ghi chú người nói. Phông Calibri Light cho tiêu đề và Calibri cho phần thân (hai phông này
+có sẵn trong bộ Office trên cả macOS lẫn Windows và hiển thị đủ dấu tiếng Việt).
+
+Ba bảng màu, chọn bằng --theme (xem THEMES bên dưới):
+
+    slate   nền xám than #1E293B, chữ #F8FAFC, nhấn mòng két #2DD4BF   (mặc định)
+    dark    nền xanh đen #0B1220, đậm nhất, cho phòng chiếu tối
+    light   nền ngà #FAFAF9, chữ gần đen, nhấn mòng két đậm #0D9488
+
+Mỗi theme kéo theo bộ ảnh có nền khớp (xem THEME_IMAGES); ảnh nền tối sinh bằng
+scripts/build_dark_assets.py.
 
 Nội dung trong file này được chép từ report/slide.md; khi sửa slide.md thì sửa cả ở đây
 rồi chạy lại script.
 """
-import sys, os
+import sys, os, argparse
 from pathlib import Path
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
@@ -27,13 +35,41 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.oxml.ns import qn
 
-C = dict(
-    bg="0B1220", ink="F2F6FB", body="C5D2E4", muted="93A6C0", faint="55688A",
-    teal="2DD4BF", teal_dk="5EEAD4", teal_50="12303A", teal_100="164E4A",
-    row_alt="121E30", white="0E1929", line="253750",
-    amber="FBBF24", violet="A78BFA", rose="FB7185",
-    neg="F87171", neu="9CA3AF", pos="4ADE80",
-)
+THEMES = {
+    # Nền xám than: vẫn tối để chiếu, nhưng dịu hơn "dark" rõ rệt.
+    "slate": dict(
+        bg="1E293B", ink="F8FAFC", body="CBD5E1", muted="94A3B8", faint="8296B0",
+        teal="2DD4BF", teal_dk="5EEAD4", teal_50="334155", teal_100="155E59",
+        row_alt="2B3A50", white="243247", line="475569",
+        amber="FBBF24", violet="A78BFA", rose="FB7185",
+        neg="F87171", neu="9CA3AF", pos="4ADE80",
+    ),
+    # Nền xanh đen: bản tối đậm nhất.
+    "dark": dict(
+        bg="0B1220", ink="F2F6FB", body="C5D2E4", muted="93A6C0", faint="55688A",
+        teal="2DD4BF", teal_dk="5EEAD4", teal_50="12303A", teal_100="164E4A",
+        row_alt="121E30", white="0E1929", line="253750",
+        amber="FBBF24", violet="A78BFA", rose="FB7185",
+        neg="F87171", neu="9CA3AF", pos="4ADE80",
+    ),
+    # Nền ngà, chữ gần đen: để in hoặc chiếu trong phòng sáng.
+    "light": dict(
+        bg="FAFAF9", ink="0F172A", body="334155", muted="64748B", faint="94A3B8",
+        teal="0D9488", teal_dk="0F766E", teal_50="F0FDFA", teal_100="CCFBF1",
+        row_alt="F8FAFC", white="FFFFFF", line="E2E8F0",
+        amber="D97706", violet="7C3AED", rose="E11D48",
+        neg="EF4444", neu="9CA3AF", pos="22C55E",
+    ),
+}
+
+_ap = argparse.ArgumentParser(description="Dựng bài thuyết trình PowerPoint của đồ án.")
+_ap.add_argument("--theme", choices=sorted(THEMES), default="slate",
+                 help="bảng màu: slate (mặc định), dark, light")
+_ap.add_argument("--out", default="report/CS221_slide.pptx",
+                 help="tệp .pptx xuất ra, tính từ thư mục gốc repo")
+ARGS = _ap.parse_args()
+
+C = THEMES[ARGS.theme]
 def rgb(k): return RGBColor.from_string(C[k] if k in C else k)
 
 TITLE_FONT = "Calibri Light"
@@ -183,12 +219,21 @@ def picture(slide, path, x=None, y=CONTENT_TOP, w=None, h=None):
 
 
 REPO = Path(__file__).resolve().parents[1]
-IMG = dict(
-    pipeline=str(REPO / "docs/diagrams/pipeline_dark.png"),
-    evaluation=str(REPO / "docs/diagrams/evaluation_dark.png"),
-    cm=str(REPO / "docs/diagrams/confusion_dark.png"),
-    app=str(REPO / "docs/screenshots/03_tab_tong_quan.png"),
-)
+# Hai sơ đồ phủ kín khung hình nên nền của chúng thay luôn nền slide; riêng ma trận nhầm
+# lẫn đặt lọt trong slide nên nền ảnh phải khớp nền theme, nếu không sẽ thấy vệt chữ nhật.
+THEME_IMAGES = {
+    "slate": dict(pipeline="docs/diagrams/pipeline_dark.png",
+                  evaluation="docs/diagrams/evaluation_dark.png",
+                  cm="docs/diagrams/confusion_slate.png"),
+    "dark": dict(pipeline="docs/diagrams/pipeline_dark.png",
+                 evaluation="docs/diagrams/evaluation_dark.png",
+                 cm="docs/diagrams/confusion_dark.png"),
+    "light": dict(pipeline="docs/diagrams/pipeline.png",
+                  evaluation="docs/diagrams/evaluation.png",
+                  cm="results/confusion_matrix_normalized.png"),
+}
+IMG = {k: str(REPO / v) for k, v in THEME_IMAGES[ARGS.theme].items()}
+IMG["app"] = str(REPO / "docs/screenshots/03_tab_tong_quan.png")
 for k, v in IMG.items():
     assert os.path.exists(v), v
 
@@ -468,6 +513,6 @@ bullets(s, [
 ], size=16.5, gap=20)
 notes(s, "Một bài học kỹ thuật nhóm em xác minh trong mã nguồn thư viện. BERTopic khởi tạo với ngôn ngữ mặc định là tiếng Anh, và nếu mình không truyền mô hình nhúng, nó âm thầm xóa hết dấu tiếng Việt trước khi tính từ khóa. Chữ \"không\" thành \"khng\". Nhóm em vá bằng cách luôn truyền mô hình nhúng và viết một kiểm thử canh chỗ đó. Phần tái lập: một lệnh huấn luyện, ba script thực nghiệm, và pytest. Không lệnh nào cần API key hay mạng, trừ lần đầu tải mô hình nhúng về cache.")
 
-out = str(REPO / "report/CS221_slide.pptx")
+out = str(REPO / ARGS.out)
 prs.save(out)
-print(f"Đã ghi {out}\n  {len(prs.slides._sldIdLst)} slide · {os.path.getsize(out)//1024} KB")
+print(f"Đã ghi {out}\n  theme {ARGS.theme} · {len(prs.slides._sldIdLst)} slide · {os.path.getsize(out)//1024} KB")
