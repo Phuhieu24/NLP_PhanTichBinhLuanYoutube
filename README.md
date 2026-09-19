@@ -109,7 +109,7 @@ Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và b�
 | `requirements.txt`, `requirements-dev.txt` | Thư viện chạy ứng dụng; bản dev thêm pytest. |
 | `report/` | Báo cáo đồ án (`BAO_CAO.md`, dựng ra `BAO_CAO.docx` bằng `scripts/build_report.py`) và slide thuyết trình (`slide.md` định dạng Marp, `CS221_slide.pptx` dựng bằng `scripts/build_slides_pptx.py`). |
 | `scripts/build_report.py` | Dựng file Word từ báo cáo Markdown. |
-| `scripts/build_slides_pptx.py` | Dựng file PowerPoint của bài thuyết trình, kèm ghi chú người nói. |
+| `scripts/build_slides_pptx.py` | Dựng file PowerPoint của bài thuyết trình, kèm ghi chú người nói. Cờ `--theme` chọn bảng màu: `slate` (mặc định, nền xám than), `dark` (nền xanh đen), `light` (nền ngà); `--out` đổi nơi ghi tệp. |
 | `docs/diagrams/` | Sơ đồ SVG dùng trong báo cáo và slide. |
 
 ## Xử lý sự cố
