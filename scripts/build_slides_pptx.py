@@ -222,8 +222,8 @@ REPO = Path(__file__).resolve().parents[1]
 # Hai sơ đồ phủ kín khung hình nên nền của chúng thay luôn nền slide; riêng ma trận nhầm
 # lẫn đặt lọt trong slide nên nền ảnh phải khớp nền theme, nếu không sẽ thấy vệt chữ nhật.
 THEME_IMAGES = {
-    "slate": dict(pipeline="docs/diagrams/pipeline_dark.png",
-                  evaluation="docs/diagrams/evaluation_dark.png",
+    "slate": dict(pipeline="docs/diagrams/pipeline_slate.png",
+                  evaluation="docs/diagrams/evaluation_slate.png",
                   cm="docs/diagrams/confusion_slate.png"),
     "dark": dict(pipeline="docs/diagrams/pipeline_dark.png",
                  evaluation="docs/diagrams/evaluation_dark.png",

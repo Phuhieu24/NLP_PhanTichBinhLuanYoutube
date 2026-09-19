@@ -3,6 +3,36 @@ marp: true
 theme: default
 paginate: true
 size: 16:9
+style: |
+  section {
+    background: #1E293B;
+    color: #CBD5E1;
+  }
+  h1, h2, h3 { color: #F8FAFC; }
+  h2 {
+    border-bottom: 3px solid #2DD4BF;
+    padding-bottom: 0.16em;
+  }
+  strong { color: #F8FAFC; }
+  em { color: #5EEAD4; }
+  a { color: #2DD4BF; }
+  code {
+    background: #334155;
+    color: #5EEAD4;
+  }
+  section table { border-collapse: collapse; }
+  section table th {
+    background: #334155;
+    color: #F8FAFC;
+    border: 1px solid #475569;
+  }
+  section table td {
+    color: #CBD5E1;
+    border: 1px solid #475569;
+  }
+  section table tbody tr:nth-child(odd) { background: #243247; }
+  section table tbody tr:nth-child(even) { background: #2B3A50; }
+  section::after { color: #8296B0; }
 ---
 
 # Phân tích chủ đề và cảm xúc bình luận YouTube tiếng Việt
@@ -36,7 +66,9 @@ Nhóm:
 
 ## Pipeline năm bước theo bài giảng, mỗi bước một module
 
-![h:490](../docs/diagrams/pipeline.png)
+<style scoped>p { font-size: 0.76em; line-height: 1.45; }</style>
+
+![h:455](../docs/diagrams/pipeline_slate.png)
 
 Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/preprocess.py`), biểu diễn (TF-IDF và vector câu), thuật toán (LinearSVC, BERTopic trong `src/topic_pipeline.py`), đánh giá (`results/`, `experiments/`)
 
@@ -105,7 +137,7 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ## Quy trình đánh giá: chọn trên tập huấn luyện, chấm một lần trên tập kiểm tra
 
-![h:520](../docs/diagrams/evaluation.png)
+![h:520](../docs/diagrams/evaluation_slate.png)
 
 <!-- Ghi chú: Trước khi xem con số, em nói cách chấm. Dữ liệu chia phân tầng 80 trên 20 với hạt giống 42. Mọi việc chọn lựa, so bốn mô hình nền và dò tham số C, chỉ chạy bằng cross-validation năm phần trên 15,997 dòng huấn luyện. Tập kiểm tra 4,000 dòng để dành, chấm đúng một lần với mô hình cuối. Sau đó nhóm em chia lại với năm hạt giống khác để xem con số có ổn định không. Quy trình này là lý do nhóm em tin các số ở hai slide sau. -->
 
@@ -133,7 +165,7 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ## Tập kiểm tra: macro-F1 0.7161, lớp trung tính là điểm yếu
 
-![bg right:42% fit](../results/confusion_matrix_normalized.png)
+![bg right:42% fit](../docs/diagrams/confusion_slate.png)
 
 <style scoped>table { font-size: 0.8em; } ul { font-size: 0.9em; }</style>
 
