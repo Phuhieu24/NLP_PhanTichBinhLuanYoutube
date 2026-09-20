@@ -4,7 +4,7 @@
 
 Lớp: CS221.F31.LT.TTNT
 
-Giảng viên: NCS.ThS Đặng Văn Thìn
+Giảng viên hướng dẫn: TS. Đặng Văn Thìn
 
 Nhóm thực hiện:
 
@@ -13,8 +13,6 @@ Nhóm thực hiện:
 - Nguyễn Thanh Phong, 26410090, LT.K2026.1.TTNT
 - Nguyễn Thị Mai Thi, 26410117, LT.K2026.1.TTNT
 - Hồ Viết Trịnh, 26410140, LT.K2026.1.TTNT
-- Nguyễn Ngọc Bích, 25730012, CN1.K2025.1.TTNT
-- Nguyễn Anh Tài, 25730063, CN1.K2025.1.TTNT
 
 Tháng 9 năm 2026
 
@@ -362,11 +360,11 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 
 ## 10. Tài liệu tham khảo
 
-1. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3 (các kỹ thuật tiền xử lý).
-2. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 4 (phương pháp biểu diễn văn bản).
-3. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 5 (phân tích cảm xúc trên bình luận phản hồi).
-4. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 6 (tách từ, phân loại văn bản và đánh giá theo lớp: độ chính xác, độ phủ, F1).
-5. Slide môn Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 8 (tóm tắt văn bản).
+1. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 3 (các kỹ thuật tiền xử lý).
+2. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 4 (phương pháp biểu diễn văn bản).
+3. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 5 (phân tích cảm xúc trên bình luận phản hồi).
+4. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 6 (tách từ, phân loại văn bản và đánh giá theo lớp: độ chính xác, độ phủ, F1).
+5. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 8 (tóm tắt văn bản).
 6. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
 7. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426.
 8. Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. Trong: Advances in Knowledge Discovery and Data Mining (PAKDD 2013), LNCS 7819, Springer, tr. 160 đến 172.

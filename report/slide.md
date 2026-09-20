@@ -39,16 +39,16 @@ style: |
 
 Đồ án môn Xử lý ngôn ngữ tự nhiên
 
-Nhóm:
+Giảng viên hướng dẫn: **TS. Đặng Văn Thìn**
+
+Nhóm thực hiện:
 - Lê Phú Hiếu | 26410038 | LT.K2026.1.TTNT	 
 - Nguyễn Thanh Duy | 26410030 | LT.K2026.1.TTNT	 
 - Nguyễn Thanh Phong | 26410090 | LT.K2026.1.TTNT	 
 - Nguyễn Thị Mai Thi | 26410117 | LT.K2026.1.TTNT	 
-- Hồ Viết Trịnh | 26410140 | LT.K2026.1.TTNT	 
-- Nguyễn Ngọc Bích | 25730012 | CN1.K2025.1.TTNT	 
-- Nguyễn Anh Tài | 25730063 | CN1.K2025.1.TTNT
+- Hồ Viết Trịnh | 26410140 | LT.K2026.1.TTNT
 
-<!-- Ghi chú: Thưa thầy và các bạn, nhóm em xin trình bày đồ án phân tích bình luận YouTube tiếng Việt. Hệ thống nhận bình luận dưới một video và trả về hai thứ: người xem đang bàn chủ đề gì, và họ khen hay chê. Bài nói khoảng 10 phút theo đúng năm bước của môn, sau đó nhóm em chạy ứng dụng trực tiếp 3 phút. Nếu chỉ nhớ một câu, xin thầy nhớ câu này: mọi con số trong bài đều đọc lại được từ thư mục results của mã nguồn. -->
+<!-- Ghi chú: Em kính chào thầy Đặng Văn Thìn và các bạn. Nhóm em gồm năm thành viên, hôm nay xin trình bày đồ án phân tích bình luận YouTube tiếng Việt. Hệ thống nhận bình luận dưới một video và trả về hai thứ: người xem đang bàn chủ đề gì, và họ khen hay chê. Bài nói khoảng 10 phút theo đúng năm bước của môn, sau đó nhóm em chạy ứng dụng trực tiếp 3 phút. Nếu chỉ nhớ một câu, xin thầy nhớ câu này: mọi con số trong bài đều đọc lại được từ thư mục results của mã nguồn. -->
 
 ---
 
@@ -266,7 +266,7 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 
 <style scoped>ol { font-size: 0.72em; }</style>
 
-1. Slide môn CS221 Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3, 4, 5, 6.
+1. Slide môn CS221 Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 3, 4, 5, 6.
 2. Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.
 3. McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426.
 4. Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. PAKDD 2013, LNCS 7819.

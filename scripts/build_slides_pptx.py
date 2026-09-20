@@ -277,17 +277,25 @@ b = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(1.35), Inches(3.98), Inches(1
 b.fill.solid(); b.fill.fore_color.rgb = rgb("teal"); b.line.fill.background(); b.shadow.inherit = False
 _, tf = textbox(s, 1.35, 4.28, 10.6, 0.4)
 run(tf.paragraphs[0], "Đồ án môn Xử lý ngôn ngữ tự nhiên", 17, "teal_dk")
+# Giảng viên đứng riêng một dòng, chữ sáng hơn danh sách thành viên để đọc được từ cuối phòng.
+_, tf = textbox(s, 1.35, 4.76, 10.6, 0.4)
+p = tf.paragraphs[0]
+run(p, "Giảng viên hướng dẫn:  ", 15, "muted")
+run(p, "TS. Đặng Văn Thìn", 15, "ink", bold=True)
+_, tf = textbox(s, 1.35, 5.34, 10.6, 0.3)
+p = tf.paragraphs[0]
+r = run(p, "NHÓM THỰC HIỆN", 10, "teal", bold=True)
+r.font._rPr.set("spc", "120")
 members = ["Lê Phú Hiếu · 26410038 · LT.K2026.1.TTNT", "Nguyễn Thanh Duy · 26410030 · LT.K2026.1.TTNT",
            "Nguyễn Thanh Phong · 26410090 · LT.K2026.1.TTNT", "Nguyễn Thị Mai Thi · 26410117 · LT.K2026.1.TTNT",
-           "Hồ Viết Trịnh · 26410140 · LT.K2026.1.TTNT", "Nguyễn Ngọc Bích · 25730012 · CN1.K2025.1.TTNT",
-           "Nguyễn Anh Tài · 25730063 · CN1.K2025.1.TTNT"]
-_, tf = textbox(s, 1.35, 5.05, 5.4, 1.9)
-for i, m in enumerate(members[:4]):
+           "Hồ Viết Trịnh · 26410140 · LT.K2026.1.TTNT"]
+_, tf = textbox(s, 1.35, 5.70, 5.4, 1.2)
+for i, m in enumerate(members[:3]):
     p = para(tf, first=(i == 0)); p.space_after = Pt(4); run(p, m, 11.5, "muted")
-_, tf = textbox(s, 6.95, 5.05, 5.4, 1.9)
-for i, m in enumerate(members[4:]):
+_, tf = textbox(s, 6.95, 5.70, 5.4, 1.2)
+for i, m in enumerate(members[3:]):
     p = para(tf, first=(i == 0)); p.space_after = Pt(4); run(p, m, 11.5, "muted")
-notes(s, "Thưa thầy và các bạn, nhóm em xin trình bày đồ án phân tích bình luận YouTube tiếng Việt. Hệ thống nhận bình luận dưới một video và trả về hai thứ: người xem đang bàn chủ đề gì, và họ khen hay chê. Bài nói khoảng 10 phút theo đúng năm bước của môn, sau đó nhóm em chạy ứng dụng trực tiếp 3 phút. Nếu chỉ nhớ một câu, xin thầy nhớ câu này: mọi con số trong bài đều đọc lại được từ thư mục results của mã nguồn.")
+notes(s, "Em kính chào thầy Đặng Văn Thìn và các bạn. Nhóm em gồm năm thành viên, hôm nay xin trình bày đồ án phân tích bình luận YouTube tiếng Việt. Hệ thống nhận bình luận dưới một video và trả về hai thứ: người xem đang bàn chủ đề gì, và họ khen hay chê. Bài nói khoảng 10 phút theo đúng năm bước của môn, sau đó nhóm em chạy ứng dụng trực tiếp 3 phút. Nếu chỉ nhớ một câu, xin thầy nhớ câu này: mọi con số trong bài đều đọc lại được từ thư mục results của mã nguồn.")
 
 # ---------------------------------------------------------------- 2. Bài toán
 s = new("Bài toán", "Hàng nghìn bình luận, hai câu hỏi")
@@ -468,7 +476,7 @@ notes(s, "Nhóm em xin dừng ở đây và sẵn sàng trả lời câu hỏi. 
 
 # ---------------------------------------------------------------- 16. B1 references
 s = new("Phụ lục B1", "Tài liệu tham khảo")
-refs = ["Slide môn CS221 Xử lý ngôn ngữ tự nhiên, NCS.ThS Đặng Văn Thìn, UIT, bài 3, 4, 5, 6.",
+refs = ["Slide môn CS221 Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 3, 4, 5, 6.",
         "Grootendorst, M. (2022). BERTopic: Neural topic modeling with a class-based TF-IDF procedure. arXiv:2203.05794.",
         "McInnes, L., Healy, J., Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426.",
         "Campello, R. J. G. B., Moulavi, D., Sander, J. (2013). Density-Based Clustering Based on Hierarchical Density Estimates. PAKDD 2013, LNCS 7819.",
