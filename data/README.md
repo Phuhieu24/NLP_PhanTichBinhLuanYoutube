@@ -4,11 +4,11 @@ Thư mục này chứa tập dữ liệu huấn luyện `dataset_chuan.csv` (đ�
 
 ## Nguồn gốc của `dataset_chuan.csv`
 
-`dataset_chuan.csv` là hai cột `text` và `label` của tệp `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin dưới đây lấy từ README của tác giả gói dữ liệu, sao chép nguyên văn tại `data/README_ATSH_NLP_20k_goc.md`.
+`dataset_chuan.csv` là hai cột `text` và `label` của tệp `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin dưới đây lấy từ README đi kèm gói dữ liệu, lưu tại `data/README_ATSH_NLP_20k_goc.md`.
 
 | Mục | Nội dung theo README của tác giả |
 |---|---|
-| Nguồn | Trích từ dự án nghiên cứu ATSH-ABSA của Phạm Xuân Vĩnh Hà (UIT, ĐHQG TP.HCM). Lấy từ bản gán nhãn tự động (silver), không lấy từ bản gán nhãn thủ công (gold); không có bình luận nào trùng với bộ gold. |
+| Nguồn | Trích từ dự án nghiên cứu ATSH-ABSA (UIT, ĐHQG TP.HCM). Lấy từ bản gán nhãn tự động (silver), không lấy từ bản gán nhãn thủ công (gold); không có bình luận nào trùng với bộ gold. |
 | Nội dung | Bình luận YouTube tiếng Việt về chương trình Anh Trai Say Hi, mùa 1, tập 1 đến 14. |
 | Cách gán nhãn | Nhãn do mô hình ngôn ngữ lớn gán tự động theo một bộ hướng dẫn gán nhãn, theo từng đối tượng (chương trình hoặc nghệ sĩ) và từng khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng). Chưa được người kiểm tra từng dòng. Tác giả ghi nhãn trung tính là nhãn nhiễu nhất và khuyên kiểm tra thủ công 100 đến 200 dòng của tập test rồi ghi tỉ lệ nhãn đúng vào báo cáo. |
 | Gộp nhãn tổng thể | Có ít nhất một nhãn tích cực: tích cực. Không có nhãn tích cực nhưng có nhãn tiêu cực: tiêu cực. Chỉ có nhãn trung tính: trung tính. Bình luận vừa có nhãn tích cực vừa có nhãn tiêu cực (hỗn hợp) đã bị loại. |
@@ -16,7 +16,7 @@ Thư mục này chứa tập dữ liệu huấn luyện `dataset_chuan.csv` (đ�
 | Bộ lọc | Không phải spam, có liên quan tới chương trình, có thể hiện cảm xúc, dài 5 đến 500 ký tự; đã loại bình luận trùng nhau và bình luận có chứa đường link. |
 | Dữ liệu cá nhân | Không có tên tài khoản hay thông tin của người bình luận. `dataset_chuan.csv` chỉ giữ hai cột `text` và `label`. |
 | Điều kiện sử dụng | "Chỉ dùng cho học tập trong khuôn khổ môn học. Không công bố lại, không đưa lên GitHub, Kaggle, Hugging Face hay bất kỳ nơi công khai nào, và không dùng cho bài báo khi chưa có sự đồng ý của tác giả." |
-| Câu trích dẫn bắt buộc | "Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập." |
+| Câu trích dẫn bắt buộc | "Dữ liệu được cung cấp bởi dự án ATSH-ABSA (UIT), chỉ dùng cho mục đích học tập." |
 | Các cột và file khác trong gói gốc | Cột `id`, `tap` (TAP1 đến TAP14), `sentiment` (nhãn dạng chữ), `doi_tuong` (`nghe_si`, `chuong_trinh`, `ca_hai`), `nghe_si` (tối đa 3 tên), `split`; bộ chia sẵn train/val/test 15.999 / 2.000 / 2.001 (80/10/10, phân tầng theo nhãn); `atsh_kol_aspect.csv` gồm 11.766 cặp bình luận và nghệ sĩ kèm nhãn cảm xúc theo 4 khía cạnh. Nhóm không dùng các cột và tệp này; phép chia 80/20 với hạt giống 42 trong đánh giá là của nhóm, không phải bộ chia sẵn. |
 | Tệp README gốc | `data/README_ATSH_NLP_20k_goc.md` |
 

@@ -44,13 +44,13 @@ Bình luận YouTube tiếng Việt khó xử lý hơn văn bản báo chí vì 
 
 ### 2.1. Nguồn gốc và cách gán nhãn
 
-Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `text` và `label`. Tệp này là hai cột `text` và `label` của `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin về nguồn gốc dưới đây lấy từ README của tác giả gói dữ liệu, được sao chép nguyên văn tại `data/README_ATSH_NLP_20k_goc.md`.
+Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `text` và `label`. Tệp này là hai cột `text` và `label` của `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin về nguồn gốc dưới đây lấy từ README đi kèm gói dữ liệu, lưu tại `data/README_ATSH_NLP_20k_goc.md`.
 
-"Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập."
+"Dữ liệu được cung cấp bởi dự án ATSH-ABSA (UIT), chỉ dùng cho mục đích học tập."
 
 | Mục | Nội dung theo README của tác giả |
 |---|---|
-| Nguồn | Trích từ dự án nghiên cứu ATSH-ABSA của Phạm Xuân Vĩnh Hà (UIT, ĐHQG TP.HCM). Lấy từ bản gán nhãn tự động (silver), không lấy từ bản gán nhãn thủ công (gold); không có bình luận nào trùng với bộ gold. |
+| Nguồn | Trích từ dự án nghiên cứu ATSH-ABSA (UIT, ĐHQG TP.HCM). Lấy từ bản gán nhãn tự động (silver), không lấy từ bản gán nhãn thủ công (gold); không có bình luận nào trùng với bộ gold. |
 | Nội dung | Bình luận YouTube tiếng Việt về chương trình Anh Trai Say Hi, mùa 1, tập 1 đến 14. |
 | Cách gán nhãn | Nhãn do mô hình ngôn ngữ lớn gán tự động theo một bộ hướng dẫn gán nhãn, theo từng đối tượng (chương trình hoặc nghệ sĩ) và từng khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng), rồi gộp thành một nhãn tổng thể (quy tắc gộp ở mục 2.3). Chưa được người kiểm tra từng dòng. Tác giả ghi nhãn trung tính là nhãn nhiễu nhất và khuyên kiểm tra thủ công 100 đến 200 dòng của tập test rồi ghi tỉ lệ nhãn đúng vào báo cáo. |
 | Lấy mẫu lại | Dữ liệu gốc khoảng 88% tích cực. Bộ này lấy toàn bộ bình luận trung tính hợp lệ, 7.000 bình luận tiêu cực, phần còn lại lấy từ bình luận tích cực; chọn mẫu với seed 42. Tỉ lệ nhãn vì vậy không phản ánh tỉ lệ thật trên YouTube. |
@@ -374,7 +374,7 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 12. Pedregosa, F. và cộng sự (2011). Scikit-learn: Machine Learning in Python. Journal of Machine Learning Research, 12, tr. 2825 đến 2830. Phiên bản dùng trong đồ án: 1.9.1.
 13. Tài liệu Streamlit (phiên bản 1.64.0) và thư viện BERTopic 0.17.4, umap-learn 0.5.12, hdbscan 0.8.44, sentence-transformers 6.0.1.
 14. Google, Tài liệu YouTube Data API v3: `commentThreads.list`, `comments.list`, `videos.list` và hạn mức truy vấn.
-15. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói dữ liệu ATSH-NLP-20k, tệp `atsh_sentiment_20k.csv`; README của tác giả sao chép tại `data/README_ATSH_NLP_20k_goc.md`.
+15. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (UIT), chỉ dùng cho mục đích học tập. Gói dữ liệu ATSH-NLP-20k, tệp `atsh_sentiment_20k.csv`; README của gói lưu tại `data/README_ATSH_NLP_20k_goc.md`.
 
 \newpage
 

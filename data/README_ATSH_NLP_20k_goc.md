@@ -1,12 +1,14 @@
 # ATSH-NLP-20k — Bộ dữ liệu phân tích cảm xúc bình luận tiếng Việt
 
+> Bản lưu README đi kèm gói dữ liệu ATSH-NLP-20k. Nhóm đã lược tên cá nhân; phần còn lại giữ như bản nhận được.
+
 Bộ dữ liệu gồm **20.000 bình luận YouTube tiếng Việt** về chương trình *Anh Trai Say Hi* (mùa 1, tập 1–14). Mỗi bình luận có nhãn cảm xúc tổng thể. Có thể dùng cho đề tài môn Xử lý ngôn ngữ tự nhiên, ví dụ phân loại cảm xúc, tiền xử lý teencode/không dấu, so sánh TF-IDF + ML với PhoBERT.
 
 ## Nguồn và điều kiện sử dụng
 
-- **Nguồn:** trích từ dự án nghiên cứu ATSH-ABSA của Phạm Xuân Vĩnh Hà (UIT, ĐHQG TP.HCM). Dữ liệu được lấy từ bản gán nhãn tự động (*silver*), không lấy từ bản gán nhãn thủ công (*gold*). Không có bình luận nào trùng với bộ gold.
+- **Nguồn:** trích từ dự án nghiên cứu ATSH-ABSA (UIT, ĐHQG TP.HCM). Dữ liệu được lấy từ bản gán nhãn tự động (*silver*), không lấy từ bản gán nhãn thủ công (*gold*). Không có bình luận nào trùng với bộ gold.
 - **Chỉ dùng cho học tập** trong khuôn khổ môn học. **Không** công bố lại, không đưa lên GitHub, Kaggle, Hugging Face hay bất kỳ nơi công khai nào, và không dùng cho bài báo khi chưa có sự đồng ý của tác giả.
-- Khi dùng trong báo cáo, cần ghi: *"Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập."*
+- Khi dùng trong báo cáo, cần ghi: *"Dữ liệu được cung cấp bởi dự án ATSH-ABSA (UIT), chỉ dùng cho mục đích học tập."*
 - Dữ liệu không có tên tài khoản hay thông tin của người bình luận. Các bình luận có chứa đường link đã bị loại bỏ.
 
 ## Các file

@@ -87,12 +87,12 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 | Tích cực (2) | 9,591 (48.0%) |
 | Tổng, sau tiền xử lý | 20,000, còn 19,997 (3 dòng rỗng) |
 
-- Nguồn: gói ATSH-NLP-20k, dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT); bình luận về Anh Trai Say Hi mùa 1, tập 1 đến 14
+- Nguồn: gói ATSH-NLP-20k, dự án ATSH-ABSA (UIT); bình luận về Anh Trai Say Hi mùa 1, tập 1 đến 14
 - Nhãn silver do mô hình ngôn ngữ lớn gán theo đối tượng và khía cạnh rồi gộp; chưa kiểm tay, trung tính nhiễu nhất
 - Tác giả lấy mẫu lại từ dữ liệu gốc khoảng 88% tích cực; tỉ lệ nhãn không phải tỉ lệ thật trên YouTube
 - Một chương trình duy nhất; chỉ dùng cho học tập, không công bố lại
 
-<!-- Ghi chú: Tập dữ liệu có 20,000 bình luận, hai cột: văn bản và nhãn. Đây là hai cột text và label của gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA của Phạm Xuân Vĩnh Hà ở UIT; nhóm em chỉ dùng cho học tập theo đúng điều kiện của tác giả. Ba lớp lệch nhau: tích cực gần một nửa, trung tính chỉ 17%. Con số 17% này sẽ quay lại ở phần kết quả, vì trung tính là lớp yếu nhất. Ba điều nhóm em nói thẳng. Thứ nhất, mọi bình luận đều về một chương trình, nên mô hình học cả tên thí sinh làm tín hiệu. Thứ hai, tỉ lệ ba lớp là do tác giả lấy mẫu lại: dữ liệu gốc khoảng 88% tích cực, tác giả giữ hết trung tính, lấy đúng 7,000 tiêu cực rồi bù tích cực cho đủ 20,000; vì vậy số 7,000 tròn, và tỉ lệ này không phải tỉ lệ thật trên YouTube. Thứ ba, nhãn là nhãn silver do mô hình ngôn ngữ lớn gán theo từng đối tượng và khía cạnh rồi gộp lại, chưa có người kiểm từng dòng; chính tác giả ghi trung tính là lớp nhiễu nhất. Phần đọc tay 150 bình luận ở cuối bài cũng là để kiểm chất lượng nhãn. -->
+<!-- Ghi chú: Tập dữ liệu có 20,000 bình luận, hai cột: văn bản và nhãn. Đây là hai cột text và label của gói ATSH-NLP-20k, trích từ dự án ATSH-ABSA ở UIT; nhóm em chỉ dùng cho học tập theo đúng điều kiện của tác giả. Ba lớp lệch nhau: tích cực gần một nửa, trung tính chỉ 17%. Con số 17% này sẽ quay lại ở phần kết quả, vì trung tính là lớp yếu nhất. Ba điều nhóm em nói thẳng. Thứ nhất, mọi bình luận đều về một chương trình, nên mô hình học cả tên thí sinh làm tín hiệu. Thứ hai, tỉ lệ ba lớp là do tác giả lấy mẫu lại: dữ liệu gốc khoảng 88% tích cực, tác giả giữ hết trung tính, lấy đúng 7,000 tiêu cực rồi bù tích cực cho đủ 20,000; vì vậy số 7,000 tròn, và tỉ lệ này không phải tỉ lệ thật trên YouTube. Thứ ba, nhãn là nhãn silver do mô hình ngôn ngữ lớn gán theo từng đối tượng và khía cạnh rồi gộp lại, chưa có người kiểm từng dòng; chính tác giả ghi trung tính là lớp nhiễu nhất. Phần đọc tay 150 bình luận ở cuối bài cũng là để kiểm chất lượng nhãn. -->
 
 ---
 
@@ -273,7 +273,7 @@ Mã nguồn, 146 kiểm thử và toàn bộ tệp kết quả nằm trong repo 
 5. Nguyen, D. Q., Nguyen, A. T. (2020). PhoBERT: Pre-trained language models for Vietnamese. Findings of EMNLP 2020.
 6. Thẻ mô hình `keepitreal/vietnamese-sbert`, Hugging Face Hub.
 7. pyvi 0.1.1; scikit-learn 1.9.1 (Pedregosa và cộng sự, JMLR 2011); Streamlit 1.64.0; BERTopic 0.17.4; tài liệu YouTube Data API v3.
-8. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (Phạm Xuân Vĩnh Hà, UIT), chỉ dùng cho mục đích học tập. Gói ATSH-NLP-20k; README của tác giả tại `data/README_ATSH_NLP_20k_goc.md`.
+8. Dữ liệu được cung cấp bởi dự án ATSH-ABSA (UIT), chỉ dùng cho mục đích học tập. Gói ATSH-NLP-20k; README của gói tại `data/README_ATSH_NLP_20k_goc.md`.
 
 <!-- Ghi chú: Danh sách tài liệu tham khảo, trùng với mục 10 của báo cáo. Slide bài giảng của môn là nguồn cho pipeline năm bước, cách tách từ và cách báo kết quả theo lớp; các bài báo là nguồn cho BERTopic, UMAP, HDBSCAN và PhoBERT; dòng cuối là câu trích dẫn mà tác giả bộ dữ liệu yêu cầu. -->
 
