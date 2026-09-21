@@ -42,18 +42,19 @@ Ngày bắt đầu: 2026-09-21
 - [x] scripts/build_slides_pptx.py: dòng nguồn, ghi chú, tài liệu tham khảo
 - [x] Bài nói ngoài repo dòng 40, xuất lại report/CS221_Slide-speaking.pdf
 - [x] Grep toàn repo (trừ .venv, .git, review-2026-09-19) sạch tên
-- [ ] Commit A
+- [x] Commit A
 
 - Ghi chú A: README gốc thêm dòng "đã lược tên cá nhân"; bỏ chữ "nguyên văn". Bài nói còn ghi "Nhóm em có bảy bạn" (dòng 18), chưa sửa vì ngoài phạm vi, báo chủ repo. PDF bài nói trên ổ ngoài chưa xuất lại.
 - Commit 5950ba0: lưu bản Word chủ repo sửa tay.
 
 ### B. Bộ dựng báo cáo Word
-- [ ] BAO_CAO.md: front matter (môn, đề tài, số trang bắt đầu...), bỏ bìa và đoạn quy ước số, hạ cấp tiêu đề (## -> #, ### -> ##)
-- [ ] build_report.py: một font Times New Roman (styles, docDefaults, theme, header/footer, mã)
-- [ ] build_report.py: trang mục lục đầu, header/footer, pgNumType start=2
-- [ ] build_report.py: heading 20/16/14pt, thân 12pt, bảng 12pt rộng hết khổ, hình vừa khung 16 x 11,5 cm
-- [ ] Dựng lại BAO_CAO.docx, cập nhật mục lục bằng Word, xuất PDF, soi từng trang
-- [ ] Script kiểm tra docx (font, header/footer, mục lục, kích thước hình/bảng) chạy sạch
+- [x] BAO_CAO.md: front matter (môn, đề tài, số trang bắt đầu...), bỏ bìa và đoạn quy ước số, hạ cấp tiêu đề (## -> #, ### -> ##)
+- [x] build_report.py: một font Times New Roman (styles, docDefaults, theme, header/footer, mã)
+- [x] build_report.py: trang mục lục đầu, header/footer, pgNumType start=2
+- [x] build_report.py: heading 20/16/14pt, thân 12pt, bảng 12pt rộng hết khổ, hình vừa khung 16 x 11,5 cm
+- [x] Dựng lại BAO_CAO.docx, cập nhật mục lục bằng Word, xuất PDF, soi từng trang
+- [x] Script kiểm tra docx (font, header/footer, mục lục, kích thước hình/bảng) chạy sạch
+- Ghi chú B: Commit A = cfacff8. Word sandbox: file phải đặt trong ~/Library/Containers/com.microsoft.Word/Data/tmp (office_refresh.py tự làm), nếu không Word hiện hộp "Grant File Access" và AppleScript treo. Bảng ngắn (<=15 dòng) giữ trọn một trang; hàng không bị cắt. PDF có ArialMT chỉ ở khoảng trắng sau số thứ tự danh sách (Word tự vẽ), không phải chữ hiển thị.
 - [ ] Commit B
 
 ### C. Slide

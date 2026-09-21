@@ -1,24 +1,22 @@
-# Phân tích chủ đề và cảm xúc bình luận YouTube tiếng Việt
+---
+# Thông tin cho bộ dựng Word (scripts/build_report.py). Bìa in rời theo mẫu UIT nên không nằm trong file .docx;
+# class, lecturer, members, date giữ lại để dựng bìa và đối chiếu; bộ dựng không in chúng.
+course: Xử lý ngôn ngữ tự nhiên
+project_title: Phân tích chủ đề và cảm xúc bình luận YouTube tiếng Việt
+toc_title: Nội dung báo cáo đồ án
+page_number_start: 2
+class: CS221.F31.LT.TTNT
+lecturer: TS. Đặng Văn Thìn
+members:
+  - Lê Phú Hiếu, 26410038, LT.K2026.1.TTNT
+  - Nguyễn Thanh Duy, 26410030, LT.K2026.1.TTNT
+  - Nguyễn Thanh Phong, 26410090, LT.K2026.1.TTNT
+  - Nguyễn Thị Mai Thi, 26410117, LT.K2026.1.TTNT
+  - Hồ Viết Trịnh, 26410140, LT.K2026.1.TTNT
+date: Tháng 9 năm 2026
+---
 
-**Báo cáo đồ án môn Xử lý ngôn ngữ tự nhiên**
-
-Lớp: CS221.F31.LT.TTNT
-
-Giảng viên hướng dẫn: TS. Đặng Văn Thìn
-
-Nhóm thực hiện:
-
-- Lê Phú Hiếu, 26410038, LT.K2026.1.TTNT
-- Nguyễn Thanh Duy, 26410030, LT.K2026.1.TTNT
-- Nguyễn Thanh Phong, 26410090, LT.K2026.1.TTNT
-- Nguyễn Thị Mai Thi, 26410117, LT.K2026.1.TTNT
-- Hồ Viết Trịnh, 26410140, LT.K2026.1.TTNT
-
-Tháng 9 năm 2026
-
-> Quy ước số trong báo cáo: dấu phẩy là dấu thập phân (0,7161; 77,58%), dấu chấm tách hàng nghìn (20.000), trong cả văn xuôi lẫn bảng. Tên tệp nguồn viết trong định dạng mã (`results/metrics.json`); mỗi bảng số liệu ghi rõ tệp bằng chứng của mình trong cột nguồn hoặc trong đoạn dẫn vào bảng. Mọi chỉ số đo trên tập kiểm tra tách riêng, cấu hình chọn bằng cross-validation trên tập huấn luyện, trừ chỗ ghi khác. Phụ lục A cho biết lệnh tái lập và vị trí của từng con số.
-
-## Tóm tắt
+# Tóm tắt
 
 Đồ án giải bài toán đọc hàng nghìn bình luận dưới một video YouTube tiếng Việt thay cho người xem. Đầu ra gồm hai phần: các chủ đề người xem đang bàn, mỗi chủ đề mô tả bằng 10 từ khóa và vài bình luận tiêu biểu, và phân bố cảm xúc theo ba lớp tiêu cực, trung tính, tích cực. Dữ liệu huấn luyện là 20.000 bình luận có nhãn về một chương trình duy nhất, lớp trung tính chỉ chiếm 17,0%.
 
@@ -28,7 +26,7 @@ Ba kết quả chính. Một, mô hình cảm xúc đạt macro-F1 0,7161 trên 
 
 \newpage
 
-## 1. Giới thiệu
+# 1. Giới thiệu
 
 Bài toán của đồ án: cho tập bình luận dưới một video YouTube tiếng Việt, hệ thống trả về hai đầu ra. Thứ nhất là các chủ đề mà người xem đang bàn tới, mỗi chủ đề được mô tả bằng một nhóm từ khóa và vài bình luận tiêu biểu. Thứ hai là phân bố cảm xúc của bình luận theo ba lớp: tiêu cực, trung tính, tích cực. Người dùng mục tiêu là người cần nắm nội dung hàng nghìn bình luận mà không thể đọc từng dòng.
 
@@ -40,9 +38,9 @@ Bình luận YouTube tiếng Việt khó xử lý hơn văn bản báo chí vì 
 
 \newpage
 
-## 2. Dữ liệu
+# 2. Dữ liệu
 
-### 2.1. Nguồn gốc và cách gán nhãn
+## 2.1. Nguồn gốc và cách gán nhãn
 
 Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `text` và `label`. Tệp này là hai cột `text` và `label` của `atsh_sentiment_20k.csv` trong gói dữ liệu ATSH-NLP-20k, đã đối chiếu từng dòng: 20.000 dòng, cùng thứ tự, cùng nhãn. Mọi thông tin về nguồn gốc dưới đây lấy từ README đi kèm gói dữ liệu, lưu tại `data/README_ATSH_NLP_20k_goc.md`.
 
@@ -61,7 +59,7 @@ Tập dữ liệu huấn luyện là `data/dataset_chuan.csv`, gồm hai cột `
 
 Theo điều kiện trên, mã nguồn và tệp dữ liệu của đồ án chỉ nộp cho môn học, không đưa lên nơi công khai.
 
-### 2.2. Thống kê
+## 2.2. Thống kê
 
 | Chỉ số | Giá trị | Nguồn |
 |---|---|---|
@@ -80,19 +78,19 @@ Theo điều kiện trên, mã nguồn và tệp dữ liệu của đồ án ch�
 
 Hai điểm cần đọc kỹ. Số 7.000 tròn cho nhãn 0 và tổng 20.000 tròn là kết quả của bước lấy mẫu lại do tác giả gói dữ liệu thực hiện (mục 2.1): giữ toàn bộ bình luận trung tính hợp lệ, lấy 7.000 bình luận tiêu cực, phần còn lại lấy từ bình luận tích cực, trong khi dữ liệu gốc khoảng 88% tích cực. Tỉ lệ ba lớp trong bảng vì vậy do tác giả chọn để giảm mất cân bằng, không phản ánh tỉ lệ thật trên YouTube, và mọi số đo ở mục 6 đều đo trên phân bố này. Toàn bộ bình luận đều nói về một chương trình duy nhất, "Anh Trai Say Hi", nên các con số ở mục 6 chỉ có giá trị trong miền đó; hệ quả được bàn ở mục 9.
 
-### 2.3. Định nghĩa ba nhãn
+## 2.3. Định nghĩa ba nhãn
 
 Ba nhãn dùng theo quy ước của tệp dữ liệu: `0` tiêu cực, `1` trung tính, `2` tích cực. Theo README của tác giả, nhãn gốc được gán theo từng đối tượng (chương trình hoặc nghệ sĩ) và từng khía cạnh (chuyên môn, ngoại hình/phong cách, tính cách, độ nổi tiếng), rồi gộp thành một nhãn tổng thể: có ít nhất một nhãn tích cực thì tích cực; không có nhãn tích cực nhưng có nhãn tiêu cực thì tiêu cực; chỉ có nhãn trung tính thì trung tính. Bình luận vừa có nhãn tích cực vừa có nhãn tiêu cực đã bị loại. Đọc lại từ dữ liệu, chúng tôi thấy lớp `0` là chê, thất vọng, bức xúc; lớp `2` là khen, yêu thích, cảm động; lớp `1` là nhận xét không nghiêng về khen hay chê, câu hỏi, câu kể, và cả những câu vừa khen vừa chê nhẹ. Điểm cuối khớp với ghi chú của tác giả rằng trung tính là nhãn nhiễu nhất: một số câu chê nhẹ hoặc khen nhẹ vẫn được gán trung tính.
 
-### 2.4. Chia tập huấn luyện và kiểm tra
+## 2.4. Chia tập huấn luyện và kiểm tra
 
 Sau tiền xử lý, 19.997 dòng được chia phân tầng theo nhãn thành 15.997 dòng huấn luyện và 4.000 dòng kiểm tra với hạt giống 42 (`results/metrics.json`, khóa `split`). Mọi bước chọn mô hình và dò tham số chỉ dùng tập huấn luyện bằng cross-validation 5-fold; tập kiểm tra được đánh giá đúng một lần ở mục 6.
 
 \newpage
 
-## 3. Tiền xử lý
+# 3. Tiền xử lý
 
-### 3.1. Các bước, theo đúng thứ tự trong mã nguồn
+## 3.1. Các bước, theo đúng thứ tự trong mã nguồn
 
 Hàm `clean_text` trong `src/preprocess.py` chạy lần lượt:
 
@@ -107,21 +105,21 @@ Hàm `clean_text` trong `src/preprocess.py` chạy lần lượt:
 
 Sau đó `tokenize_vietnamese` tách từ bằng pyvi rồi mới hạ chữ thường. Hàm `preprocess_text` ghép hai hàm này; cả huấn luyện lẫn ứng dụng đều gọi đúng hàm đó, nên đặc trưng lúc dự đoán khớp với lúc huấn luyện.
 
-### 3.2. Vì sao tách từ trước khi hạ chữ thường
+## 3.2. Vì sao tách từ trước khi hạ chữ thường
 
 pyvi phân biệt chữ hoa và chữ thường khi ghép tên riêng. Kiểm tra trực tiếp ngày 18-09-2026: `ViTokenizer.tokenize("Đông Hùng hát")` trả về `Đông_Hùng hát`, còn với đầu vào đã hạ chữ thường trả về `đông hùng hát`, tức là hai âm tiết rời. Phiên bản đầu của đồ án hạ chữ thường ngay trong bước làm sạch, nên cụm `đông_hùng` mà báo cáo cũ lấy làm ví dụ thực ra chưa bao giờ được tạo ra. Phiên bản hiện tại giữ nguyên chữ hoa qua `clean_text`, tách từ, rồi mới hạ chữ thường; nhờ vậy tên riêng như `Đông_Hùng` là token đơn trong cả từ khóa chủ đề lẫn đặc trưng TF-IDF. Thứ tự này chỉ đem lại lợi ích cho tên riêng: các từ ghép thông thường như `chương_trình`, `khán_giả` được pyvi ghép đúng dù đầu vào viết hoa hay viết thường (kiểm tra cùng ngày).
 
-### 3.3. Nguyên tắc của từ điển teencode
+## 3.3. Nguyên tắc của từ điển teencode
 
 Từ điển chỉ chuẩn hóa biến thể chính tả của cùng một từ về dạng chuẩn: `ko`, `k`, `hok`, `khong` thành `không`; `đc`, `dc` thành `được`; `j` thành `gì`; `oke`, `okie` thành `ok`. Từ điển không dịch tiếng lóng hay từ chửi sang một từ mang sắc thái cảm xúc. Phiên bản cũ có các ánh xạ `ok` thành `tốt`, `vcl` thành `rất`, `đkm` thành `tồi`, và `sp` thành `sản phẩm` (một ánh xạ của miền thương mại điện tử, không phù hợp với bình luận YouTube). Những ánh xạ này là tự gán nhãn cảm xúc cho dữ liệu trước khi mô hình được học; chúng tôi bỏ chúng và để bộ phân loại tự học trọng số của các token đó từ 20.000 mẫu có nhãn.
 
-### 3.4. Từ dừng chỉ dùng cho từ khóa chủ đề
+## 3.4. Từ dừng chỉ dùng cho từ khóa chủ đề
 
 Tệp `src/resources/vietnamese_stopwords.txt` có 236 mục do nhóm tự biên soạn, viết ở dạng đã tách từ (`như_thế_nào`, `tuy_nhiên`) để khớp trực tiếp với token của pyvi. Danh sách chỉ giữ hư từ và tiểu từ kiểu chat; từ mang nội dung hoặc sắc thái (`hay`, `hát`, `buồn`, `đỉnh`) không có trong đó vì đó chính là thứ mô hình chủ đề cần thấy.
 
 Danh sách này chỉ được đưa vào `CountVectorizer` của bước c-TF-IDF (mục 4.3), không đưa vào TF-IDF của bộ phân loại cảm xúc. Lý do: `không` và các từ phủ định khác nằm trong danh sách từ dừng, trong khi `không` là đặc trưng có trọng số dương lớn nhất của lớp tiêu cực (+2,93 trong `results/top_features.txt`). Loại từ dừng ở đây sẽ làm mất chính tín hiệu phủ định.
 
-### 3.5. So sánh hai phiên bản tiền xử lý
+## 3.5. So sánh hai phiên bản tiền xử lý
 
 Để biết thay đổi tiền xử lý ảnh hưởng thế nào tới bộ phân loại, chúng tôi chạy cùng một pipeline TF-IDF + LinearSVC với hai phiên bản tiền xử lý trên năm hạt giống chia tập (0 đến 4). Phiên bản cũ là bản sao đóng băng của mã tiền xử lý ban đầu (`experiments/preprocess_baseline.py`); phiên bản mới là `src/preprocess.py` hiện tại. Script `experiments/ab_preprocess.py` ghi kết quả vào `results/ab_preprocess.txt` và `results/ab_preprocess.csv`. Giá trị trong bảng là trung bình ± độ lệch chuẩn mẫu (ddof = 1) trên năm hạt giống.
 
@@ -138,19 +136,19 @@ Kết luận: đối với bộ phân loại cảm xúc, thay đổi tiền xử
 
 \newpage
 
-## 4. Biểu diễn
+# 4. Biểu diễn
 
-### 4.1. TF-IDF n-gram cho phân loại cảm xúc
+## 4.1. TF-IDF n-gram cho phân loại cảm xúc
 
 Văn bản đã tách từ được đưa qua `TfidfVectorizer` với `ngram_range=(1, 2)`, `max_features=15000`, `sublinear_tf=True` (`results/metrics.json`, khóa `features`). Bigram là cần thiết vì phủ định trong tiếng Việt đứng trước từ được phủ định: `không hay`, `không thích` là hai trong năm đặc trưng mạnh nhất của lớp tiêu cực, còn `hay mà`, `hay nhưng` là đặc trưng của lớp trung tính (`results/top_features.txt`). Với unigram thuần, `hay` sẽ kéo cả ba câu về lớp tích cực.
 
-### 4.2. Vector câu 768 chiều cho gom cụm chủ đề
+## 4.2. Vector câu 768 chiều cho gom cụm chủ đề
 
 Mỗi bình luận đã tách từ được mã hóa bằng `keepitreal/vietnamese-sbert`, một mô hình Sentence-BERT tiếng Việt. Thẻ mô hình không nêu mô hình gốc; chúng tôi suy ra nó được tinh chỉnh từ PhoBERT-base dựa trên `config.json` của mô hình trên Hugging Face Hub: `_name_or_path` là `sentence_phobert_nli`, kiến trúc RoBERTa, 12 tầng, kích thước ẩn 768, bộ tách từ `PhobertTokenizer` với từ vựng 64.001, `max_position_embeddings` 258. Theo thẻ mô hình sentence-transformers: `max_seq_length` 256, mean pooling, huấn luyện bằng `CosineSimilarityLoss`. Kết quả là một vector câu 768 chiều cho mỗi bình luận.
 
 PhoBERT được huấn luyện trên văn bản đã tách từ, nên bước pyvi phía trước là định dạng đầu vào mà mô hình nhúng mong đợi, chứ không chỉ phục vụ từ khóa. Trên máy thử nghiệm (Apple Silicon, MPS), mã hóa 1.496 bình luận mất 3,4 giây.
 
-### 4.3. c-TF-IDF: cách BERTopic chọn từ khóa cho một cụm
+## 4.3. c-TF-IDF: cách BERTopic chọn từ khóa cho một cụm
 
 Sau khi gom cụm, BERTopic nối tất cả bình luận của một cụm thành một văn bản và tính trọng số cho từng từ theo công thức c-TF-IDF (Grootendorst, 2022):
 
@@ -173,9 +171,9 @@ Bộ đếm từ dùng mẫu token `(?u)\b[^\W\d_]\w*\b`: token phải bắt đ�
 
 \newpage
 
-## 5. Mô hình
+# 5. Mô hình
 
-### 5.1. Phân loại cảm xúc
+## 5.1. Phân loại cảm xúc
 
 Bốn mô hình được so sánh bằng cross-validation 5-fold phân tầng trên 15.997 dòng huấn luyện, cùng một bộ đặc trưng TF-IDF (`results/model_comparison.csv`). LogisticRegression và LinearSVC dùng `class_weight="balanced"` để bù cho lớp trung tính chỉ chiếm 17%.
 
@@ -195,7 +193,7 @@ Tham số C của LinearSVC được dò trên lưới bốn giá trị theo mac
 
 C = 0,3 được chọn. Ở giá trị này, LinearSVC hơn LogisticRegression 0,0010 macro-F1, nhỏ hơn độ lệch chuẩn giữa các fold của cả hai mô hình, nên hai mô hình coi như ngang nhau. Chúng tôi giữ LinearSVC theo thiết kế ban đầu: cùng là mô hình tuyến tính, thời gian khớp ngắn hơn, và không có bằng chứng để đổi.
 
-### 5.2. Gom cụm chủ đề bằng BERTopic
+## 5.2. Gom cụm chủ đề bằng BERTopic
 
 Pipeline trong `src/topic_pipeline.py` khai báo tường minh bốn thành phần:
 
@@ -220,7 +218,7 @@ Số chủ đề và tỉ lệ nhiễu phụ thuộc vào mẫu bình luận, v�
 
 Một bài học kỹ thuật đã xác minh trong mã nguồn thư viện: `BERTopic` khởi tạo với `language="english"`, và khi không truyền `embedding_model`, bước tiền xử lý nội bộ xóa mọi ký tự ngoài `[A-Za-z0-9 ]` trước khi tính c-TF-IDF, biến `không` thành `khng` và `chương_trình` thành `chngtrnh`. Pipeline của đồ án luôn truyền mô hình nhúng vào `BERTopic` kể cả khi vector đã tính sẵn, và có một kiểm thử đơn vị xác nhận `language` của mô hình là `None`.
 
-### 5.3. Tóm tắt chủ đề bằng mô hình ngôn ngữ chạy nội bộ
+## 5.3. Tóm tắt chủ đề bằng mô hình ngôn ngữ chạy nội bộ
 
 Từ khóa c-TF-IDF là danh sách rời. Lớp `OllamaSummarizer` (`src/llm_summary.py`) gửi 10 từ khóa và tối đa 10 bình luận tiêu biểu (văn bản gốc, không phải chuỗi đã tách từ) của mỗi chủ đề tới Ollama qua API tương thích OpenAI (`http://localhost:11434/v1`, mô hình `qwen2`, `temperature=0.3`, tối đa 150 token) và yêu cầu đúng một câu tiếng Việt dưới 40 từ. Ứng dụng chỉ tóm tắt 8 chủ đề lớn nhất và kiểm tra Ollama có chạy không trước khi gọi.
 
@@ -228,13 +226,13 @@ Phần này chưa có đánh giá định lượng: chưa có bộ tóm tắt th
 
 \newpage
 
-## 6. Đánh giá
+# 6. Đánh giá
 
 ![Quy trình đánh giá: chia dữ liệu, chọn mô hình bằng cross-validation, đánh giá một lần trên tập kiểm tra](../docs/diagrams/evaluation.png)
 
 Thuật ngữ trong mục này theo bài giảng: "độ chính xác (precision)" là tỉ lệ dự đoán vào một lớp mà đúng lớp đó; "độ phủ (recall)" là tỉ lệ mẫu của một lớp được tìm ra; "tỉ lệ dự đoán đúng (accuracy)" là tỉ lệ đúng trên toàn tập. Hai khái niệm precision và accuracy không được dùng thay nhau.
 
-### 6.1. Kết quả trên tập kiểm tra
+## 6.1. Kết quả trên tập kiểm tra
 
 Mô hình cuối (LinearSVC, C = 0,3) được huấn luyện trên 15.997 dòng và đánh giá một lần trên 4.000 dòng kiểm tra (`results/metrics.json`, khóa `test`; `results/classification_report.txt`).
 
@@ -259,11 +257,11 @@ Ma trận nhầm lẫn (hàng là nhãn thật, cột là dự đoán, thứ t�
 
 ![Ma trận nhầm lẫn chuẩn hóa theo hàng](../results/confusion_matrix_normalized.png)
 
-### 6.2. Độ ổn định theo hạt giống
+## 6.2. Độ ổn định theo hạt giống
 
 Chia lại tập và huấn luyện lại với năm hạt giống 0 đến 4 cho tỉ lệ dự đoán đúng 77,58% ± 0,44 và macro-F1 0,7200 ± 0,0037 (`results/metrics.json`, khóa `seed_robustness`). Lần chia với hạt giống 42 ở mục 6.1 nằm ở đầu thấp của khoảng này, nên con số 76,62% là ước lượng thận trọng.
 
-### 6.3. So với phiên bản đầu của đồ án
+## 6.3. So với phiên bản đầu của đồ án
 
 Phiên bản đầu (đo lại ngày 18-09-2026 với cùng dữ liệu) cho tỉ lệ dự đoán đúng 76,83% và macro-F1 0,71 trên tập kiểm tra, F1 từng lớp 0,76 / 0,52 / 0,87. Cùng cấu hình đó (tiền xử lý cũ, C = 1) chạy trên hạt giống 0 đến 4 đạt trung bình 76,61% ± 0,40 (hàng "Cũ, C = 1,0" của bảng mục 3.5, `results/ab_preprocess.txt`), nên lần chia ban đầu cao hơn trung bình 0,2 điểm, trong phạm vi một độ lệch chuẩn. Cross-validation 5-fold trên toàn tập cho 76,74% ± 0,57.
 
@@ -279,7 +277,7 @@ Phiên bản đầu (đo lại ngày 18-09-2026 với cùng dữ liệu) cho t�
 
 \newpage
 
-## 7. Phân tích lỗi
+# 7. Phân tích lỗi
 
 Ma trận nhầm lẫn cho thấy lớp trung tính là điểm yếu của mô hình. Chỉ 371 trong 682 bình luận trung tính (54,4%) được nhận ra; 203 bị gán tiêu cực và 108 bị gán tích cực. Chiều ngược lại cũng vậy: trong 704 bình luận được dự đoán là trung tính, có 208 bình luận thật ra tiêu cực và 125 thật ra tích cực. Hai lớp còn lại ít nhầm sang nhau: chỉ 133 tiêu cực bị đoán tích cực và 158 tích cực bị đoán tiêu cực.
 
@@ -314,7 +312,7 @@ Hai nhóm lớn nhất chiếm gần nửa số lỗi và cùng chỉ về một
 
 \newpage
 
-## 8. Ứng dụng
+# 8. Ứng dụng
 
 Ứng dụng Streamlit (`src/app.py`) chạy sáu bước theo thứ tự: lấy dữ liệu, làm sạch và tách từ, nhúng câu, gom cụm, phân loại cảm xúc, tóm tắt bằng LLM (tùy chọn). Ba nguồn dữ liệu được hỗ trợ: Link YouTube (cần `YOUTUBE_API_KEY`), Tệp CSV (tải lên rồi chọn cột văn bản), và Dữ liệu mẫu (đọc N dòng đầu của `data/dataset_chuan.csv`, không cần API key, dành cho người chấm). Với nguồn Dữ liệu mẫu, ứng dụng hiển thị lời nhắc rằng tệp này chính là tập huấn luyện của mô hình cảm xúc, nên tỉ lệ cảm xúc hiển thị lạc quan hơn thực tế và chỉ phần chủ đề là minh họa công bằng.
 
@@ -336,7 +334,7 @@ Hạn chế vận hành. YouTube Data API v3 cấp mặc định 10.000 đơn v�
 
 \newpage
 
-## 9. Hạn chế và hướng phát triển
+# 9. Hạn chế và hướng phát triển
 
 Hạn chế của phiên bản hiện tại:
 
@@ -358,7 +356,7 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 
 \newpage
 
-## 10. Tài liệu tham khảo
+# 10. Tài liệu tham khảo
 
 1. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 3 (các kỹ thuật tiền xử lý).
 2. Slide môn Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Thìn, UIT, bài 4 (phương pháp biểu diễn văn bản).
@@ -378,7 +376,7 @@ Hướng phát triển, theo thứ tự chi phí tăng dần:
 
 \newpage
 
-## Phụ lục A. Tái lập kết quả
+# Phụ lục A. Tái lập kết quả
 
 Môi trường: Python 3.11.15 là phiên bản đã kiểm thử (3.12 dự kiến chạy được, chưa thử), `pip install -r requirements-dev.txt` (xem `README.md`). Không lệnh nào dưới đây cần API key hay kết nối tới YouTube. Lần chạy đầu của ứng dụng hoặc của `src/topic_model.py` tải mô hình nhúng câu từ Hugging Face Hub về cache; các lệnh gom cụm và hai kiểm thử đầu-cuối đọc mô hình từ cache đó, nên cần chạy một trong hai lệnh này trước khi ngắt mạng.
 
