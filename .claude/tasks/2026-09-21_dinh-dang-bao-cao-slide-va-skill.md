@@ -64,12 +64,13 @@ Ngày bắt đầu: 2026-09-21
 - [x] Dựng lại pptx, xuất PDF bằng PowerPoint, soi từng slide, chạy script kiểm tra vùng
 - [x] slide.md (Marp) đồng bộ nội dung đã đổi
 - Ghi chú C: sơ đồ dùng bản _body.png (build_dark_assets.py --crop-only ghép khối + chú giải, bỏ tiêu đề và dải trống); fit_picture() đặt ảnh vừa vùng nội dung y 1,98 đến 6,84 in. check_pptx.py (skill slide-deck) 0 lỗi, 0 cảnh báo với --font Calibri --font "Calibri Light" --skip 1.
-- [ ] Commit C
+- [x] Commit C (3911753)
 
 ### D. Skill dùng chung (nar-core-space)
-- [ ] Skill `word-report`: SKILL.md + references/format-contract.md + scripts/build_docx.py + scripts/check_docx.py
-- [ ] Skill `slide-deck`: SKILL.md + references/layout-contract.md + scripts/pptx_zones.py + scripts/check_pptx.py
-- [ ] Mục connector "Claude trong PowerPoint/Word" trong cả hai skill
+- [x] Skill `word-report`: SKILL.md + references/format-contract.md + scripts/build_docx.py + scripts/check_docx.py
+- [x] Skill `slide-deck`: SKILL.md + references/layout-contract.md + scripts/pptx_zones.py + scripts/check_pptx.py
+- [x] Mục connector "Claude trong PowerPoint/Word" trong cả hai skill
+- Ghi chú D: build_report.py của CS221 = bản sao nguyên văn của skill word-report/scripts/build_docx.py (đồng bộ 2026-09-21). office_refresh.py nằm ở word-report/scripts, slide-deck dùng chung.
 - [ ] USAGE.md thêm hai mục; knowledge/log.md dòng schema-change
 - [ ] Symlink hai skill vào ~/.claude/skills/
 - [ ] CLAUDE.md máy: mục ngắn trong Coursework (commit riêng hunk của mình)

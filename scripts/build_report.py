@@ -1,9 +1,12 @@
 """Build a UIT course-project report (.docx) from Markdown, following Nar's report contract.
 
-Vendored from nar-core-space/.claude/skills/word-report/scripts/build_docx.py.
-Edit the skill copy first, then copy it back here, so projects do not drift.
+Canonical copy, owned by the nar-core-space skill `word-report`. Projects vendor it as
+scripts/build_report.py (copied verbatim); fix bugs here first, then re-copy, so projects do not
+drift. First vendored into CS221-F31_XLNNTN_course-proj on 2026-09-21.
 
-Run from the repo root:
+Needs python-docx >= 1.1 (PyYAML optional; a flat front matter parser is built in).
+
+Run from the repo root of the project that vendored it:
 
     .venv/bin/python scripts/build_report.py
     .venv/bin/python scripts/build_report.py --src report/BAO_CAO.md --out report/BAO_CAO.docx
