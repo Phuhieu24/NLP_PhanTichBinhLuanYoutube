@@ -90,7 +90,6 @@ Ngày bắt đầu: 2026-09-21
   check_pptx.py 0 lỗi 0 cảnh báo (18 slide, 18 ghi chú). Chưa push repo nào.
 
 ## Việc còn mở (chủ repo quyết)
-- PDF bài nói trên ổ ngoài `/Volumes/USR_18T_01/UIT_eLearning/CS221_Slide-speaking.pdf` còn bản cũ có tên.
-- Bài nói dòng 18 còn ghi "Nhóm em có bảy bạn" (nhóm đã còn 5 người từ 2026-09-20).
+- [x] Bài nói dòng 18 sửa thành "Nhóm em có năm bạn"; PDF xuất lại, chép ra cả ổ ngoài lẫn `report/` (2026-09-21).
 - Bìa CS221 chưa có config trong repo CourseProj-Report_w_Pandoc.
 - `review-2026-09-19/` và lịch sử git vẫn còn tên cá nhân (không viết lại lịch sử).
