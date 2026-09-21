@@ -71,11 +71,26 @@ Ngày bắt đầu: 2026-09-21
 - [x] Skill `slide-deck`: SKILL.md + references/layout-contract.md + scripts/pptx_zones.py + scripts/check_pptx.py
 - [x] Mục connector "Claude trong PowerPoint/Word" trong cả hai skill
 - Ghi chú D: build_report.py của CS221 = bản sao nguyên văn của skill word-report/scripts/build_docx.py (đồng bộ 2026-09-21). office_refresh.py nằm ở word-report/scripts, slide-deck dùng chung.
-- [ ] USAGE.md thêm hai mục; knowledge/log.md dòng schema-change
-- [ ] Symlink hai skill vào ~/.claude/skills/
-- [ ] CLAUDE.md máy: mục ngắn trong Coursework (commit riêng hunk của mình)
-- [ ] Commit D (nar-core-space)
+- [x] USAGE.md thêm hai mục; knowledge/log.md dòng schema-change
+- [x] Symlink hai skill vào ~/.claude/skills/
+- [x] CLAUDE.md máy: mục ngắn trong Coursework (commit riêng hunk của mình)
+- [x] Commit D (nar-core-space)
 
 ### E. Kết thúc
-- [ ] Memory dự án: quyết định nguồn dữ liệu + con trỏ skill
-- [ ] Báo cáo chủ repo
+- [x] Memory dự án: quyết định nguồn dữ liệu + con trỏ skill
+- [x] Báo cáo chủ repo
+
+## Kết quả (2026-09-21, hoàn tất)
+- CS221: 5950ba0 (bản Word chủ repo sửa tay), cfacff8 (bỏ tên), e689b7b (bộ dựng Word mới + BAO_CAO.docx),
+  3911753 (slide), dd92302 (đồng bộ build_report.py với skill).
+- nar-core-space: ac11223 (skill word-report, slide-deck; USAGE.md; log.md; mục mới trong CLAUDE.md máy).
+  Hunk Co-Authored-By của chủ repo trong CLAUDE.md máy vẫn chưa commit, để nguyên.
+- Symlink: ~/.claude/skills/word-report, ~/.claude/skills/slide-deck.
+- Kiểm tra: check_docx.py 0 lỗi (BAO_CAO.docx 26 trang, mục lục đã cập nhật bằng Word);
+  check_pptx.py 0 lỗi 0 cảnh báo (18 slide, 18 ghi chú). Chưa push repo nào.
+
+## Việc còn mở (chủ repo quyết)
+- PDF bài nói trên ổ ngoài `/Volumes/USR_18T_01/UIT_eLearning/CS221_Slide-speaking.pdf` còn bản cũ có tên.
+- Bài nói dòng 18 còn ghi "Nhóm em có bảy bạn" (nhóm đã còn 5 người từ 2026-09-20).
+- Bìa CS221 chưa có config trong repo CourseProj-Report_w_Pandoc.
+- `review-2026-09-19/` và lịch sử git vẫn còn tên cá nhân (không viết lại lịch sử).
