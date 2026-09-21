@@ -68,7 +68,7 @@ Nhóm thực hiện:
 
 <style scoped>p { font-size: 0.76em; line-height: 1.45; }</style>
 
-![h:455](../docs/diagrams/pipeline_slate.png)
+![h:410](../docs/diagrams/pipeline_slate_body.png)
 
 Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/preprocess.py`), biểu diễn (TF-IDF và vector câu), thuật toán (LinearSVC, BERTopic trong `src/topic_pipeline.py`), đánh giá (`results/`, `experiments/`)
 
@@ -137,7 +137,7 @@ Thu thập (`src/crawler.py`, ba nguồn dữ liệu), tiền xử lý (`src/pre
 
 ## Quy trình đánh giá: chọn trên tập huấn luyện, chấm một lần trên tập kiểm tra
 
-![h:520](../docs/diagrams/evaluation_slate.png)
+![h:470](../docs/diagrams/evaluation_slate_body.png)
 
 <!-- Ghi chú: Trước khi xem con số, em nói cách chấm. Dữ liệu chia phân tầng 80 trên 20 với hạt giống 42. Mọi việc chọn lựa, so bốn mô hình nền và dò tham số C, chỉ chạy bằng cross-validation năm phần trên 15,997 dòng huấn luyện. Tập kiểm tra 4,000 dòng để dành, chấm đúng một lần với mô hình cuối. Sau đó nhóm em chia lại với năm hạt giống khác để xem con số có ổn định không. Quy trình này là lý do nhóm em tin các số ở hai slide sau. -->
 

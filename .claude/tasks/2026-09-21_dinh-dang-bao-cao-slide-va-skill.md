@@ -55,14 +55,15 @@ Ngày bắt đầu: 2026-09-21
 - [x] Dựng lại BAO_CAO.docx, cập nhật mục lục bằng Word, xuất PDF, soi từng trang
 - [x] Script kiểm tra docx (font, header/footer, mục lục, kích thước hình/bảng) chạy sạch
 - Ghi chú B: Commit A = cfacff8. Word sandbox: file phải đặt trong ~/Library/Containers/com.microsoft.Word/Data/tmp (office_refresh.py tự làm), nếu không Word hiện hộp "Grant File Access" và AppleScript treo. Bảng ngắn (<=15 dòng) giữ trọn một trang; hàng không bị cắt. PDF có ArialMT chỉ ở khoảng trắng sau số thứ tự danh sách (Word tự vẽ), không phải chữ hiển thị.
-- [ ] Commit B
+- [x] Commit B (e689b7b)
 
 ### C. Slide
-- [ ] Sơ đồ slide 3 và 8: bỏ tiêu đề nướng trong ảnh, đặt tiêu đề slide chuẩn, ảnh lấp đầy vùng nội dung
-- [ ] Ảnh/bảng các slide khác lấp tối đa vùng nội dung, không lấn vùng tiêu đề và số trang
-- [ ] Đổi --out mặc định sang tên file hiện tại `report/CS221_Xử-Lý-NNTN_slide.pptx`
-- [ ] Dựng lại pptx, xuất PDF bằng PowerPoint, soi từng slide, chạy script kiểm tra vùng
-- [ ] slide.md (Marp) đồng bộ nội dung đã đổi
+- [x] Sơ đồ slide 3 và 8: bỏ tiêu đề nướng trong ảnh, đặt tiêu đề slide chuẩn, ảnh lấp đầy vùng nội dung
+- [x] Ảnh/bảng các slide khác lấp tối đa vùng nội dung, không lấn vùng tiêu đề và số trang
+- [x] Đổi --out mặc định sang tên file hiện tại `report/CS221_Xử-Lý-NNTN_slide.pptx`
+- [x] Dựng lại pptx, xuất PDF bằng PowerPoint, soi từng slide, chạy script kiểm tra vùng
+- [x] slide.md (Marp) đồng bộ nội dung đã đổi
+- Ghi chú C: sơ đồ dùng bản _body.png (build_dark_assets.py --crop-only ghép khối + chú giải, bỏ tiêu đề và dải trống); fit_picture() đặt ảnh vừa vùng nội dung y 1,98 đến 6,84 in. check_pptx.py (skill slide-deck) 0 lỗi, 0 cảnh báo với --font Calibri --font "Calibri Light" --skip 1.
 - [ ] Commit C
 
 ### D. Skill dùng chung (nar-core-space)

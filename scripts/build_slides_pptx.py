@@ -65,7 +65,7 @@ THEMES = {
 _ap = argparse.ArgumentParser(description="Dựng bài thuyết trình PowerPoint của đồ án.")
 _ap.add_argument("--theme", choices=sorted(THEMES), default="slate",
                  help="bảng màu: slate (mặc định), dark, light")
-_ap.add_argument("--out", default="report/CS221_slide.pptx",
+_ap.add_argument("--out", default="report/CS221_Xử-Lý-NNTN_slide.pptx",
                  help="tệp .pptx xuất ra, tính từ thư mục gốc repo")
 ARGS = _ap.parse_args()
 
@@ -82,6 +82,9 @@ KICKER_TOP = 0.36
 TITLE_TOP = 0.66
 BAR_TOP = 1.60
 CONTENT_TOP = 1.98
+# Vùng nội dung: từ dưới vạch nhấn của tiêu đề tới trên số trang. Ảnh và bảng lấp tối đa vùng
+# này nhưng không bao giờ lấn lên vùng tiêu đề (kicker, tiêu đề, vạch nhấn) hay xuống số trang.
+CONTENT_BOTTOM = 6.84
 
 def set_bg(slide, color="bg"):
     f = slide.background.fill
@@ -206,30 +209,36 @@ def table(slide, rows, x, y, w, col_w, size=12.5, header_size=None, row_h=0.34,
                 cell_text(cell, val, size, "ink" if hi else "body", bold=hi, align=al)
     return t
 
-def picture(slide, path, x=None, y=CONTENT_TOP, w=None, h=None):
-    kw = {}
-    if w: kw["width"] = Inches(w)
-    if h: kw["height"] = Inches(h)
-    pic = slide.shapes.add_picture(path, Inches(x if x is not None else ML), Inches(y), **kw)
-    if x is None:
-        pic.left = Emu(int((Inches(SW) - pic.width)))
-    return pic
+def fit_picture(slide, path, x=ML, y=CONTENT_TOP, w=CW, h=None, align="center"):
+    """Ảnh lớn nhất vừa khung (x, y, w, h) mà vẫn giữ tỉ lệ; khung mặc định là cả vùng nội dung.
+
+    Ảnh bám mép trên của khung (ngay dưới vùng tiêu đề) và căn ngang theo align.
+    """
+    from PIL import Image
+    h = CONTENT_BOTTOM - y if h is None else h
+    with Image.open(path) as im:
+        iw, ih = im.size
+    scale = min(w / iw, h / ih)
+    pw, ph = iw * scale, ih * scale
+    px = {"left": x, "right": x + w - pw}.get(align, x + (w - pw) / 2)
+    return slide.shapes.add_picture(path, Inches(px), Inches(y), Inches(pw), Inches(ph))
 
 
 
 
 REPO = Path(__file__).resolve().parents[1]
-# Hai sơ đồ phủ kín khung hình nên nền của chúng thay luôn nền slide; riêng ma trận nhầm
-# lẫn đặt lọt trong slide nên nền ảnh phải khớp nền theme, nếu không sẽ thấy vệt chữ nhật.
+# Mọi ảnh đặt lọt trong vùng nội dung, nên nền ảnh phải khớp nền theme, nếu không sẽ thấy vệt
+# chữ nhật. Hai sơ đồ dùng bản _body (đã cắt tiêu đề nướng sẵn, xem build_dark_assets.py):
+# tiêu đề của chúng giờ là tiêu đề slide.
 THEME_IMAGES = {
-    "slate": dict(pipeline="docs/diagrams/pipeline_slate.png",
-                  evaluation="docs/diagrams/evaluation_slate.png",
+    "slate": dict(pipeline="docs/diagrams/pipeline_slate_body.png",
+                  evaluation="docs/diagrams/evaluation_slate_body.png",
                   cm="docs/diagrams/confusion_slate.png"),
-    "dark": dict(pipeline="docs/diagrams/pipeline_dark.png",
-                 evaluation="docs/diagrams/evaluation_dark.png",
+    "dark": dict(pipeline="docs/diagrams/pipeline_dark_body.png",
+                 evaluation="docs/diagrams/evaluation_dark_body.png",
                  cm="docs/diagrams/confusion_dark.png"),
-    "light": dict(pipeline="docs/diagrams/pipeline.png",
-                  evaluation="docs/diagrams/evaluation.png",
+    "light": dict(pipeline="docs/diagrams/pipeline_body.png",
+                  evaluation="docs/diagrams/evaluation_body.png",
                   cm="results/confusion_matrix_normalized.png"),
 }
 IMG = {k: str(REPO / v) for k, v in THEME_IMAGES[ARGS.theme].items()}
@@ -254,15 +263,6 @@ def new(kick=None, ttl=None, tsize=29, number=True):
     if number and n > 1: page_number(s, n)
     return s
 
-def full_bleed(path):
-    """Sơ đồ phủ kín khung hình: hình đã có tiêu đề riêng nên slide không cần tiêu đề."""
-    global n
-    s = prs.slides.add_slide(BLANK)
-    set_bg(s)
-    n += 1
-    s.shapes.add_picture(path, 0, 0, width=Inches(SW), height=Inches(SH))
-    page_number(s, n)
-    return s
 
 # ---------------------------------------------------------------- 1. Bìa
 s = new(number=False)
@@ -309,7 +309,8 @@ bullets(s, [
 notes(s, "Bài toán xuất phát từ nhu cầu thật: một video có vài nghìn bình luận, không ai đọc nổi từng dòng. Nhóm em muốn trả lời hai câu: người xem đang nói về cái gì, và họ thấy thế nào. Dữ liệu này khó hơn văn bản báo chí. Một phần ba bình luận có emoji. Trung vị chỉ 52 ký tự, tức là một câu ngắn, ít ngữ cảnh. Và rất nhiều câu kiểu \"hay mà tiếc\", vừa khen vừa chê. Thêm cái khó riêng của tiếng Việt: từ ghép không có ranh giới, nên tách từ sai thì từ khóa chủ đề sai và đặc trưng phân loại cũng sai.")
 
 # ---------------------------------------------------------------- 3. Pipeline
-s = full_bleed(IMG["pipeline"])
+s = new("Tổng quan", "Pipeline năm bước theo bài giảng, mỗi bước một module")
+fit_picture(s, IMG["pipeline"])
 notes(s, "Nhóm em xếp đồ án theo đúng quy trình năm bước của bài 5 trong môn: thu thập và phân tích dữ liệu, tiền xử lý, biểu diễn, thuật toán, rồi đánh giá và phân tích lỗi. Sơ đồ này cho thấy mỗi bước nằm ở module nào trong mã nguồn. Điểm khác so với bài phân loại thuần: từ bước biểu diễn, pipeline tách làm hai nhánh. Nhánh cảm xúc dùng TF-IDF và LinearSVC. Nhánh chủ đề dùng vector câu và BERTopic. Hai nhánh gặp lại nhau ở ứng dụng, khi cảm xúc được hiển thị theo từng chủ đề. Phần còn lại của bài đi lần lượt qua năm bước này.")
 
 # ---------------------------------------------------------------- 4. Dữ liệu
@@ -364,7 +365,8 @@ bullets(s, [
 notes(s, "Hai bài toán con cần hai cách biểu diễn. Với cảm xúc, nhóm em dùng TF-IDF có bigram. Nếu chỉ dùng unigram, chữ \"hay\" sẽ kéo cả \"không hay\" lẫn \"hay nhưng\" về lớp tích cực. Bigram giữ được cặp phủ định. Với chủ đề, mỗi bình luận thành một vector 768 chiều từ một mô hình Sentence-BERT tiếng Việt. Thẻ mô hình không ghi mô hình gốc, nhóm em đọc file config trên Hugging Face và suy ra nó tinh chỉnh từ PhoBERT-base. Điều đó có hệ quả thực tế: PhoBERT học trên văn bản đã tách từ, nên bước pyvi phía trước vừa phục vụ từ khóa, vừa là định dạng đầu vào mà mô hình nhúng mong đợi.")
 
 # ---------------------------------------------------------------- 8. Quy trình đánh giá
-s = full_bleed(IMG["evaluation"])
+s = new("Bước 5 · Đánh giá", "Chọn trên tập huấn luyện, chấm một lần trên tập kiểm tra")
+fit_picture(s, IMG["evaluation"])
 notes(s, "Trước khi xem con số, em nói cách chấm. Dữ liệu chia phân tầng 80 trên 20 với hạt giống 42. Mọi việc chọn lựa, so bốn mô hình nền và dò tham số C, chỉ chạy bằng cross-validation năm phần trên 15.997 dòng huấn luyện. Tập kiểm tra 4.000 dòng để dành, chấm đúng một lần với mô hình cuối. Sau đó nhóm em chia lại với năm hạt giống khác để xem con số có ổn định không. Quy trình này là lý do nhóm em tin các số ở hai slide sau.")
 
 # ---------------------------------------------------------------- 9. Mô hình cảm xúc
@@ -390,7 +392,7 @@ table(s, [["Lớp", "Độ chính xác", "Độ phủ", "F1"],
           ["Trung tính (682)", "0,5270", "0,5440", "0,5354"],
           ["Tích cực (1.918)", "0,8715", "0,8525", "0,8619"]],
       x=ML, y=2.08, w=5.6, col_w=[2.2, 1.25, 1.1, 1.05], size=14.5, row_h=0.56, align_right_from=1, highlight_row=2)
-picture(s, IMG["cm"], x=6.68, y=1.98, w=5.75)
+fit_picture(s, IMG["cm"], x=6.68, w=SW - MR - 6.68)
 bullets(s, [
     "Tỉ lệ dự đoán đúng 76,62% và macro-F1 0,7161 trên 4.000 dòng, chấm một lần; độ chính xác là precision, độ phủ là recall",
     "Năm hạt giống 0 đến 4: 77,58% ± 0,44 và macro-F1 0,7200 ± 0,0037",
@@ -416,14 +418,14 @@ notes(s, "Sang nhánh chủ đề. BERTopic gồm UMAP giảm 768 chiều xuốn
 
 # ---------------------------------------------------------------- 12. Ứng dụng
 s = new("Ứng dụng", "Năm tab, ba nguồn dữ liệu, không cần API key để chấm")
-pic = picture(s, IMG["app"], x=6.10, y=2.02, w=6.43)
+pic = fit_picture(s, IMG["app"], x=5.45, w=SW - MR - 5.45, align="right")
 pic.line.color.rgb = rgb("line"); pic.line.width = Pt(0.75)
 bullets(s, [
     [("Ba nguồn: ", {"bold": True, "color": "ink"}), ("Link YouTube (cần API key), Tệp CSV, Dữ liệu mẫu", {})],
     [("Năm tab: ", {"bold": True, "color": "ink"}), ("Tổng quan, Chủ đề, Cảm xúc, Dữ liệu, Mô hình", {})],
     [("Bình luận và vector nhúng được cache; đổi tab hay lọc bảng không chạy lại", {})],
     [("Ảnh: 1.000 dòng mẫu, 23 chủ đề, 20,6% nhiễu, 47,4% tích cực (tập huấn luyện, nên tỉ lệ cảm xúc lạc quan hơn thực tế)", {})],
-], x=ML, y=2.08, w=5.05, size=16, gap=20)
+], x=ML, y=2.08, w=4.4, size=16, gap=20)
 notes(s, "Toàn bộ pipeline đóng thành một ứng dụng Streamlit. Bây giờ nhóm em chạy trực tiếp khoảng 3 phút. (mở ứng dụng, ở thanh bên chọn Dữ liệu mẫu, 1.000 dòng, hoặc Tệp CSV nếu nhóm đã cào sẵn bình luận của một video; bấm Bắt đầu phân tích) Trong lúc chạy em nói qua sáu bước của ứng dụng: lấy dữ liệu, làm sạch, nhúng câu, gom cụm, phân loại, tóm tắt tùy chọn. (khi xong, mở tab Tổng quan) Đây là số chủ đề, tỉ lệ nhiễu và tỉ lệ tích cực. (mở tab Chủ đề, chỉ vào một cụm) Mỗi chủ đề có từ khóa và bình luận tiêu biểu; bản đồ khoảng cách cho thấy cụm nào gần nhau. (mở tab Cảm xúc) Cảm xúc theo từng chủ đề: chủ đề nào bị chê nhiều nhất. (mở tab Dữ liệu, lọc một từ khóa) Bảng có lọc theo chủ đề, cảm xúc, từ khóa và tải CSV. Tab Mô hình chỉ đọc lại thẻ mô hình và các bảng em vừa trình bày, em không mở để tiết kiệm thời gian.")
 
 # ---------------------------------------------------------------- 13. Phân tích lỗi
@@ -484,7 +486,7 @@ refs = ["Slide môn CS221 Xử lý ngôn ngữ tự nhiên, TS. Đặng Văn Th�
         "Thẻ mô hình keepitreal/vietnamese-sbert, Hugging Face Hub.",
         "pyvi 0.1.1; scikit-learn 1.9.1 (Pedregosa và cộng sự, JMLR 2011); Streamlit 1.64.0; BERTopic 0.17.4; tài liệu YouTube Data API v3.",
         "Dữ liệu được cung cấp bởi dự án ATSH-ABSA (UIT), chỉ dùng cho mục đích học tập. Gói ATSH-NLP-20k."]
-_, tf = textbox(s, ML, 1.98, CW, 5.0)
+_, tf = textbox(s, ML, CONTENT_TOP, CW, CONTENT_BOTTOM - CONTENT_TOP)
 for i, r in enumerate(refs):
     p = para(tf, first=(i == 0)); p.space_after = Pt(13); p.line_spacing = 1.14
     pPr = p._p.get_or_add_pPr()

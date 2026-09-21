@@ -107,7 +107,7 @@ Trong ứng dụng, mở "Tóm tắt bằng LLM (Ollama)" ở thanh bên và b�
 | `docs/screenshots/` | Ảnh chụp ứng dụng trên dữ liệu mẫu, dùng trong báo cáo và slide. |
 | `.streamlit/config.toml` | Giao diện tối và cấu hình máy chủ Streamlit. |
 | `requirements.txt`, `requirements-dev.txt` | Thư viện chạy ứng dụng; bản dev thêm pytest. |
-| `report/` | Báo cáo đồ án (`BAO_CAO.md`, dựng ra `BAO_CAO.docx` bằng `scripts/build_report.py`) và slide thuyết trình (`slide.md` định dạng Marp, `CS221_slide.pptx` dựng bằng `scripts/build_slides_pptx.py`). |
+| `report/` | Báo cáo đồ án (`BAO_CAO.md`, dựng ra `BAO_CAO.docx` bằng `scripts/build_report.py`) và slide thuyết trình (`slide.md` định dạng Marp, `CS221_Xử-Lý-NNTN_slide.pptx` dựng bằng `scripts/build_slides_pptx.py`, kèm bản PDF xuất từ PowerPoint). |
 | `scripts/build_report.py` | Dựng file Word từ báo cáo Markdown theo chuẩn báo cáo đồ án UIT: trang đầu là mục lục, header tên môn, footer tên đề tài và số trang bắt đầu từ 2 (bìa in rời), một font Times New Roman. Thông tin môn và đề tài lấy từ front matter của `BAO_CAO.md`. Mở file bằng Word và cập nhật mục lục (Update Field) trước khi nộp. |
 | `scripts/build_slides_pptx.py` | Dựng file PowerPoint của bài thuyết trình, kèm ghi chú người nói. Cờ `--theme` chọn bảng màu: `slate` (mặc định, nền xám than), `dark` (nền xanh đen), `light` (nền ngà); `--out` đổi nơi ghi tệp. |
 | `docs/diagrams/` | Sơ đồ SVG dùng trong báo cáo và slide. |

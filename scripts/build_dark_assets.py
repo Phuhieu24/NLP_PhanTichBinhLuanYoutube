@@ -14,6 +14,11 @@ Word vẫn dùng chúng.
 
 Bước đổi SVG sang PNG 2560x1440 dùng playwright, và lùi về rsvg-convert (brew install librsvg)
 nếu không có playwright; thiếu cả hai thì các tệp PNG đã commit vẫn dùng được.
+
+Cuối cùng script ghép bản "thân sơ đồ" `<tên>[_dark|_slate]_body.png` cho slide: bỏ tiêu đề
+nướng sẵn trong ảnh (trên slide tiêu đề nằm ở vùng tiêu đề, ảnh chỉ lấp vùng nội dung bên dưới),
+bỏ dải trống và dòng ghi chú cuối để sơ đồ phóng được to nhất. Cờ --crop-only chỉ chạy bước này
+trên các PNG đã có.
 """
 import argparse
 from pathlib import Path
@@ -34,8 +39,49 @@ _ap.add_argument("--theme", choices=sorted(CM_THEMES), default="dark",
                  help="nền của ma trận nhầm lẫn: dark (mặc định) hoặc slate")
 _ap.add_argument("--skip-svg", action="store_true",
                  help="chỉ vẽ lại ma trận nhầm lẫn, không ghi đè hai SVG bản tối")
+_ap.add_argument("--crop-only", action="store_true",
+                 help="chỉ cắt bản thân sơ đồ (_body.png) từ các PNG đã có")
 ARGS = _ap.parse_args()
 T = CM_THEMES[ARGS.theme]
+
+# Bản thân sơ đồ cho slide, tính trên ảnh 2560x1440: bỏ tiêu đề và phụ đề (hàng 53 đến 149),
+# bỏ dải trống giữa khối và chú giải, bỏ dòng ghi chú cuối; giữ các khối và chú giải màu, ghép
+# lại với khe 40 px. Nội dung nằm trong cột 62 đến 2497. Đo lại các dải hàng nếu sửa SVG.
+BODY_COLS = (40, 2520)
+BODY_BANDS = {
+    "pipeline": [(190, 1105), (1255, 1350)],    # khối và mũi tên phản hồi; chú giải màu
+    "evaluation": [(160, 1180), (1240, 1335)],  # khối và mũi tên; chú giải màu
+}
+BODY_GAP = 40
+
+
+def crop_bodies():
+    """Ghép bản thân sơ đồ cho slide từ mọi bản màu (sáng, dark, slate) đang có."""
+    from PIL import Image
+    for name, bands in BODY_BANDS.items():
+        for suffix in ("", "_dark", "_slate"):
+            src = REPO / f"docs/diagrams/{name}{suffix}.png"
+            if not src.exists():
+                continue
+            im = Image.open(src).convert("RGB")
+            sx, sy = im.width / 2560, im.height / 1440
+            left, right = (int(v * sx) for v in BODY_COLS)
+            parts = [im.crop((left, int(a * sy), right, int(b * sy))) for a, b in bands]
+            gap = int(BODY_GAP * sy)
+            out = Image.new("RGB", (right - left, sum(p.height for p in parts) + gap * (len(parts) - 1)),
+                            im.getpixel((2, 2)))
+            y = 0
+            for part in parts:
+                out.paste(part, (0, y))
+                y += part.height + gap
+            dst = src.with_name(f"{name}{suffix}_body.png")
+            out.save(dst, optimize=True)
+            print("->", dst, out.size)
+
+
+if ARGS.crop_only:
+    crop_bodies()
+    raise SystemExit(0)
 
 
 import re, sys
@@ -179,3 +225,4 @@ if __name__ == "__main__":
         except (FileNotFoundError, OSError):
             print("Bỏ qua bước render PNG: không có playwright lẫn rsvg-convert. "
                   "Các tệp PNG đã commit vẫn dùng được.")
+    crop_bodies()
