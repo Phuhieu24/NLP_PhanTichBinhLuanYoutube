@@ -1,6 +1,6 @@
 ---
-# Thông tin cho bộ dựng Word (scripts/build_report.py). Bìa in rời theo mẫu UIT nên không nằm trong file .docx;
-# class, lecturer, members, date giữ lại để dựng bìa và đối chiếu; bộ dựng không in chúng.
+# Thông tin cho bộ dựng Word (scripts/build_report.py) và cho bìa rời (skill uit-cover, make_cover.py).
+# Bìa in rời theo mẫu UIT nên không nằm trong file .docx; bộ dựng Word không in các khóa của bìa.
 course: Xử lý ngôn ngữ tự nhiên
 project_title: Phân tích chủ đề và cảm xúc bình luận YouTube tiếng Việt
 toc_title: Nội dung báo cáo đồ án
@@ -14,6 +14,12 @@ members:
   - Nguyễn Thị Mai Thi, 26410117, LT.K2026.1.TTNT
   - Hồ Viết Trịnh, 26410140, LT.K2026.1.TTNT
 date: Tháng 9 năm 2026
+# Khóa riêng cho bìa rời
+course_en: Natural Language Processing
+program: Liên Thông Đại Học
+major: Ngành Trí Tuệ Nhân tạo
+group_code: Nhóm 19
+submission_date: 22/09/2026
 ---
 
 # Tóm tắt
